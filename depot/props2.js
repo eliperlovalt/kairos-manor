@@ -145,12 +145,14 @@ def('forgeHearth',{label:'Forge hearth with bellows',room:'The Forge',act:'light
   k.box(9,4,-3,15,8,3,C.leather);k.box(9,9,-2,15,9,2,C.oak);k.box(16,8,0,20,8,0,C.oak);return{V:k.V,size:[3.3,3.5,1.5]}});
 def('waterTrough',{label:'Stone water trough',room:'Stable Court, village square',act:'none'},o=>{const k=kit();k.box(-10,0,-4,10,6,4,C.stone);k.box(-9,3,-3,9,6,3,'#6b8aa0');k.del(-9,6,-3,9,6,3);return{V:k.V,size:[2.4,.8,1]}});
 def('carriage',{label:'Town carriage',room:'Coach House, the drive',act:'board'},o=>{const k=kit(),c=hc(o,0,'#1e2a3a'),d=hc(o,1,'#14202e');
-  for(const z of[-12,12]){const R=z>0?6:8;for(const x of[-9,9])for(let a=0;a<24;a++){const t=a/24*6.28;k.put(x,R+Math.round(Math.sin(t)*R),z+Math.round(Math.cos(t)*R),'#3a2a1e')}for(const x of[-9,9])k.put(x,R,z,C.brass)}
+  const wheel=(x,cy,cz,R,c)=>{for(let dy=-R;dy<=R;dy++)for(let dz=-R;dz<=R;dz++){const d=Math.hypot(dy,dz);if(Math.abs(d-R)<.62)k.put(x,cy+dy,cz+dz,c);else if(d<R&&(dy===0||dz===0||Math.abs(dy)===Math.abs(dz)))k.put(x,cy+dy,cz+dz,c)}};   /* v1.58: a wheel is a whole rim with eight spokes (it was a ring of separate dots: KAIROS's "loose cubes") */
+  for(const z of[-12,12]){const R=z>0?6:8;for(const x of[-9,9]){wheel(x,R,z,R,'#3a2a1e');k.put(x,R,z,C.brass)}}
   k.box(-7,9,-14,7,11,10,d);k.box(-7,12,-10,7,26,6,c);k.box(-6,17,-9,-7,23,-2,C.glass);k.box(6,17,-9,7,23,-2,C.glass);k.box(-8,27,-11,8,27,7,C.black);k.box(-8,13,-2,-8,22,2,C.gilt,'door');
   k.box(-6,12,7,6,18,12,d);k.box(-5,19,9,5,19,12,C.leather,'seat');k.box(-1,10,13,1,10,22,C.oak);for(const s of[-1,1]){k.box(s*7,24,7,s*7,27,7,C.brass);k.put(s*7,28,7,C.flame,'flame')}
   return{V:k.V,size:[2.1,3.3,4]}});
 def('cart',{label:'Farm cart',room:'Home Farm, village',act:'none'},o=>{const k=kit();
-  for(const x of[-8,8])for(let a=0;a<20;a++){const t=a/20*6.28;k.put(x,7+Math.round(Math.sin(t)*7),Math.round(Math.cos(t)*7),C.oak)}k.box(-7,8,-10,7,9,10,C.oakL);for(const x of[-7,7])k.box(x,10,-10,x,13,10,C.oakL);k.box(-7,10,-10,7,13,-10,C.oakL);
+  const wheel=(x,cy,cz,R,c)=>{for(let dy=-R;dy<=R;dy++)for(let dz=-R;dz<=R;dz++){const d=Math.hypot(dy,dz);if(Math.abs(d-R)<.62)k.put(x,cy+dy,cz+dz,c);else if(d<R&&(dy===0||dz===0||Math.abs(dy)===Math.abs(dz)))k.put(x,cy+dy,cz+dz,c)}};   /* v1.58: a wheel is a whole rim with eight spokes (it was a ring of separate dots: KAIROS's "loose cubes") */
+  for(const x of[-8,8])wheel(x,7,0,7,C.oak);k.box(-7,8,-10,7,9,10,C.oakL);for(const x of[-7,7])k.box(x,10,-10,x,13,10,C.oakL);k.box(-7,10,-10,7,13,-10,C.oakL);
   const r=rng(2);for(let x=-6;x<=6;x++)for(let z=-9;z<=9;z++)for(let y=10;y<=10+Math.floor(r()*4);y++)k.put(x,y,z,'#c9b88a');k.box(-4,6,11,-4,8,24,C.oak);k.box(4,6,11,4,8,24,C.oak);return{V:k.V,size:[2,1.9,3.9]}});
 def('haystack',{label:'Haystack',room:'Home Farm',act:'none'},o=>{const k=kit(),r=rng(5);for(let y=0;y<=22;y++){const R=Math.round(12*Math.sqrt(Math.max(0,1-(y/23)**2.2)));for(let x=-R;x<=R;x++)for(let z=-R;z<=R;z++){const q=x*x+z*z;if(q>R*R||q<(R-2)*(R-2))continue;k.put(x,y,z,r()<.3?'#b89a5a':'#d8c07a')}}return{V:k.V,size:[2.8,2.6,2.8]}});
 def('beehive',{label:'Straw bee skep on a stand',room:'Kitchen garden, orchard',act:'none'},o=>{const k=kit();k.box(-4,0,-4,-4,7,-4,C.oak);k.box(4,0,-4,4,7,-4,C.oak);k.box(-4,0,4,-4,7,4,C.oak);k.box(4,0,4,4,7,4,C.oak);k.box(-5,8,-5,5,8,5,C.oakL);

@@ -1,6 +1,6 @@
 # Euphrates Hall: the Voxel Estate
 
-One big self-contained three.js (0.160.0) voxel page. Live at https://eliperlovalt.github.io/Eh/ (this repo's root `index.html`, served by GitHub Pages from `main`). Current version: v1.49. The brand line in the page says the version; bump it on every release.
+One big self-contained three.js (0.160.0) voxel page. Live at https://eliperlovalt.github.io/Eh/ (this repo's root `index.html`, served by GitHub Pages from `main`). Current version: v1.58. The brand line in the page says the version; bump it on every release.
 
 ## Where things are
 - `src/index.html`: THE SOURCE (about 760 KB, one file, ES module importing three from a CDN). Edit this, never the root file.
@@ -44,4 +44,4 @@ There is no separate Depot chat any more. You make the parts and you place them.
 - Every clickable object opens a fixed link (`URLS`, `ROOMOF`, `HOUSEDOCS` in the source). That wiring is to be redesigned.
 
 ## The owner
-Address him as Your Grace. Short sentences, answer first, no em dashes ever. He gives the goal; you do the rest and ask taste questions as short multiple-choice quizzes. Always give the Estate as its GitHub Pages link.
+Address him as Your Grace. Short sentences, answer first, no em dashes ever. He gives the goal; you do the rest and ask taste questions as short multiple-choice quizzes. Every question to him is a clickable quiz (the question tool), never a list he must type an answer to (his order, 23 Nov 2026). Always give the Estate as its GitHub Pages link.
