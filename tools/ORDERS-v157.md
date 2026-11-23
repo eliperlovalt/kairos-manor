@@ -30,3 +30,23 @@ Received while v1.56 was in its gate. Not started: v1.56 was ordered lean and to
 - Items 5 and 6 are the two-storey Great Hall's void seen from the Long Gallery.
 - Item 3 touches wall move 23 (the nave door stands one block from the porch door, clear of this stair); widening the stair to 3 changes that again.
 - Item 15 changes the outside of the Hall: outer boxes do not move, so the landings and balustrade go through the kits or the terrace builder.
+
+## State after v1.57 (23 Nov 2026; stills in `tools/shots/v157/`, before on top, after below, same pose)
+His Grace sent the photos himself on 23 Nov and asked why they were not fixed. That was the word to start.
+| # | State |
+|---|---|
+| 1 | Done: four globes, a true sphere with a gold meridian ring on a turned three-footed stand, each turned differently. Not done: the "stick on the sill" is a stone pinnacle of the tower parapet outside the window (the outside goes through the kits: His Grace's choice). The holo globe's link comes from his private device map only. |
+| 2 | Done: boarded stalls with posts, hay rack, bucket and straw; horses (bay, chestnut, grey) in three of four; the comb and name boards gone; glass behind the window bars; a dark timber ceiling; five iron wall lanterns and no chandeliers. |
+| 3 | Done: the green slab gone (it was the lawn plane over the stairwell), stone treads with nosings, a stone curb and balustrade round the opening, flagged floors, a lantern at the foot; walked by the reach test. Two wide, not three: three leaves no path to the nave door. |
+| 4 | Done: a coped stone wall with capped piers and gateways, stone outhouses under slate, the cloister roofed in slate. |
+| 5 | Done: the rod (a strip of dado on a one-block pier) gone; the painted ceiling runs over the whole void. The candle stub: not found in the current build. |
+| 6 | Done: the void's side bays opened behind an oak balustrade. |
+| 7 | Done: runner proud of the treads, on the risers too, a rod its own width a step, nosings. |
+| 8 | Done with 11: the photo is the Women's Stair where it comes up in the Oak Stair hall. The sunk rail and the lantern in the flight are gone (v1.56 and the hung-piece rule); the well is fenced. |
+| 9 | Done: the pole, the bracket and the red drip were the ends of the wall boards at the door; every such door has a door case now and the boards are drawn on their middle. The rails end at the door case legs. |
+| 10 | Done: chairs in facing pairs down the whole table, no loose chairs. |
+| 11 | Done: an oak balustrade with newels round the well (see 8). The stone handrail's end now meets the stair's own head piers inside it. |
+| 12, 13 | Done: a door case with a pediment and two mirror-image leaves behind the thrones; the white line was a gap between two bays. Kairos's hands lie on the throne arms in four stills; not measured. |
+| 14 | Done: forty different sitters with eyes and mouths; the cornice runs over the doors; door cases; the portrait over the doorway taken down. |
+| 15 | Done: three runs, two landings (two blocks deep: three would put the foot on the walker's start), raking and level balustrades, an urn on every pier, nosings. |
+| 16 | Part: the attic sash is made to its opening with a low pelmet. The upper panes are still blind behind the bars (the eaves cover them outside). |

@@ -123,7 +123,7 @@ def main(folder, page='index.html'):
         # v1.14 checks: fine stairs, see-through panes, faster flight
         if pg.evaluate('() => typeof __vx.stairRamp') == 'function':
             fl = pg.evaluate('() => __vx.FLIGHTS.map(f => [f.bid, f.axis, f.l0, f.l1, f.dir, f.e0, f.L, f.y0, f.H, f.sty, f.lesser ? 1 : 0])')
-            check('every stair a fine flight (v1.48: five grand and the rest)', sum(1 for f in fl if not f[10]) == 5 and sum(1 for f in fl if f[9] == 'stone') >= 2, str(len(fl)))
+            check('every stair a fine flight (v1.48: five grand and the rest; v1.57: seven, the front steps are three runs)', sum(1 for f in fl if not f[10]) == 7 and sum(1 for f in fl if f[9] == 'stone') >= 2, str(len(fl)))
             CLIMB = """([i, down, side]) => { const v = __vx, f = v.FLIGHTS[i], P = v.PL, zx = f.axis === 'z', mid = (f.l0 + f.l1) / 2;
               if (P.fly) v.setFly(0, 1); P.sit = null; P.jmp = 0; P.vy = 0; P.air = 0;
               const u0 = down ? (side ? f.L - .3 : f.L + 1.5) : (side ? .3 : -1.5), a0 = f.e0 + f.dir * u0; P.x = zx ? mid : a0; P.z = zx ? a0 : mid; P.y = side ? f.y0 + f.H * u0 / f.L + .05 : (down ? f.y0 + f.H : f.y0);

@@ -126,10 +126,15 @@ def('studyTable',{label:'Crypt study table',room:'Chapel crypt (the Pardes)',act
   k.box(-6,10,-3,0,10,3,C.paper,'face');k.box(-6,10,0,0,11,0,C.leather);k.box(2,10,-3,6,13,-2,C.leather);k.box(5,10,2,5,13,2,C.white);k.put(5,14,2,C.flame,'flame');return{V:k.V,size:[2.4,1.7,1.5]}});
 
 /* ---------------- stables, forge and yard ---------------- */
-def('stableStall',{label:'Horse stall with manger',room:'Stable Court',act:'lead a horse'},o=>{const k=kit(),W=14,L=22;
-  for(let z=-L;z<=L;z++){k.box(-W,0,z,-W,16,z,C.oak);k.box(W,0,z,W,16,z,C.oak)}for(let z=-L;z<=L;z+=3){k.box(-W,17,z,-W,22,z,C.iron);k.box(W,17,z,W,22,z,C.iron)}k.box(-W,0,-L,W,16,-L,C.oak);
-  k.box(-W+1,10,-L+1,-W+6,12,-L+5,C.oakL);k.box(-W+2,12,-L+2,-W+5,13,-L+4,'#c9b88a');k.box(W-4,0,-L+1,W-1,5,-L+3,C.stone);k.box(W-3,4,-L+2,W-2,4,-L+2,'#6b8aa0');
-  for(let x=-W+1;x<W;x++)for(let z=-L+1;z<L;z++)if((x*7+z*3)%5===0)k.put(x,0,z,'#c9b88a');k.box(-4,24,L,4,26,L,C.oak,'face');k.box(-3,25,L+1,3,25,L+1,C.gilt,'face');return{V:k.V,size:[3.3,3,5.2]}});
+def('stableStall',{label:'Horse stall with a hay rack and a bucket',room:'Stable Court',act:'lead a horse'},o=>{const k=kit(),W=14,L=22,H=12,hay='#c9b88a',hay2='#d8c070';
+  /* v1.57 (His Grace's photo of the Stalls): a low boarded partition each side, one and a half blocks high, with a capping rail and a post at each end; a boarded back with a hay rack; a bucket by the front post; straw. The iron bars every third voxel (a jagged black comb) and the name board that hung in the air over the open front are gone */
+  for(const x of[-W,W]){const xi=x<0?x+1:x-1;for(let z=-L;z<=L;z++)for(let y=0;y<=H;y++)k.put(x,y,z,(z+L)%4===3?C.oak:C.oakL);k.box(x,H+1,-L,x,H+1,L,C.oak);
+    for(const z of[-L,L-1]){k.box(Math.min(x,xi),0,z,Math.max(x,xi),H+4,z+1,C.oak);k.box(Math.min(x,xi),H+5,z,Math.max(x,xi),H+5,z+1,C.iron)}}
+  for(let x=-W+1;x<W;x++)for(let y=0;y<=H;y++)k.put(x,y,-L,(x+W)%4===3?C.oak:C.oakL);k.box(-W+1,H+1,-L,W-1,H+1,-L,C.oak);
+  k.box(-7,6,-L+1,7,6,-L+3,C.iron);for(let x=-7;x<=7;x+=2){k.box(x,7,-L+3,x,9,-L+3,C.iron);k.box(x,10,-L+4,x,12,-L+4,C.iron)}k.box(-7,13,-L+4,7,13,-L+4,C.iron);
+  for(let x=-6;x<=6;x++)for(let y=7;y<=13;y++){if((x*5+y*3)%7===0)continue;k.put(x,y,-L+1,hay);if(y>8)k.put(x,y,-L+2,(x+y)%3?hay2:hay);if(y>10&&(x+y)%2)k.put(x,y,-L+3,hay2)}
+  for(let x=W-6;x<=W-3;x++)for(let z=L-8;z<=L-5;z++){const edge=(x===W-6||x===W-3)&&(z===L-8||z===L-5);if(edge)continue;for(let y=0;y<=4;y++){const rim=x===W-6||x===W-3||z===L-8||z===L-5;if(y===4&&!rim){k.put(x,3,z,'#6b8aa0');continue}if(rim||y===0)k.put(x,y,z,y===1||y===4?C.iron:'#8a6a3a')}}
+  for(let x=-W+1;x<W;x++)for(let z=-L+1;z<L;z++)if((x*7+z*3)%5===0&&!k.V.has(x+',0,'+z))k.put(x,0,z,hay);return{V:k.V,size:[3.3,2,5.2]}});
 def('saddleRack',{label:'Saddle rack and bridles',room:'Tack Room',act:'none',wall:true},o=>{const k=kit();
   for(const y of[8,20]){k.box(-1,y,0,1,y,6,C.oak);k.box(-3,y+1,1,3,y+3,5,C.leather);k.box(-3,y,1,-3,y-4,4,C.leather);k.box(3,y,1,3,y-4,4,C.leather);k.put(0,y+4,1,C.leatherL)}
   for(const x of[-8,8]){k.put(x,28,1,C.brass);for(let y=18;y<=27;y++)k.put(x+(y%3===0?1:0),y,1,C.leather)}return{V:k.V,size:[2,3.4,.8],anchor:'wall'}});

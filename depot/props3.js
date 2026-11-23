@@ -106,6 +106,14 @@ def('font',{label:'Stone font with oak cover',room:'The village church',act:'loo
   for(let y=15;y<=22;y++)k.ring(0,y,0,Math.max(0,5-Math.round((y-15)*.7)),C.oak);k.put(0,23,0,C.gilt);return{V:k.V,size:[1.3,2.7,1.3]}});
 def('churchBell',{label:'Church bell in its frame',room:'The village church tower',act:'ring'},o=>{const k=kit();for(const x of[-8,8])k.box(x,0,-1,x,22,1,C.oak);k.box(-8,22,-1,8,23,1,C.oak);for(let y=8;y<=19;y++){const r=Math.round(2+((19-y)/11)**1.4*5);k.ring(0,y,0,r,C.brass)}k.ring(0,8,0,7,'#9c7a1c');k.box(0,4,0,0,9,0,C.iron);k.box(0,20,0,0,21,0,C.brass);
   k.box(-8,21,0,-12,21,0,C.oak);for(let y=0;y<=20;y++)k.put(-12,y,0,'#c9a36a');return{V:k.V,size:[2.8,2.8,.9]}});
+def('daisDoor',{label:'State door case with a pediment, two leaves',room:'The Great Hall, behind the thrones',act:'look',wall:true},o=>{const k=kit(),wd=o.wood||C.oak,ml=o.mould||C.oakL,fd=o.field||'#4e3420',H=46;
+  /* v1.57: two mirror-image leaves, three panels each on the same lines, a dark meeting stile, brass knobs; an architrave with a gilt bead, a frieze with rosettes, a cornice and a pediment with a gilt cartouche */
+  for(const s of[-1,1])for(let lx=1;lx<=9;lx++)for(let y=0;y<=H;y++){const inP=lx>=3&&lx<=7&&((y>=4&&y<=14)||(y>=18&&y<=31)||(y>=35&&y<=43)),ed=inP&&(lx===3||lx===7||y===4||y===14||y===18||y===31||y===35||y===43);k.put(s*lx,y,0,inP?(ed?ml:fd):wd,'door')}
+  for(let y=0;y<=H;y++)k.put(0,y,0,'#2e1d12','door');k.put(-2,24,1,C.brass,'door');k.put(2,24,1,C.brass,'door');
+  k.box(-12,0,0,-10,H+4,1,C.white);k.box(10,0,0,12,H+4,1,C.white);k.box(-10,0,2,-10,H+1,2,C.gilt);k.box(10,0,2,10,H+1,2,C.gilt);k.box(-9,H+1,0,9,H+4,1,C.white);k.box(-10,H+1,2,10,H+1,2,C.gilt);
+  k.box(-12,H+5,0,12,H+8,1,C.cream);for(const x of[-9,-5,5,9])k.put(x,H+6,2,C.gilt);k.box(-2,H+6,2,2,H+7,2,C.gilt);k.box(-13,H+9,0,13,H+10,2,C.white);k.box(-13,H+11,0,13,H+11,3,C.white);
+  for(let h=0;h<=6;h++){const w=13-2*h;k.box(-w,H+12+h,0,w,H+12+h,2,C.white);if(w>3)k.box(-w+2,H+12+h,2,w-2,H+12+h,2,C.cream)}k.box(-1,H+13,3,1,H+15,3,C.gilt);k.put(0,H+16,3,C.gilt);
+  return{V:k.V,size:[3.1,7.5,.46],anchor:'wall'}});
 def('altarTable',{label:'Altar table with frontal and candles',room:'The village church, the Chapel',act:'look'},o=>{const k=kit(),f=o.c||'#7a1f2a';k.box(-12,0,-4,12,10,4,C.oak);k.box(-12,1,5,12,10,5,f,'face');for(let x=-11;x<=11;x+=2)k.put(x,10,5,C.gold,'face');k.box(-13,11,-5,13,11,5,C.white);
   /* v1.55: orphrey bands and a cross on the frontal, a standing cross between four candles, the book on its cushion (it was a box with two candles) */
   for(const x of[-7,7])k.box(x,1,5,x,9,5,C.gold,'face');k.box(0,3,5,0,8,5,C.gold,'face');k.box(-2,6,5,2,6,5,C.gold,'face');

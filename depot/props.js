@@ -158,20 +158,30 @@ def('grandPiano',{label:'Grand piano',room:'Music Room, Ballroom',act:'play'},o=
   for(let z=-14;z<=12;z++){const w=z<0?8:Math.round(8-(z/12)*4);for(let x=-8;x<=w;x++)k.box(x,9,z,x,11,z,c)}k.box(-8,6,12,8,8,15,c);for(let x=-7;x<=7;x++){k.put(x,9,14,x%3?C.white:C.black);k.put(x,9,15,C.white)}
   for(const[x,z]of[[-7,13],[7,13],[0,-12]])k.box(x,0,z,x+1,8,z+1,c);k.box(-1,0,9,1,4,9,C.brass);k.box(-8,12,-14,-8,24,-14,c,'lid');for(let z=-14;z<=6;z++){k.put(-8,12+Math.round((6-z)/2),z,c,'lid')}
   k.box(-5,0,20,5,6,24,c,'seat');return{V:k.V,size:[1.9,2.8,4.4]}});
-def('globe',{label:'Globe on a stand',room:'Schoolroom, Map Room, Library',act:'touch: the globe'},o=>{const k=kit();
-  k.disc(0,0,0,3,C.wal);k.box(0,1,0,0,7,0,C.wal);k.ring(0,8,0,4,C.brass);const r=rng(3);
-  for(let x=-4;x<=4;x++)for(let y=-4;y<=4;y++)for(let z=-4;z<=4;z++){const q=x*x+y*y+z*z;if(q>16||q<9)continue;const land=Math.sin(x*1.3+y)+Math.cos(z*1.1-y*.7)+r()*.5>.9;k.put(x,13+y,z,land?'#c9b88a':'#4a7a9a','face')}
-  k.box(0,17,0,0,18,0,C.brass);k.box(0,8,0,0,8,0,C.brass);return{V:k.V,size:[1,2.1,1]}});
+def('globe',{label:'Globe on a stand',room:'Schoolroom, Map Room, Library',act:'touch: the globe'},o=>{const k=kit(),sd=(o.seed||0)*1.7,cy=16,G='#c9a227',sea='#3f78a8',sea2='#4a86b6';
+  /* v1.57 (His Grace's photo of the Observatory): a round ball of blue sea with green and tan land and white at the poles, inside an upright gold meridian ring (it was a lumpy shell over a flat gold tray), on a turned stand with three feet. o.seed turns the world, so no two globes are the same */
+  for(const a of[1.5708,3.6652,5.7596])for(let t=1;t<=4;t++)k.put(Math.round(Math.cos(a)*t),t>=3?0:1,Math.round(Math.sin(a)*t),C.wal);
+  for(let y=1;y<=8;y++)k.put(0,y,0,C.wal);for(const y of[3,6])for(const[x,z]of[[1,0],[-1,0],[0,1],[0,-1]])k.put(x,y,z,C.wal);k.box(-1,9,0,1,9,0,G);
+  for(let x=-5;x<=5;x++)for(let y=-5;y<=5;y++)for(let z=-5;z<=5;z++){const q=x*x+y*y+z*z;if(q>30||q<14)continue;const n=Math.sin(x*.9+sd+y*.5)+Math.cos(z*.8-y*.6+sd*.6)+Math.sin((x+z)*.45+sd*1.3);
+    k.put(x,cy+y,z,Math.abs(y)>=5?'#eef2f4':n>1.55?'#c9b88a':n>.75?((x+y+z)&1?'#5f8a4a':'#6b9654'):((x*3+y+z*5)%4?sea:sea2),'face')}
+  for(let x=-7;x<=7;x++)for(let y=-7;y<=7;y++){const q=x*x+y*y;if(q>=37&&q<=50)k.put(x,cy+y,0,G)}k.put(0,cy+6,0,G);k.put(0,cy-6,0,G);k.put(0,cy+8,0,G);return{V:k.V,size:[1.5,2.8,1.3]}});
 def('wireless',{label:'The wireless set',room:'Wireless Room',act:'touch: the Edition and alerts'},o=>{const k=kit();
   k.box(-8,0,-4,8,10,4,C.wal);k.box(-7,11,-4,7,20,3,C.wal);k.box(-6,12,4,6,19,4,'#c9b28a','face');for(let x=-5;x<=5;x+=2)for(let y=13;y<=18;y+=2)k.put(x,y,5,C.wal);
   for(const x of[-5,0,5]){k.disc(x,7,5,1,C.brass);k.put(x,7,6,C.black)}k.box(-3,3,5,3,4,5,C.flame,'flame');k.box(0,21,0,0,30,0,C.brass);k.box(-6,30,0,6,30,0,C.brass);return{V:k.V,size:[2,3.6,1]}});
 def('telescope',{label:'Telescope',room:'Observatory',act:'look'},o=>{const k=kit();
   for(const a of[0,2.1,4.2]){for(let s=0;s<12;s++)k.put(Math.round(Math.cos(a)*s/2.5),12-s,Math.round(Math.sin(a)*s/2.5),C.wal)}
   for(let s=-8;s<=18;s++){const y=13+Math.round(s*.55),z=Math.round(s*.8);k.put(0,y,z,C.brass);k.put(1,y,z,C.brass);if(s>14){k.put(-1,y,z,C.brass);k.put(2,y,z,C.brass)}}k.put(0,8,-7,C.black);return{V:k.V,size:[1,3,2.5]}});
-def('portrait',{label:'Gilt-framed portrait',room:'Long Gallery, every state room',act:'touch: opens its essay or Call',wall:true},o=>{const k=kit(),W=o.w||6,H=o.h||9,r=rng(o.seed||2);
+def('portrait',{label:'Gilt-framed portrait',room:'Long Gallery, every state room',act:'touch: opens its essay or Call',wall:true},o=>{const k=kit(),W=o.w||6,H=o.h||9,r=rng(o.seed||2),pk=a=>a[Math.floor(r()*a.length)];
   for(let x=-W-1;x<=W+1;x++)for(let y=-1;y<=2*H+1;y++){const edge=x<-W||x>W||y<0||y>2*H;k.put(x,y+14,0,edge?((x+y)%3?C.gilt:C.giltD):null)}
-  const bg=['#2b2a24','#3a2a1e','#1e2a2a'][Math.floor(r()*3)],coat=BOOKS[Math.floor(r()*BOOKS.length)];
-  for(let x=-W;x<=W;x++)for(let y=0;y<=2*H;y++){let c=bg;const dx=Math.abs(x);if(y<H&&dx<W-1-Math.max(0,(H-y)/4|0))c=coat;if(y>=H&&y<H+5&&dx<=2)c='#d9b48a';if(y>=H+4&&y<H+6&&dx<=2)c=r()<.5?'#3a2a1e':'#5a3a22';k.put(x,y+14,0,c,'face')}
+  /* v1.57: a sitter with eyes and a mouth, and no two alike: a lady or a gentleman by the seed, with their own skin, hair, dress and ground (plain, a curtain, or a park and sky). They were all one faceless figure in a red block (His Grace's photo of the Music Room) */
+  const bgK=Math.floor(r()*3),bg=pk(['#2b2a24','#3a2a1e','#1e2a2a','#2a2433']),lady=r()<.5,skin=pk(['#d9b48a','#e8c6a0','#c99a6e','#a8744a']),hair=pk(['#3a2a1e','#5a3a22','#1e1612','#8a6a3a','#b9b2a6','#7a3a1c']),
+    dress=lady?pk(['#7a1f2a','#1f4a7a','#2a6a4a','#6a3a7a','#c9a227','#e9dfc4','#b8526a']):pk(['#1e2a3a','#26262a','#3a1e1e','#24402e','#4a3420','#7a1f2a']),drape=pk(['#6a1a22','#1f3a2a','#2a2a4a','#5a4a1e']),stache=!lady&&r()<.4,sash=!lady&&r()<.3;
+  for(let x=-W;x<=W;x++)for(let y=0;y<=2*H;y++){let c=bg;const dx=Math.abs(x);
+    if(bgK===1&&(x>W-4||y>2*H-2))c=(x+((y/3)|0))%2?drape:bg;if(bgK===2)c=y>H+3?(y>2*H-4?'#5f7f96':'#8aa2ae'):(y>H?'#5a7a48':'#3a5230');
+    if(y<H){const bw=y>=H-1?1:y>=H-2?W-3:W-2;if(dx<=bw){c=y>=H-1?skin:dress;if(lady){if(y===H-2&&dx<=2)c=skin;if(y===H-3&&x===0)c='#d4af37'}else{if(dx<=1&&y>=H-4&&y<H-1)c='#f4f1ea';if(x===0&&y<H-4&&y%2===0)c='#c9a227';if(sash&&x===Math.round((y-H+6)*.8))c='#a02a2a'}}}
+    if(y>=H&&y<=H+4&&dx<=2)c=skin;if((y===H+5&&dx<=2)||(y===H+6&&dx<=1)||(y===H+4&&dx===2))c=hair;if(lady&&dx===3&&y>=H-1&&y<=H+5)c=hair;
+    if(y===H+3&&dx===1)c='#3a281c';if(y===H+1&&dx<=(lady?0:1))c=stache?hair:'#9a4a3c';
+    k.put(x,y+14,0,c,'face')}
   for(const[key,v]of k.V)if(v[3]===null)k.V.delete(key);return{V:k.V,size:[(2*W+3)/8.7,(2*H+3)/8.7,.1],anchor:'wall'}});
 def('bellPull',{label:'Bell pull',room:'Every room',act:'ring: a servant comes',wall:true},o=>{const k=kit(),c=o.c||C.damask;
   k.box(0,30,0,0,30,1,C.brass);for(let y=8;y<=29;y++){k.put(0,y,1,c,'face');if(y%4===0)k.put(0,y,1,C.gold,'face')}k.box(0,5,1,0,7,1,C.brass,'face');k.put(0,4,1,C.gold,'face');return{V:k.V,size:[.2,3.5,.2],anchor:'wall'}});

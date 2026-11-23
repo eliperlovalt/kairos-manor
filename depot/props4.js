@@ -71,9 +71,9 @@ def('beam',{label:'Oak ceiling beam (o.len for one long timber)',room:'Below sta
 
 /* ---------- quad budget: the same looks with far fewer faces (pattern goes to texture where the surface is flat) ---------- */
 const BOOKS=PROPS.books,rng=PROPS.rng;
-def('sash',{label:'Sash window with shutters and curtains (budget mesh)',room:'State rooms',act:'open curtains',wall:true},o=>{const k=kit(),W=8,H=42,cu=o.c||C.damask;
-  for(let x=-W;x<=W;x++)for(let y=0;y<=H;y++){const fr=Math.abs(x)===W||y===0||y===H||y===21||x===0;k.put(x,y+8,0,fr?C.white:C.glass)}k.box(-W-1,6,0,W+1,7,2,C.white);
-  for(const s of[-1,1])for(let d=0;d<4;d++){const x=s*(W+1+d),z=1+(d%2);for(let y=0;y<=H+4;y++)k.put(x,y+6,z,cu,'door')}k.box(-W-5,H+11,1,W+5,H+13,2,C.gilt);return{V:k.V,size:[2.8,7,.3],anchor:'wall'}});
+def('sash',{label:'Sash window with shutters and curtains (budget mesh)',room:'State rooms',act:'open curtains',wall:true},o=>{const k=kit(),W=8,H=o.ph?Math.round(o.ph*8.7)-2:42,sh=H!==42,m1=sh?Math.round(H/2):21,cu=o.c||C.damask;   /* v1.57: ph, the panes' height in blocks, for a window shorter than five (the attic rooms): the sash is made to the opening, with a plain low pelmet, and no longer runs up into the ceiling */
+  for(let x=-W;x<=W;x++)for(let y=0;y<=H;y++){const fr=Math.abs(x)===W||y===0||y===H||y===m1||x===0;k.put(x,y+8,0,fr?C.white:C.glass)}k.box(-W-1,6,0,W+1,7,2,C.white);
+  for(const s of[-1,1])for(let d=0;d<4;d++){const x=s*(W+1+d),z=1+(d%2);for(let y=0;y<=H+(sh?2:4);y++)k.put(x,y+6,z,cu,'door')}if(sh)k.box(-W-5,H+9,1,W+5,H+10,2,C.white);else k.box(-W-5,H+11,1,W+5,H+13,2,C.gilt);return{V:k.V,size:[2.8,sh?(H+11)/8.7:7,.3],anchor:'wall'}});
 def('rug',{label:'Turkey rug (budget mesh; field takes the carpet texture)',room:'State rooms',act:'none'},o=>{const k=kit(),W=o.w||16,L=o.l||22,f=o.c||C.damask,b=o.c2||C.blue;
   for(let x=-W;x<=W;x++)for(let z=-L;z<=L;z++){const e=Math.min(W-Math.abs(x),L-Math.abs(z));const m=Math.min(Math.max(0,6-Math.abs(x)),Math.max(0,9-Math.abs(z)));
     let c=e===0?C.cream:e<=2?b:e===3?C.gold:f;if(e>3&&Math.abs(x)<=6&&Math.abs(z)<=9)c=m>=5?b:m>=3?C.gold:m>=1?b:f;k.put(x,0,z,c)}
