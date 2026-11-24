@@ -35,5 +35,8 @@ His words as relayed: the outside ground "looks so basic".
 | 2 | Open |
 | 3 | Asked (order of work) |
 | 4 | Asked (order of work) |
-| 5 | Asked (order of work) |
+| 5 | Built as v1.59 (KAIROS relayed His Grace's approval of the order: ground and floors first). Lawns, gravel, kerbs, flags, the fountain court, and a floor finish in every room. Not in it: terrain undulation and a ha-ha, hedge borders and bedding (the gardens version), skirting |
 | 6 | Done |
+
+## The ten-version plan relayed on 24 Nov ("His Grace has approved the plan for tonight")
+Ground and floors; the throne room and Kairos (the whole mansion at load, the thrones at the head of the table, the napkin, the hands); the gardens; the outside of the house; the state rooms; below stairs; the bedrooms and upper floors; the outbuildings; light and atmosphere; final polish. My numbering runs one ahead of the relay's, because v1.58 was already pushed when it came: ground and floors is v1.59, the throne room v1.60, and so on.
