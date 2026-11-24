@@ -352,3 +352,10 @@ Since v1.62 (KAIROS's sweep of v1.60: merge held for three regressions against t
 - The Home Farm's paths are laid in jointed flags with the thin kerb (they are gravel cells; in v1.57 their two tones read as flags, in v1.60 they were gravel).
 - The pedimented door case hangs on the Great Hall's north wall again (`daisDoor`). v1.60 took it down when the thrones left that wall. It is a door case on the outer wall, as it always was: nothing lies north of it and it was never a way through. `tidy()` clears a seat standing in front of it.
 - Open from the same sweep: a tone step down the middle of some floors, the fountain court's joints too heavy near the camera, gravel flat at middle distance, the Tower Porch floor, parquet shimmer, two gardeners overlapping, the walk's kerb against the cobbles.
+
+Since v1.63 (KAIROS's open list; still `tools/shots/v163/`, v1.62 on top and v1.63 below, his poses):
+- **The "flat plates" at the Women's and Men's Stairs, five sweeps running, are found.** They were never the stairs. His two poses face the hall's north wall, and through its doorway the camera sees the passage beyond: a dark runner on the floor (the "plate") with a barrel standing on it (the barrel "sunk in the plate"). `tidy()` now takes a barrel, a rack, a crate, a sack, a bucket or a coal scuttle off any carpet (37 pieces, `out.offRug`). The flights themselves are fine stone stairs with rails, as shot in v1.58.
+- `RPOST`: the Night Nursery has three iron beds, a cot and two night tables (the planner had placed none of the four beds on its list); the Sewing Room a cutting table with four chairs, presses, a tallboy, a drying rack, a fitting mirror; the Upper Linen Room three presses, linen stacks, an ironing table.
+- The Tower Porch is flagged (`FDEF`); it had boards. `tidy()` takes a rug out of the porch if one is laid there.
+- The fountain court's joints are half as wide, in a lighter mortar.
+- Still open: a tone step down the middle of some floors, gravel flat at middle distance, parquet shimmer, two gardeners overlapping, the flagged walk's kerb against the stable cobbles, figures on plinths in the Business Room, door-jamb z-fighting.
