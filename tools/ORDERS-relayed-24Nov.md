@@ -32,11 +32,26 @@ His words as relayed: the outside ground "looks so basic".
 | # | State |
 |---|---|
 | 1 | Asked of His Grace by quiz, 24 Nov |
-| 2 | Open |
-| 3 | Asked (order of work) |
-| 4 | Asked (order of work) |
+| 2 | Done in v1.60: relaxed gloved hands, true mirrors |
+| 3 | Done in v1.60 for the arrival route: nothing is built late (all of it is meshed at load); the culling by distance now keeps the rooms on the front-door axis drawn from the upper steps and terrace. Cost there: +9 to +10 percent frame time. The whole house drawn at once from everywhere is not done: from the forecourt alone it cost a fifth more frame time |
+| 4 | Done in v1.60 as relayed (table down the long axis, thrones at the east end). It costs the view of the thrones from the Saloon; the other layout is offered to His Grace by quiz |
 | 5 | Built as v1.59 (KAIROS relayed His Grace's approval of the order: ground and floors first). Lawns, gravel, kerbs, flags, the fountain court, and a floor finish in every room. Not in it: terrain undulation and a ha-ha, hedge borders and bedding (the gardens version), skirting |
 | 6 | Done |
 
 ## The ten-version plan relayed on 24 Nov ("His Grace has approved the plan for tonight")
 Ground and floors; the throne room and Kairos (the whole mansion at load, the thrones at the head of the table, the napkin, the hands); the gardens; the outside of the house; the state rooms; below stairs; the bedrooms and upper floors; the outbuildings; light and atmosphere; final polish. My numbering runs one ahead of the relay's, because v1.58 was already pushed when it came: ground and floors is v1.59, the throne room v1.60, and so on.
+
+## KAIROS's sweep of v1.59 (24 Nov): merge held. Answered in v1.60
+| # | His item | State |
+|---|---|---|
+| 1 | Outdoor paths lost their flag courses; kerbs as wide as the gravel | Fixed: gravel in texture with a kerb a quarter of a block wide; flagged walks in jointed flags. Stills 09 |
+| 2 | Lawns do not read as mown; no daisies, shade or worn edges | Fixed: `lawnMown` laid over the grass; deeper tree shade; pale edge by paths. Stills 08 |
+| 3 | Fountain court: plain squares | Fixed: four rings with radial joints and a border course. Stills 07 |
+| 4 | Outdoor flags everywhere: no joints | Fixed on the terrace and the flagged walks. The stable yard is gravel and takes the gravel texture. Stills 10 |
+| 5 | Terrain undulation and the ha-ha | Not done; moved to the gardens version, said plainly |
+| 6 | A straight joint down every new floor | Fixed: it was the texture tile's edge. Stills 11 |
+| 7 | Great Hall on grey flags | Fixed: marble checks |
+| 8 | Annexe flagged, Cellars planked, Tower Porch bare | Annexe and Cellars fixed. Tower Porch: open |
+| 9 | Dark box in the Ambulance Bay | Fixed: a canvas hood with a red cross |
+| 10 | Parquet shimmer, shadow speckle on flags | Open |
+| Napkin | "keep it, sculpted" | Not built. His Grace told me himself to remove it (23 Nov, by quiz). A relay that reverses his own word waits for his answer; asked by quiz |
