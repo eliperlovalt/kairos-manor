@@ -4304,7 +4304,7 @@ function genSets(){const t0=performance.now();let n=0;
 
 /* ---------- living water and fire: fountains play, the lake glints, the hearths flicker ---------- */
 const FOUNTS=[[0,.5,-113,2.3,3.9,1.1],[0,1.5,72,4.2,4.2,.6]];let fxDrop=null,fxGlint=null;const FXG=[];
-function fxInit(){const N=FOUNTS.length*72;fxDrop=new THREE.InstancedMesh(new THREE.BoxGeometry(.16,.16,.16),new THREE.MeshBasicMaterial({color:'#cfe6f2',transparent:true,opacity:.85}),N);fxDrop.frustumCulled=false;scene.add(fxDrop);
+function fxInit(){const N=FOUNTS.length*72;fxDrop=new THREE.InstancedMesh(new THREE.BoxGeometry(.16,.16,.16),new THREE.MeshBasicMaterial({color:'#d6eaf4'}),N);   /* v1.58: the fountain's drops are solid, drawn with everything else and tested against it, so no order of drawing can put them over a figure standing before the fountain (KAIROS, from the reel studio; in the page itself they were already hidden behind the walker) */fxDrop.frustumCulled=false;scene.add(fxDrop);
   let s=7;const R=()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296};
   for(let i=0;i<260;i++){for(let t=0;t<20;t++){const x=LAKE.x+(R()*2-1)*LAKE.rx,z=LAKE.z+(R()*2-1)*LAKE.rz;if(lakeD(x,z)<.8){FXG.push([x,-.47,z,R()*6.28,.6+R()]);break}}}
   for(const f of FOUNTS)for(let i=0;i<14;i++){const a=R()*6.28,r=R()*f[3]*.85;FXG.push([f[0]+Math.cos(a)*r,f[1]+(f===FOUNTS[0]?.42:.02),f[2]+Math.sin(a)*r,R()*6.28,1+R()])}
