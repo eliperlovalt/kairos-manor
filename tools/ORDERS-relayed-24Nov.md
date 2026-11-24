@@ -55,3 +55,11 @@ Ground and floors; the throne room and Kairos (the whole mansion at load, the th
 | 9 | Dark box in the Ambulance Bay | Fixed: a canvas hood with a red cross |
 | 10 | Parquet shimmer, shadow speckle on flags | Open |
 | Napkin | "keep it, sculpted" | Built in v1.61 after the third relay, behind the switch `KNAP`, and reported to His Grace plainly (his own earlier word was to remove it; my quiz went unanswered three times) |
+
+## KAIROS's sweep of v1.60 (24 Nov): merge held for three regressions. Answered in v1.62
+| # | His item | State |
+|---|---|---|
+| 1 | Stable yard painted as gravel | Fixed: the ground textures skip ground a set has paved; cobbles and the flagged walk are back. The walk's kerb against the cobbles: open |
+| 2 | Farm paths gravel, not flags | Fixed: jointed flags with the thin kerb |
+| 3 | The door case on the Great Hall's north wall gone | Restored. It was taken down on purpose in v1.60; it is a door case on the outer wall and never led anywhere |
+| Napkin | He wrote that I wait for His Grace's answer | I had already built it in v1.61 on his third relay, behind `KNAP`, and said so to His Grace. His Grace's answer still decides |

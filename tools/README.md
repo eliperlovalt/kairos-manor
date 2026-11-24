@@ -346,3 +346,9 @@ Since v1.61 (the napkin, sculpted):
 - Kairos's napkin is back as a draped cloth (`kairosBot`, switch `KNAP`): over the left forearm above the cuff, with a band of sleeve between; a top that rises in the middle, a short inner fall, a long outer fall that tapers to a slanted, rolled hem, folds in two whites, a tuck under the arm. The left forearm is carried level again (`rest.f2`). It fits the doorway check at 1.85 wide (the first cut, one voxel proud, made him 1.91).
 - Why it is back: His Grace told me by quiz on 23 Nov to remove it, and v1.58 did. KAIROS then relayed three times that he wants it kept and sculpted. My quiz to confirm went unanswered three times (he was away), the change is small and undone by `KNAP=false`, so it is built and reported to him plainly.
 - Stills: `tools/shots/v161/`.
+
+Since v1.62 (KAIROS's sweep of v1.60: merge held for three regressions against the live site; still `tools/shots/v162/`, live v1.57, v1.61 and v1.62 in rows):
+- The ground's textures are not laid over ground an outdoor set has already paved. `fplane` marks those cells in `GCOV`; `groundDress` skips them. The stable yard has its cobbles and its flagged walk again (v1.60 had painted the yard as gravel).
+- The Home Farm's paths are laid in jointed flags with the thin kerb (they are gravel cells; in v1.57 their two tones read as flags, in v1.60 they were gravel).
+- The pedimented door case hangs on the Great Hall's north wall again (`daisDoor`). v1.60 took it down when the thrones left that wall. It is a door case on the outer wall, as it always was: nothing lies north of it and it was never a way through. `tidy()` clears a seat standing in front of it.
+- Open from the same sweep: a tone step down the middle of some floors, the fountain court's joints too heavy near the camera, gravel flat at middle distance, the Tower Porch floor, parquet shimmer, two gardeners overlapping, the walk's kerb against the cobbles.
