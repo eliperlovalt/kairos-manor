@@ -341,3 +341,8 @@ Since v1.60 (the throne room and Kairos; relayed by KAIROS in His Grace's name, 
 - `ambulanceCart` (`props5.js`): a canvas hood with a red cross each side (it was a dark box).
 - The arrival rule (`AXIS`) holds only on the upper steps and the terrace within 14 of the axis. Measured there: +9 and +10 percent frame time, 67 more draws, 150 to 245 thousand more triangles (the Saloon and the Great Hall, now in sight). At the foot of the steps and on the lawn it costs nothing. Drawn from the whole forecourt it cost a fifth more frame time for rooms that cannot be seen from below.
 - The napkin stays off, as His Grace told me himself on 23 Nov. KAIROS has since relayed that he wants it back as a sculpted cloth; that reverses his own word to me, so it waits for his answer by quiz.
+
+Since v1.61 (the napkin, sculpted):
+- Kairos's napkin is back as a draped cloth (`kairosBot`, switch `KNAP`): over the left forearm above the cuff, with a band of sleeve between; a top that rises in the middle, a short inner fall, a long outer fall that tapers to a slanted, rolled hem, folds in two whites, a tuck under the arm. The left forearm is carried level again (`rest.f2`). It fits the doorway check at 1.85 wide (the first cut, one voxel proud, made him 1.91).
+- Why it is back: His Grace told me by quiz on 23 Nov to remove it, and v1.58 did. KAIROS then relayed three times that he wants it kept and sculpted. My quiz to confirm went unanswered three times (he was away), the change is small and undone by `KNAP=false`, so it is built and reported to him plainly.
+- Stills: `tools/shots/v161/`.

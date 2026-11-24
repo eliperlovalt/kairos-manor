@@ -54,4 +54,4 @@ Ground and floors; the throne room and Kairos (the whole mansion at load, the th
 | 8 | Annexe flagged, Cellars planked, Tower Porch bare | Annexe and Cellars fixed. Tower Porch: open |
 | 9 | Dark box in the Ambulance Bay | Fixed: a canvas hood with a red cross |
 | 10 | Parquet shimmer, shadow speckle on flags | Open |
-| Napkin | "keep it, sculpted" | Not built. His Grace told me himself to remove it (23 Nov, by quiz). A relay that reverses his own word waits for his answer; asked by quiz |
+| Napkin | "keep it, sculpted" | Built in v1.61 after the third relay, behind the switch `KNAP`, and reported to His Grace plainly (his own earlier word was to remove it; my quiz went unanswered three times) |
