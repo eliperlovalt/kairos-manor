@@ -63,3 +63,16 @@ Ground and floors; the throne room and Kairos (the whole mansion at load, the th
 | 2 | Farm paths gravel, not flags | Fixed: jointed flags with the thin kerb |
 | 3 | The door case on the Great Hall's north wall gone | Restored. It was taken down on purpose in v1.60; it is a door case on the outer wall and never led anywhere |
 | Napkin | He wrote that I wait for His Grace's answer | I had already built it in v1.61 on his third relay, behind `KNAP`, and said so to His Grace. His Grace's answer still decides |
+
+## 25 Nov: resumed; KAIROS merged v1.63 to main (live). His sweep of v1.63, to fold into the next pushes
+| # | His item | State |
+|---|---|---|
+| 1 | Stable yard walk: plain gravel, no joints, no kerb against the cobbles (the last regression against the old live site) | open |
+| 2 | No climbable Women's or Men's Stair in view of six poses: build real flights where the names say, visible through those doors | open |
+| 3 | Robed figures on grey bases walk into furniture: take the bases off walking figures or make them statues that stay put | open |
+| 4 | A man stands in a chair's seat in the kitchen: keep walkers' paths off furniture | open |
+| 5 | Sewing Room and Upper Linen Room read the same: a sewing table, a dress form, bolts of cloth, a work basket; shelved presses of folded linen | open |
+| 6 | Night Nursery: the bed butts the toy fort; the cot is not identifiable | open |
+| 7 | Great Hall door case jammed between two windows, pediment over their cornices; leaf specks indoors | open |
+| 8 | Carried: r070a glass room, the floor tone step, door-jamb z-fighting, r031a double frame, a jagged shadow edge, the Tower Porch floor out of his view | open |
+| Napkin | His Grace's own answer (25 Nov): keep it, sculpted, with more contrast | Done in v1.64. ORDERS item 1 closed |
