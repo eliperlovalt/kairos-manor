@@ -67,12 +67,14 @@ Ground and floors; the throne room and Kairos (the whole mansion at load, the th
 ## 25 Nov: resumed; KAIROS merged v1.63 to main (live). His sweep of v1.63, to fold into the next pushes
 | # | His item | State |
 |---|---|---|
-| 1 | Stable yard walk: plain gravel, no joints, no kerb against the cobbles (the last regression against the old live site) | open |
-| 2 | No climbable Women's or Men's Stair in view of six poses: build real flights where the names say, visible through those doors | open |
-| 3 | Robed figures on grey bases walk into furniture: take the bases off walking figures or make them statues that stay put | open |
-| 4 | A man stands in a chair's seat in the kitchen: keep walkers' paths off furniture | open |
-| 5 | Sewing Room and Upper Linen Room read the same: a sewing table, a dress form, bolts of cloth, a work basket; shelved presses of folded linen | open |
-| 6 | Night Nursery: the bed butts the toy fort; the cot is not identifiable | open |
-| 7 | Great Hall door case jammed between two windows, pediment over their cornices; leaf specks indoors | open |
-| 8 | Carried: r070a glass room, the floor tone step, door-jamb z-fighting, r031a double frame, a jagged shadow edge, the Tower Porch floor out of his view | open |
+| 1 | Stable yard walk: plain gravel, no joints, no kerb against the cobbles (the last regression against the old live site) | Fixed in v1.65: jointed flags, and a kerb where the walk meets the cobbles |
+| 2 | No climbable Women's or Men's Stair in view of six poses: build real flights where the names say, visible through those doors | Not changed in v1.65, and why: the Women's flight is in its room, at the east wall, beside poses that look north past it. The Men's flight stands south of its room by the agreed wall plan (moves 4 and 5 walled the doors beside its rail in the Gun Room). The Grand Stair fills the hall above, so neither flight can stand on the door's line. Moving the Men's flight is put to His Grace by quiz |
+| 3 | Robed figures on grey bases walk into furniture: take the bases off walking figures or make them statues that stay put | Fixed in v1.65: they were the silver house's women in stone grey with a slab hem. Slate blue now, and every skirt swells in two steps, no slab |
+| 4 | A man stands in a chair's seat in the kitchen: keep walkers' paths off furniture | Fixed in v1.65: walkers are refused the footprint of every floor-standing piece |
+| 5 | Sewing Room and Upper Linen Room read the same: a sewing table, a dress form, bolts of cloth, a work basket; shelved presses of folded linen | Fixed in v1.65: six new Depot parts; all of his list is in |
+| 6 | Night Nursery: the bed butts the toy fort; the cot is not identifiable | Fixed in v1.65: the fort is out of the Night Nursery; the cot has a rail, a blue blanket and a muslin hood |
+| 7 | Great Hall door case jammed between two windows, pediment over their cornices; leaf specks indoors | Fixed in v1.65: the two windows beside it are bare frames, no curtains or pelmets; no weather is drawn under a roof |
+| 8 | Carried: r070a glass room, the floor tone step, door-jamb z-fighting, r031a double frame, a jagged shadow edge, the Tower Porch floor out of his view | open, carried again |
 | Napkin | His Grace's own answer (25 Nov): keep it, sculpted, with more contrast | Done in v1.64. ORDERS item 1 closed |
+
+v1.65 also carries the plan on: the gardens, second part (the sundial garden hedged with rose arches; a rose garden across the avenue). Stills in `tools/shots/v165/`.

@@ -284,3 +284,16 @@ Load order: props.js, props2, props3, props4, props5, floors, sets, livery, seas
 3. **Routes.** HOUSEHOLD routes are computed on my plans. Rebuild after fitting, passing your fitted item list as `plans`. About 2% of in-room routes fall back to a straight line.
 4. **Not seen in first person.** Every part was checked in the Depot preview, not inside the Estate.
 5. **Labels only.** Nothing in the Depot holds His Grace's records. The example tasks in Chores and the `real` lines are placeholders.
+
+## v1.65 (25 Nov 2026): six parts for the Sewing Room and the Upper Linen Room, and the cot
+Made and placed by the Estate chat (there is no separate Depot chat). All in `props5.js`, after `dryingRack`; the page's embedded copy is the same text. Indoor pieces are drawn within 46 blocks, so far off they cost nothing.
+
+| Part | What it is | Triangles near | Far |
+|---|---|---|---|
+| `dressForm` | A dress form on an ebony stand, a tape over its shoulders; with `c`, a dress in that cloth pinned on it | 160 (138 with `c`) | 0 |
+| `clothBolts` | A wall rack of twelve bolts of cloth | 436 | 0 |
+| `sewingTable` | A work table with a hand machine, cloth, shears, a pin cushion, a pattern | 242 | 0 |
+| `workBasket` | A wicker basket of wools with a handle | 230 | 0 |
+| `linenShelves` | Open shelves of folded linen, some tied in blue tape | 440 | 0 |
+| `laundryBasket` | A hamper heaped with linen | 196 | 0 |
+| `cot` (changed) | A top rail, a blue blanket, a muslin hood at the head | 342 | 0 |
