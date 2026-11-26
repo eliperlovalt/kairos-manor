@@ -22,9 +22,9 @@ const CONTOURS=(()=>{const O=ORNAMENT,{PAL,Skin,Face,P,W}=O;
 const median=a=>{const s=a.slice().sort((x,y)=>x-y);return s.length?s[s.length>>1]:0};
 const VW=['#f1ede4','#d8ccae','#e8dcc0','#bdb5a2'];
 const STYLES={
- hall:{label:'Pinnacles',rows:['rust','state','hood','key','attic'],sub:['hood','hood'],vert:'stack',zoneOff:.5,plinth:.75,balcony:1,centre:16.5,cornice:{w:1},parapet:{base:1.75,crest:.75,ob:'piers'},subcap:{die:4.25,b:1.5,h:3.5},corner:'pil',niche:true,portico:true,cresting:true},
- state:{label:'The grand order of the wing',rows:['rust','state','hood'],vert:'giant',plinth:.75,cornice:{w:1},parapet:{base:1.75,crest:.75,ob:{every:8,phase:.5,die:2.25}},corner:'pil',niche:true},
- service:{label:'Plain dress',rows:['plainkey','lintel'],vert:'none',plinth:.5,cornice:{w:.5,slim:true},parapet:{base:1.5,crest:0,ob:'corners'},corner:'quoin'},
+ hall:{label:'Pinnacles',rows:['rust','state','hood','key','attic'],sub:['hood','hood'],vert:'stack',zoneOff:.5,plinth:.75,balcony:1,centre:16.5,cornice:{w:1},parapet:{base:1.75,crest:.75,ob:'piers'},subcap:{die:4.25,b:1.5,h:3.5},corner:'pil',niche:true,portico:true,cresting:true,stacks:{every:16,inset:3.5,w:3,d:2,h:8,pots:3}},
+ state:{label:'The grand order of the wing',rows:['rust','state','hood'],vert:'giant',plinth:.75,cornice:{w:1},parapet:{base:1.75,crest:.75,ob:{every:8,phase:.5,die:2.25}},corner:'pil',niche:true,stacks:{every:16,inset:3.5,w:3,d:2,h:7,pots:3}},
+ service:{label:'Plain dress',rows:['plainkey','lintel'],vert:'none',plinth:.5,cornice:{w:.5,slim:true},parapet:{base:1.5,crest:0,ob:'corners'},corner:'quoin',stacks:{every:16,inset:3.5,w:2,d:2,h:6,pots:2}},
  chapel:{label:'Gothic',rows:['lancet','lancet'],vert:'buttress',plinth:.75,eave:'corbel',gable:{coping:true,finial:'cross'},corner:'buttress',pal:{trim:'#ddd6c6',deep:'#bdb5a2'}},
  glass:{label:'Iron and stone',special:'glass',pal:{trim:'#d8ccae',deep:'#c3af86'}},
  stable:{label:'Stone on brick',rows:['lintelkey','lintel'],vert:'none',plinth:.5,eave:'plain',gable:{coping:true,finial:'ball'},corner:'board',arch:true,turret:true},
@@ -149,6 +149,22 @@ function cresting(F,S,c,pal){/* a strapwork cresting over the door, on the show 
   for(const s of[-1,1]){const u=uc+s*7.75;F.box(u-.75,c.top,-1.25,u+.75,y+1,o+.25,T,'die',true);const[x,z]=F.xz(u,o-.5);W.obelisk(S,x,y+1,z,{b:1.5,h:4,ball:true,c:T})}
   const[x,z]=F.xz(uc,o-.125);W.obelisk(S,x,y+4,z,{b:1,h:2,ball:true,c:T})}
 
+/* ---------- chimney stacks (v21: made by the Estate chat, 26 Nov 2026). A flat roof behind its parapet carries stone stacks with clay pots: set back from each front,
+   spaced out from the middle of each side, never beside a higher part of the same building (a tower, the dome). A narrow roof has one row down its middle.
+   Far off a stack is its shaft and its cap. st.stacks = {every, inset, w, d, h, pots}; sizes on the half block so near and far agree ---------- */
+function stacks(S,spec,b,bi,st,pal){const k=st.stacks,y=b.roofY+.5,T=pal.trim,D=pal.deep,far=S.unit>=.5,e=k.every,ins=k.inset,cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2,hw=k.w/2,hd=k.d/2,H=k.h,L=b.x1-b.x0+1,Dz=b.z1-b.z0+1;let n=0;
+  const clear=(x,z)=>!spec.boxes.some((o,i)=>i!==bi&&o.roofY>b.roofY&&x>o.x0-3&&x<o.x1+3&&z>o.z0-3&&z<o.z1+3);
+  const one=(x,z,ax)=>{if(!clear(x,z))return;const a=ax?hw:hd,c=ax?hd:hw;n++;
+    if(far){S.wbox(x-a,y,z-c,x+a,y+H-.5,z+c,T,'stack');S.wbox(x-a-.5,y+H-.5,z-c-.5,x+a+.5,y+H,z+c+.5,D,'stack');return}
+    S.wbox(x-a-.25,y,z-c-.25,x+a+.25,y+.5,z+c+.25,D,'stack');S.wbox(x-a,y+.5,z-c,x+a,y+H-1,z+c,T,'stack');S.wbox(x-a-.25,y+H-1.75,z-c-.25,x+a+.25,y+H-1.5,z+c+.25,D,'stack');
+    S.wbox(x-a-.25,y+H-1,z-c-.25,x+a+.25,y+H-.5,z+c+.25,T,'stack');S.wbox(x-a-.5,y+H-.5,z-c-.5,x+a+.5,y+H-.25,z+c+.5,D,'stack');S.wbox(x-a,y+H-.25,z-c,x+a,y+H,z+c,T,'stack');
+    for(let i=0;i<k.pots;i++){const t=k.pots>1?(i/(k.pots-1)*2-1)*((ax?a:c)-.5):0,px=x+(ax?t:0),pz=z+(ax?0:t);S.wbox(px-.25,y+H,pz-.25,px+.25,y+H+1,pz+.25,'#b5653a','pot')}};
+  if(Dz>=2*ins+12&&L>=2*ins+12){for(let u=e;u<L/2-ins-1;u+=e)for(const s of[-1,1]){one(cx+s*u,b.z0-.5+ins,true);one(cx+s*u,b.z1+.5-ins,true)}
+    for(let u=e*.75;u<Dz/2-ins-1;u+=e)for(const s of[-1,1]){one(b.x0-.5+ins,cz+s*u,false);one(b.x1+.5-ins,cz+s*u,false)}}
+  else if(L>=Dz)for(let u=e/2;u<L/2-ins;u+=e)for(const s of[-1,1])one(Math.round((cx+s*u)*2)/2,Math.round(cz*2)/2,true);
+  else for(let u=e/2;u<Dz/2-ins;u+=e)for(const s of[-1,1])one(Math.round(cx*2)/2,Math.round((cz+s*u)*2)/2,false);
+  return n}
+
 function dome(S,R,b,st,pal){const cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2,rx=(b.x1-b.x0)/2+.5,H=rx*.9,yc=b.roofY,T=pal.trim,D=pal.deep,u=R.unit,far=S.unit>=.5;
   /* four corner turrets where the round dome leaves the square open */
   for(const sx of[-1,1])for(const sz of[-1,1]){const x=cx+sx*(rx-1.5),z=cz+sz*(rx-1.5);S.wbox(x-1.5,yc+.5,z-1.5,x+1.5,yc+3,z+1.5,T,'turret');if(!far)S.wbox(x-1.75,yc+3,z-1.75,x+1.75,yc+3.25,z+1.75,D,'turret');W.obelisk(S,x,yc+3.25,z,{b:1.5,h:3.5,ball:true,c:T})}
@@ -230,6 +246,7 @@ function layout(spec,st,env,lod,o){const far=lod==='far',S=new Skin(far?.5:.25),
       if(st.vert==='buttress'||st.corner==='buttress'){const us=st.vert==='buttress'?res.piers.slice():[];if(st.corner==='buttress'){if(F.free0)us.push(.5);if(F.free1)us.push(F.L-.5)}for(const p of us){const[x,z]=F.xz(p,.5);solids.push({what:'buttress',x0:x-.5,y0:g,z0:z-.5,x1:x+.5,y1:g+3,z1:z+.5})}}
       facesOut.push({box:bi,side:sd.side,axis:sd.axis,o:sd.o,f:sd.f,n:sd.n,L:sd.L,depth:F.D,piers:res.piers})}
     if(t==='dome'&&!far||t==='dome')dome(S,R,b,st,pal);
+    if(st.stacks&&t==='flat'&&bi===0)stacks(S,spec,b,bi,st,pal);
     const rg=ridged(S,b,st,pal,t==='gableX'?[endFree.W,endFree.E]:[endFree.N,endFree.S]);
     if(st.turret&&bi===0&&rg)turret(S,R,rg,b,pal)});
   if(st.gateArch)gateArch(S,spec,pal,g);

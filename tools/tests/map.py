@@ -1,6 +1,6 @@
 """Top-down ground map. python3 map.py FOLDER OUT.png [x0,z0,x1,z1]"""
 import sys,json,base64
-sys.path.insert(0,'/home/claude/tests')
+sys.path.insert(0,__import__('os').path.dirname(__import__('os').path.abspath(__file__)))
 from harness import serve, open_estate
 from playwright.sync_api import sync_playwright
 import numpy as np

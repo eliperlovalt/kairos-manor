@@ -945,9 +945,9 @@ const CONTOURS=(()=>{const O=ORNAMENT,{PAL,Skin,Face,P,W}=O;
 const median=a=>{const s=a.slice().sort((x,y)=>x-y);return s.length?s[s.length>>1]:0};
 const VW=['#f1ede4','#d8ccae','#e8dcc0','#bdb5a2'];
 const STYLES={
- hall:{label:'Pinnacles',rows:['rust','state','hood','key','attic'],sub:['hood','hood'],vert:'stack',zoneOff:.5,plinth:.75,balcony:1,centre:16.5,cornice:{w:1},parapet:{base:1.75,crest:.75,ob:'piers'},subcap:{die:4.25,b:1.5,h:3.5},corner:'pil',niche:true,portico:true,cresting:true},
- state:{label:'The grand order of the wing',rows:['rust','state','hood'],vert:'giant',plinth:.75,cornice:{w:1},parapet:{base:1.75,crest:.75,ob:{every:8,phase:.5,die:2.25}},corner:'pil',niche:true},
- service:{label:'Plain dress',rows:['plainkey','lintel'],vert:'none',plinth:.5,cornice:{w:.5,slim:true},parapet:{base:1.5,crest:0,ob:'corners'},corner:'quoin'},
+ hall:{label:'Pinnacles',rows:['rust','state','hood','key','attic'],sub:['hood','hood'],vert:'stack',zoneOff:.5,plinth:.75,balcony:1,centre:16.5,cornice:{w:1},parapet:{base:1.75,crest:.75,ob:'piers'},subcap:{die:4.25,b:1.5,h:3.5},corner:'pil',niche:true,portico:true,cresting:true,stacks:{every:16,inset:3.5,w:3,d:2,h:8,pots:3}},
+ state:{label:'The grand order of the wing',rows:['rust','state','hood'],vert:'giant',plinth:.75,cornice:{w:1},parapet:{base:1.75,crest:.75,ob:{every:8,phase:.5,die:2.25}},corner:'pil',niche:true,stacks:{every:16,inset:3.5,w:3,d:2,h:7,pots:3}},
+ service:{label:'Plain dress',rows:['plainkey','lintel'],vert:'none',plinth:.5,cornice:{w:.5,slim:true},parapet:{base:1.5,crest:0,ob:'corners'},corner:'quoin',stacks:{every:16,inset:3.5,w:2,d:2,h:6,pots:2}},
  chapel:{label:'Gothic',rows:['lancet','lancet'],vert:'buttress',plinth:.75,eave:'corbel',gable:{coping:true,finial:'cross'},corner:'buttress',pal:{trim:'#ddd6c6',deep:'#bdb5a2'}},
  glass:{label:'Iron and stone',special:'glass',pal:{trim:'#d8ccae',deep:'#c3af86'}},
  stable:{label:'Stone on brick',rows:['lintelkey','lintel'],vert:'none',plinth:.5,eave:'plain',gable:{coping:true,finial:'ball'},corner:'board',arch:true,turret:true},
@@ -1072,6 +1072,22 @@ function cresting(F,S,c,pal){/* a strapwork cresting over the door, on the show 
   for(const s of[-1,1]){const u=uc+s*7.75;F.box(u-.75,c.top,-1.25,u+.75,y+1,o+.25,T,'die',true);const[x,z]=F.xz(u,o-.5);W.obelisk(S,x,y+1,z,{b:1.5,h:4,ball:true,c:T})}
   const[x,z]=F.xz(uc,o-.125);W.obelisk(S,x,y+4,z,{b:1,h:2,ball:true,c:T})}
 
+/* ---------- chimney stacks (v21: made by the Estate chat, 26 Nov 2026). A flat roof behind its parapet carries stone stacks with clay pots: set back from each front,
+   spaced out from the middle of each side, never beside a higher part of the same building (a tower, the dome). A narrow roof has one row down its middle.
+   Far off a stack is its shaft and its cap. st.stacks = {every, inset, w, d, h, pots}; sizes on the half block so near and far agree ---------- */
+function stacks(S,spec,b,bi,st,pal){const k=st.stacks,y=b.roofY+.5,T=pal.trim,D=pal.deep,far=S.unit>=.5,e=k.every,ins=k.inset,cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2,hw=k.w/2,hd=k.d/2,H=k.h,L=b.x1-b.x0+1,Dz=b.z1-b.z0+1;let n=0;
+  const clear=(x,z)=>!spec.boxes.some((o,i)=>i!==bi&&o.roofY>b.roofY&&x>o.x0-3&&x<o.x1+3&&z>o.z0-3&&z<o.z1+3);
+  const one=(x,z,ax)=>{if(!clear(x,z))return;const a=ax?hw:hd,c=ax?hd:hw;n++;
+    if(far){S.wbox(x-a,y,z-c,x+a,y+H-.5,z+c,T,'stack');S.wbox(x-a-.5,y+H-.5,z-c-.5,x+a+.5,y+H,z+c+.5,D,'stack');return}
+    S.wbox(x-a-.25,y,z-c-.25,x+a+.25,y+.5,z+c+.25,D,'stack');S.wbox(x-a,y+.5,z-c,x+a,y+H-1,z+c,T,'stack');S.wbox(x-a-.25,y+H-1.75,z-c-.25,x+a+.25,y+H-1.5,z+c+.25,D,'stack');
+    S.wbox(x-a-.25,y+H-1,z-c-.25,x+a+.25,y+H-.5,z+c+.25,T,'stack');S.wbox(x-a-.5,y+H-.5,z-c-.5,x+a+.5,y+H-.25,z+c+.5,D,'stack');S.wbox(x-a,y+H-.25,z-c,x+a,y+H,z+c,T,'stack');
+    for(let i=0;i<k.pots;i++){const t=k.pots>1?(i/(k.pots-1)*2-1)*((ax?a:c)-.5):0,px=x+(ax?t:0),pz=z+(ax?0:t);S.wbox(px-.25,y+H,pz-.25,px+.25,y+H+1,pz+.25,'#b5653a','pot')}};
+  if(Dz>=2*ins+12&&L>=2*ins+12){for(let u=e;u<L/2-ins-1;u+=e)for(const s of[-1,1]){one(cx+s*u,b.z0-.5+ins,true);one(cx+s*u,b.z1+.5-ins,true)}
+    for(let u=e*.75;u<Dz/2-ins-1;u+=e)for(const s of[-1,1]){one(b.x0-.5+ins,cz+s*u,false);one(b.x1+.5-ins,cz+s*u,false)}}
+  else if(L>=Dz)for(let u=e/2;u<L/2-ins;u+=e)for(const s of[-1,1])one(Math.round((cx+s*u)*2)/2,Math.round(cz*2)/2,true);
+  else for(let u=e/2;u<Dz/2-ins;u+=e)for(const s of[-1,1])one(Math.round(cx*2)/2,Math.round((cz+s*u)*2)/2,false);
+  return n}
+
 function dome(S,R,b,st,pal){const cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2,rx=(b.x1-b.x0)/2+.5,H=rx*.9,yc=b.roofY,T=pal.trim,D=pal.deep,u=R.unit,far=S.unit>=.5;
   /* four corner turrets where the round dome leaves the square open */
   for(const sx of[-1,1])for(const sz of[-1,1]){const x=cx+sx*(rx-1.5),z=cz+sz*(rx-1.5);S.wbox(x-1.5,yc+.5,z-1.5,x+1.5,yc+3,z+1.5,T,'turret');if(!far)S.wbox(x-1.75,yc+3,z-1.75,x+1.75,yc+3.25,z+1.75,D,'turret');W.obelisk(S,x,yc+3.25,z,{b:1.5,h:3.5,ball:true,c:T})}
@@ -1153,6 +1169,7 @@ function layout(spec,st,env,lod,o){const far=lod==='far',S=new Skin(far?.5:.25),
       if(st.vert==='buttress'||st.corner==='buttress'){const us=st.vert==='buttress'?res.piers.slice():[];if(st.corner==='buttress'){if(F.free0)us.push(.5);if(F.free1)us.push(F.L-.5)}for(const p of us){const[x,z]=F.xz(p,.5);solids.push({what:'buttress',x0:x-.5,y0:g,z0:z-.5,x1:x+.5,y1:g+3,z1:z+.5})}}
       facesOut.push({box:bi,side:sd.side,axis:sd.axis,o:sd.o,f:sd.f,n:sd.n,L:sd.L,depth:F.D,piers:res.piers})}
     if(t==='dome'&&!far||t==='dome')dome(S,R,b,st,pal);
+    if(st.stacks&&t==='flat'&&bi===0)stacks(S,spec,b,bi,st,pal);
     const rg=ridged(S,b,st,pal,t==='gableX'?[endFree.W,endFree.E]:[endFree.N,endFree.S]);
     if(st.turret&&bi===0&&rg)turret(S,R,rg,b,pal)});
   if(st.gateArch)gateArch(S,spec,pal,g);
@@ -1307,6 +1324,9 @@ const PADDOCK={x0:172,x1:196,z0:-112,z1:-72};
 const FLATS=[[-135,-152,140,66],[60,-122,200,-56],[-185,-100,-85,-60],[136,-52,198,-14],[-168,114,-110,158],[16,160,46,188],[-26,186,26,212],[141,-16,193,20],[-130,54,-110,68]];
 const formal=(x,z)=>{for(const f of FLATS)if(x>=f[0]&&x<=f[2]&&z>=f[1]&&z<=f[3])return true;return false};
 const H=new Int8Array(SX*SZ);const HI=(x,z)=>(z+OZ)*SX+(x+OX);
+/* v1.66: the ha-ha. A sunk fence on the north garden's far edge, where the deer park begins: a stone wall two blocks deep faces the park, a ditch at its foot, the far bank rising in a step.
+   From the garden the lawn runs on to the park unbroken; from the park it is a wall. A causeway at the middle carries the trail. The deer park's own fence gives way along it. H is below 0 in the ditch, so no beast or walker of the house goes down into it */
+const HAHA={x0:-62,x1:64,z:-150},hahaD=(x,z)=>{if(x<HAHA.x0||x>HAHA.x1||Math.abs(x)<=3)return 0;const dd=HAHA.z-z;return dd===1||dd===2?-2:dd===3?-1:0};
 function baseH(x,z){if(lakeD(x,z)<1)return -3;if(onRoad(x,z)||formal(x,z))return 0;if(riverD(x,z)<1)return -3;const inWall=Math.abs(x)<WALL+4&&Math.abs(z)<WALL+4;
   if(inWall){if(Math.abs(Math.abs(x)-WALL)<5||Math.abs(Math.abs(z)-WALL)<5)return 0;return Math.max(0,Math.floor(smooth(x*.03,z*.03)*2.6-.4))}
   if(z>204&&vilD(x,z)<VILR)return 0;
@@ -1339,17 +1359,19 @@ function surf(x,z,h){if(onRoad(x,z))return hash(x,z)>.5?C.gravel:C.gravel2;if(z>
   {const t=trailAt(x,z);if(t)return t===2?(hash(x*1.7,z*1.3)>.55?C.greyStone:C.stone):(hash(x*1.3,z*1.1)>.72?C.mud:C.dirt)}
   const g=(Math.abs(x)>WALL||Math.abs(z)>WALL)?C.grassD:C.grass;return g[Math.min(g.length-1,Math.floor(smooth(x*.04+9,z*.04+4)*g.length))]}   /* v1.59: a lawn's green changes in slow sweeps, not block by block (a different green for every block made the lawn a checker and hid the mowing stripes) */
 function genGround(){CUR=0;
-  for(let z=-OZ;z<ZMAX;z++)for(let x=-OX;x<XMAX;x++)H[HI(x,z)]=baseH(x,z);
+  for(let z=-OZ;z<ZMAX;z++)for(let x=-OX;x<XMAX;x++){let h=hahaD(x,z)||baseH(x,z);if(h>0&&x>=HAHA.x0&&x<=HAHA.x1){if(z===HAHA.z-4)h=0;else if(z===HAHA.z-5)h=Math.min(h,1)}H[HI(x,z)]=h}
   {const D=new Uint16Array(SX*SZ).fill(999),at=(x,z)=>(z+OZ)*SX+(x+OX);for(let z=-OZ;z<ZMAX;z++)for(let x=-OX;x<XMAX;x++)if(onRoad(x,z)||(z>204&&vilD(x,z)<VILR))D[at(x,z)]=0;
    for(let z=-OZ;z<ZMAX;z++)for(let x=-OX;x<XMAX;x++){const i=at(x,z);let d=D[i];if(x>-OX)d=Math.min(d,D[i-1]+1);if(z>-OZ)d=Math.min(d,D[i-SX]+1);D[i]=d}
    for(let z=ZMAX-1;z>=-OZ;z--)for(let x=XMAX-1;x>=-OX;x--){const i=at(x,z);let d=D[i];if(x<XMAX-1)d=Math.min(d,D[i+1]+1);if(z<ZMAX-1)d=Math.min(d,D[i+SX]+1);D[i]=d}
    for(let z=-OZ;z<ZMAX;z++)for(let x=-OX;x<XMAX;x++){const h=H[HI(x,z)];if(h>0){const cap=Math.max(0,Math.floor((D[at(x,z)]-1)/3));if(cap<h)H[HI(x,z)]=cap}}}
   for(let z=-OZ;z<ZMAX;z++)for(let x=-OX;x<XMAX;x++){const h=H[HI(x,z)];
+    if(h<0&&hahaD(x,z)<0){S(x,h,z,surf(x,z,0));S(x,h-1,z,C.dirt);continue}
     if(h<0){S(x,-3,z,C.mud);S(x,-2,z,C.water);S(x,-1,z,C.water);continue}
     if(riverD(x,z)<1&&onRoad(x,z)){S(x,-3,z,C.mud);S(x,-2,z,C.water);S(x,0,z,C.greyStone);continue}   /* a bridge: the road on a stone deck, the water running under */
     S(x,h,z,surf(x,z,h));
     let lo=h;for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]]){if(!inb(x+dx,0,z+dz))continue;lo=Math.min(lo,H[HI(x+dx,z+dz)])}
-    for(let y=h-1;y>=Math.max(lo,-3);y--)S(x,y,z,C.dirt)}}
+    for(let y=h-1;y>=Math.max(lo,-3);y--)S(x,y,z,C.dirt);
+    if(z===HAHA.z&&hahaD(x,z-1)<0){S(x,h,z,C.trim);for(let y=h-1;y>=-2;y--)S(x,y,z,C.stone)}}}   /* the ha-ha's wall: a coping level with the lawn, stone below */
 
 /* =========================================================
    Buildings
@@ -1611,7 +1633,7 @@ function genBuildings(){
   for(let x=-64;x<=64;x+=8)if(x>-44&&x<44)for(const z of[-66,30]){S(x,39,z,C.trim);S(x,40,z,C.gold)}
   for(let z=-66;z<=30;z+=8)if(z>-46&&z<10)for(const x of[-64,64]){S(x,39,z,C.trim);S(x,40,z,C.gold)}
   for(const[x0,z0]of[[-64,-66],[44,-66],[-64,10],[44,10]])for(const[x,z]of[[x0,z0],[x0+20,z0],[x0,z0+20],[x0+20,z0+20]]){for(let y=47;y<=49;y++)S(x,y,z,C.trim);S(x,50,z,C.gold)}
-  for(const[x,z]of[[-36,-58],[34,-58],[-36,18],[34,18]]){fill(x,39,z,x+1,43,z+1,C.brick);fill(x,44,z,x+1,44,z+1,C.stone);SMOKE.push([x,45,z])}
+  for(const[x,z]of[[-16,-63],[16,-63],[-16,27],[16,27]])SMOKE.push([x,48,z]);   /* v1.66: the four brick stubs are gone; the Depot's kit sets twelve stone stacks with pots on this roof (contours.js, stacks), and the smoke rises from four of them */
   CUR=B1;const quo=(x,z)=>{for(let y=1;y<=37;y+=2)if(G(x,y,z)!==C.win&&G(x,y,z))S(x,y,z,C.trim)};
   for(const x of[-64,-44,44,64])for(const z of[-66,30])quo(x,z);for(const z of[-46,10])for(const x of[-64,64])quo(x,z);
   CUR=0;
@@ -1740,7 +1762,7 @@ function genGrounds(){CUR=0;
   const wpost=(x,z)=>{if(Math.abs(x)<=16&&z===WALL)return;const hw=H[HI(x,z)],g=Math.max(0,hw);for(let y=g+(hw<0?3:1);y<=g+8;y++)S(x,y,z,C.greyStone);if(((x+z)&1)===0)S(x,g+9,z,C.greyStone)};
   for(let x=-WALL;x<=WALL;x++){wpost(x,-WALL);wpost(x,WALL)}for(let z=-WALL;z<=WALL;z++){wpost(-WALL,z);wpost(WALL,z)}
   /* fences */
-  const fence=(x0,z0,x1,z1,gaps=[])=>{const post=(x,z)=>{if(gaps.some(g=>Math.abs(g[0]-x)<=1&&Math.abs(g[1]-z)<=1))return;const g=Math.max(0,H[HI(x,z)]);S(x,g+1,z,(x+z)%3===0?C.woodD:C.white)};for(let x=x0;x<=x1;x++){post(x,z0);post(x,z1)}for(let z=z0;z<=z1;z++){post(x0,z);post(x1,z)}};
+  const fence=(x0,z0,x1,z1,gaps=[])=>{const post=(x,z)=>{if(gaps.some(g=>Math.abs(g[0]-x)<=1&&Math.abs(g[1]-z)<=1))return;if((z===HAHA.z&&x<=HAHA.x1+1)||hahaD(x,z)<0)return;const g=Math.max(0,H[HI(x,z)]);S(x,g+1,z,(x+z)%3===0?C.woodD:C.white)};for(let x=x0;x<=x1;x++){post(x,z0);post(x,z1)}for(let z=z0;z<=z1;z++){post(x0,z);post(x1,z)}};
   fence(DEER.x0,DEER.z0,DEER.x1,DEER.z1,[[105,DEER.z1]]);fence(PADDOCK.x0,PADDOCK.z0,PADDOCK.x1,PADDOCK.z1,[[PADDOCK.x0,-92]]);fence(FIELDS.x0-1,FIELDS.z0-1,FIELDS.x1+1,FIELDS.z1+1,[[FIELDS.x1+1,130]]);
   /* jetty and boat */
   fill(-92,0,96,-86,0,98,C.plank);fill(-100,-1,97,-97,-1,98,C.walnut);
@@ -3897,7 +3919,7 @@ function buildProps(){const groups=new Map();let quads=0,n=0;const fr=new Map();
         for(let k=0;k<4;k++){const P=q.p[k],j=o+k*3;fb.p[j]=P[0]*u;fb.p[j+1]=P[1]*u;fb.p[j+2]=P[2]*u;fb.nm[j]=q.n[0]*127;fb.nm[j+1]=q.n[1]*127;fb.nm[j+2]=q.n[2]*127;fb.c[j]=Math.min(255,col[0]*255);fb.c[j+1]=Math.min(255,col[1]*255);fb.c[j+2]=Math.min(255,col[2]*255)}fb.n++}
       const geos=fbs.map(f=>f.n?f.geo():null),B=pbox(r),small=Math.max(B.x1-B.x0,B.y1,B.z1-B.z0)<1.7,cells=new Map();for(const it of list){const k=Math.floor(it.x/80)+','+Math.floor(it.z/80);let c=cells.get(k);if(!c)cells.set(k,c=[]);c.push(it)}
       for(const[k,c]of cells){const[cx,cz]=k.split(',').map(Number);for(let gi=0;gi<2;gi++){if(!geos[gi])continue;const im=new THREE.InstancedMesh(geos[gi],gi?glow:mat,c.length);c.forEach((it,i)=>{Rm.makeRotationY(it.th);M.copy(Rm).setPosition(it.x,it.y,it.z);im.setMatrixAt(i,M)});
-          im.instanceMatrix.needsUpdate=true;if(!gi){im.castShadow=true;im.receiveShadow=true}im.matrixAutoUpdate=false;im.updateMatrix();im.computeBoundingSphere();scene.add(im);INSTS.push({obj:im,x:cx*80+40,z:cz*80+40,small,near:r.kind==='hedge'})}}}}
+          im.instanceMatrix.needsUpdate=true;if(!gi){im.castShadow=true;im.receiveShadow=true}im.matrixAutoUpdate=false;im.updateMatrix();im.computeBoundingSphere();scene.add(im);INSTS.push({obj:im,x:cx*80+40,z:cz*80+40,small,near:r.kind==='hedge'||r.kind==='flowerBorder'})}}}}
   for(const g of groups.values()){for(const[fb,m]of[[g.fb,mat],[g.fl,glow]]){if(!fb.n)continue;const me=new THREE.Mesh(fb.geo(),m);if(m===mat){me.castShadow=true;me.receiveShadow=true}me.matrixAutoUpdate=false;me.updateMatrix();if(g.wint)me.userData.wint=1;scene.add(me);GROUPS.push({obj:me,bid:g.bid,band:g.band,d:g.d,x:g.x,z:g.z,wint:g.wint})}}
   return{props:n,quads,inst:INSTS.length}}
 /* ---------- the room layout kit ---------- */
@@ -5220,7 +5242,13 @@ function groveFrustum(){GCUT=false;if(ISO||!camera.isPerspectiveCamera)return;GC
    Now, whenever the shadow map is to be drawn, every tree is set out first, the shadows drawn on their own (into a one-pixel target), and the camera's own trees put back */
 let SHRT=null;
 function groveAll(){for(const b of GROVE.b.values()){if(b.imp)b.imp.mesh.count=0;const L=FULL.on&&b.hero?b.hero:(b.far||b.near||b.hero);if(!L)continue;for(const k of['hero','near','far','dot'])if(b[k]&&b[k]!==L)b[k].count=0;let n=0;for(const it of b.items)L.setMatrixAt(n++,it.m);L.count=n;L.instanceMatrix.needsUpdate=true}}
-function shadowPass(){if(!renderer.shadowMap.needsUpdate||!GROVE.n)return;groveAll();SHRT=SHRT||new THREE.WebGLRenderTarget(1,1);const was=renderer.getRenderTarget();renderer.setRenderTarget(SHRT);renderer.render(scene,camera);renderer.setRenderTarget(was);GROVE.key=null;GROVE.t=-9;groveStep()}
+/* v1.66: the shadow map is drawn with every storey in place. It is drawn only when the light changes, with whatever stood in view at that moment: the storeys cut from view above the walker cast nothing,
+   so the sun came down through them from the upper windows and the lantern and lay on floors and walls in bands, with a step in tone wherever one piece was cut and its neighbour was not (KAIROS: the tone step, the jagged light bands).
+   For this one drawing the cut interiors are put back; it is drawn through a camera that looks at nothing, so nothing but the shadow map is paid for */
+let SHCAM=null;
+function shadowPass(){if(!renderer.shadowMap.needsUpdate)return;if(GROVE.n)groveAll();const put=[];for(const g of GROUPS)if(g.si&&g.cut&&g.v!==false&&!g.obj.visible){g.obj.visible=true;put.push(g)}
+  if(!SHCAM){SHCAM=new THREE.PerspectiveCamera(1,1,.1,1);SHCAM.position.set(0,6000,0);SHCAM.lookAt(0,7000,0);SHCAM.updateMatrixWorld()}
+  SHRT=SHRT||new THREE.WebGLRenderTarget(1,1);const was=renderer.getRenderTarget();renderer.setRenderTarget(SHRT);renderer.render(scene,SHCAM);renderer.setRenderTarget(was);for(const g of put)g.obj.visible=false;TM.shadowPut=put.length;if(GROVE.n){GROVE.key=null;GROVE.t=-9;groveStep()}}
 /* v1.21: tree portraits. Every tree is drawn in its finest shape; beyond IMP.D blocks it is drawn as a portrait of that same finest shape, so it looks the same and costs two triangles.
    Each kind of tree is photographed from 12 directions at 3 heights (level, 30 and 60 degrees) onto one sheet, lit as the estate is lit now. The portrait turns to face you and shows the photograph
    taken nearest your line of sight. The sheets are taken again when the light changes (the hour, the season, the live sky), one kind a frame, so nothing stalls. Shadows still come from the real trees */
@@ -5389,7 +5417,7 @@ function cullStep(){const walk=MODE==='walk',px=walk?PL.x:camera.position.x,pz=w
     if(walk){const dc=g.x!=null?Math.hypot(g.x-px,g.z-pz):0,ax=WB!==g.bid&&AXIS(g,BLD[g.bid],px,pz);cut=d>(ax?110:46);if(!cut&&WB===g.bid)cut=(g.band>=0&&Math.abs(g.band-WL)>1)||dc>84||(g.band!==WL&&g.x!=null&&dc>(PL.tall?70:46));else if(!cut){if(b.glass)cut=dc>58;else{const bn=BLD[g.bid].band,eb=bn[Math.max(0,Math.min(bn.length-1,Math.round(PL.y)+2+OY))];cut=dc>(ax?170:58)||g.band>Math.max(2,eb+1)||(eb>2&&g.band<eb-1)}}}
     else if(OPEN_B!=null)cut=g.bid!==OPEN_B&&BLD[g.bid].hideWith!==OPEN_B;else cut=!(b.far&&d<=170&&(b.glass||g.band===1||g.band===2));
     if(cut!==!!g.cut){g.cut=cut;g.obj.visible=g.v!==false&&!cut}}
-  for(const I of INSTS){const d=Math.hypot(I.x-px,I.z-pz);I.obj.visible=!walk||d<(I.near?170:I.small?(FULL.on?Math.min(400,GOV.far+90):130):GOV.far+90)}}   /* v1.65: a garden hedge is drawn within 170 of its cell's middle: at full quality the two garden rooms' 118 blocks were drawn to 400, 38 thousand triangles in every view that faced them, from indoors too */
+  for(const I of INSTS){const d=Math.hypot(I.x-px,I.z-pz);I.obj.visible=!walk||d<(I.near?170:I.small?(FULL.on?Math.min(400,GOV.far+90):130):GOV.far+90)}}   /* v1.65: a garden hedge (v1.66: and a flower border) is drawn within 170 of its cell's middle: at full quality the two garden rooms' 118 blocks were drawn to 400, 38 thousand triangles in every view that faced them, from indoors too */
 let DBG=false,dbgT=0;function dbgToggle(){DBG=!DBG;$('#dbg').hidden=!DBG;if(DBG)toast('Frame readout on.')}
 function dbgStep(){if(!DBG||tt-dbgT<.5)return;dbgT=tt;const i=renderer.info.render;$('#dbg').textContent=GOV.ms.toFixed(1)+' ms  '+(1000/GOV.ms).toFixed(0)+' fps  worst '+GOV.worst.toFixed(0)+' ms\n'+i.calls+' draws  '+(i.triangles/1000|0)+'k tris  level '+GOV.lv+'  x'+renderer.getPixelRatio().toFixed(2)}
 function sysStep(dt){const now=performance.now();if(GOV.last){const ms=now-GOV.last;GOV.acc+=ms;GOV.n++;if(ms>GOV.wmax)GOV.wmax=ms;
@@ -5776,7 +5804,7 @@ const TM={};async function build(){const t0=performance.now();let tm=t0;TM.start
   try{TM.water=mergeWater()}catch(e){TM.water=String(e)}tm=performance.now();makeClouds();makeCards();makeExtras();const PPL=LIVE?buildLife():buildPeople();mark('life');await Y();const WIN=LIVE?buildWindowDetail():0;mark('windows');await Y();wdOutdoor();const PRB=buildProps();wdApply();mark('props');await Y();TM.stairq=buildStairs();TM.chapel=chapelGlass();TM.bars=glazeInside()+glazeInsideAll();mark('stairs');await Y();TM.ground=groundDress();const PRF=buildFloors();TM.trim=propTrim();fxInit();fxLightInit();postInit();rail();size();setTime('day');applyVis();styleUI();mark('scene');GOV.base=renderer.getPixelRatio();try{GOV.off=localStorage.getItem('euph_gov')==='off'}catch(e){}seaInit();seaUI();mark('sky');groveInit();mark('grove');flowersInit();mark('beds');if(posLoad())setTimeout(()=>toast('Walk, and you are back where you last stood.'),900);cullStep();
   window.__vx={THREE,tidyStats:()=>TM.tidy,glz:()=>({bars:TM.bars,doors:glazeInsideAll.doors}),finOn:()=>FIN_ON,kbot:()=>({P:kairosBot(),H:kairosHeadVox().V,person:personVox(outfit('none',null,()=>.37))}),groundY,get KH(){return KH},GOAL,goalOpen,URLS,WDRESS,wdApply,regRow,holesOf,T20,LMAP,LAMPS,LDAY,FULL,GROVE,IMP,BENCH,benchUI,pq:PQ,palette:PAL,trail:trailAt,settle:SETTLE,skins:CSKINS,windows:windowList,dep:DSTAT,seats:SEATS,kseat:()=>KSEAT,vr:VROOMS,dmap:DMAP,isWin:g=>isPane(g),isBlind:g=>g===C.winB,isInv:g=>!!(g&&(PF[g]&IV)),props:Object.assign({},PRO,PRB,typeof PRF!=="undefined"?PRF:{},typeof PRS!=="undefined"?PRS:{}),FP:()=>FPV,setFP:v=>{FPV=v},life:LIFE,win:WIN,post:postRender,style:SK,quadsTotal:quads,people:PPL,PEOPLE,moveTo,fall,setFly,tapJump,KEYS,PROPS,propGet,pbox,GOV,govSet,cullStep,pickTime,photo,posSave,posLoad,HALLS,GR:GROUPS,TM,pal:()=>PAL.length,grove:()=>({trees:GROVE.n,ready:GROVE.ready,got:GROVE.got||0,ver:TVER,drawn:GROVE.drawn,worker:!!TWORK,bad:TBAD}),pickSeason,seak:()=>SEAK,grassRGB:()=>PAL[C.grass[0]].map(v=>+v.toFixed(3)),flowers:()=>FBED?FBED.stats():null,KIT,SEASONS,sea:()=>SEA,liveAt:d=>{SEAD=d;pickTime('live')},perf:()=>({ms:GOV.ms,worst:GOV.worst,lv:GOV.lv,calls:renderer.info.render.calls,tris:renderer.info.render.triangles}),G,T,renderer,scene,camera,controls,quads,groups:GROUPS.length,trees:TREES,objs:OBJ.length,rooms:BLD.slice(1).reduce((s,b)=>s+b.rooms.length,0),gen:Math.round(t1-t0),mesh:Math.round(t2-t1),setTime,openB,close,setMode,PL,run,catalog,BLD,OBJ,goStairs,pickAt,FLIGHTS,stairRamp};
   TM.wall=Math.round(performance.now()-t0);frame();BENCH.first=performance.now();if(BENCH.on)setTimeout(benchUI,800);$('#bStats').onclick=()=>{const b=$('#bench');if(b)b.remove();else benchUI()};setTimeout(fxWarm,2500);if(!KIT||!GROVE.n||(GROVE.fd||0)>=GROVE.b.size*2)veilOff();else setTimeout(veilOff,8000)}
-function styleUI(){$('#brandS').textContent='Euphrates Hall v1.65 . the '+ST.n+' Estate';if(!SHOWCASE)$('#bStyle').hidden=true;$('#styleList').innerHTML=Object.entries(STYLES).map(([k,v])=>`<button class="b${k===SK?' on':''}" data-st="${k}">${esc(v.n)}<small>${esc(v.d)}</small></button>`).join('');
+function styleUI(){$('#brandS').textContent='Euphrates Hall v1.66 . the '+ST.n+' Estate';if(!SHOWCASE)$('#bStyle').hidden=true;$('#styleList').innerHTML=Object.entries(STYLES).map(([k,v])=>`<button class="b${k===SK?' on':''}" data-st="${k}">${esc(v.n)}<small>${esc(v.d)}</small></button>`).join('');
   $('#styleList').querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>pickStyle(b.dataset.st));$('#bStyle').onclick=()=>{$('#stylebox').hidden=!$('#stylebox').hidden};
   if(ISO){for(const[id,dd]of[['#bRotL',-1],['#bRotR',1]]){const b=$(id);b.hidden=false;b.onclick=()=>{if(ISOV.rot)return;const a=ISOV.yaw;ISOV.rot={t0:performance.now(),a,b:a+dd*Math.PI/2};if(MODE==='walk'){ISOV.yaw=a+dd*Math.PI/2;ISOV.rot=null}}}}}
 $('#load').innerHTML='Raising Euphrates Hall<i>The '+ST.n+' Estate. Raising the mansion, about ten seconds.</i>';

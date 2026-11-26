@@ -297,3 +297,15 @@ Made and placed by the Estate chat (there is no separate Depot chat). All in `pr
 | `linenShelves` | Open shelves of folded linen, some tied in blue tape | 440 | 0 |
 | `laundryBasket` | A hamper heaped with linen | 196 | 0 |
 | `cot` (changed) | A top rail, a blue blanket, a muslin hood at the head | 342 | 0 |
+
+## v1.66 (26 Nov 2026): chimney stacks in `contours.js`
+Made by the Estate chat. `stacks(S,spec,b,bi,st,pal)`, called for the first box of a building whose roof is flat and whose style carries `stacks:{every,inset,w,d,h,pots}`. The page's embedded copy is the same text.
+
+| Building | Stacks | Triangles near, before > after | Far, before > after |
+|---|---|---|---|
+| Euphrates Hall | 12 (two a side on the north and south fronts beside the middle, two each on the east and west) | 74,406 > 76,546 | 11,968 > 12,396 |
+| The State Wing | by the rule | 14,524 > 15,788 | 2,200 > 2,488 |
+| The Service Wing | by the rule | 4,684 > 5,780 | 366 > 590 |
+
+One stack: about 178 triangles near (a base, a shaft, a neck band, a three-part cap, pots), 36 far (a shaft and a cap).
+
