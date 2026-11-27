@@ -309,3 +309,12 @@ Made by the Estate chat. `stacks(S,spec,b,bi,st,pal)`, called for the first box 
 
 One stack: about 178 triangles near (a base, a shaft, a neck band, a three-part cap, pots), 36 far (a shaft and a cap).
 
+## v1.69 (27 Nov 2026): three parts for the Billiard Room
+In `props5.js` after `laundryBasket`; the page's embedded copy is the same text. Indoor pieces are drawn within 46 blocks.
+
+| Part | What it is | Triangles near | Far |
+|---|---|---|---|
+| `billiardLight` | A brass rail with three green shades on two rods; `h` is the rods' height in voxels, so it reaches any ceiling | 162 (at `h` 58) | 0 |
+| `cueRack` | A wall rack with six cues; starts 16 voxels above its foot | 274 | 0 |
+| `scoreBoard` | A mahogany scoreboard with two brass rails and markers; starts 20 voxels above its foot | 280 | 0 |
+
