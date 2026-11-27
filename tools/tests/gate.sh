@@ -75,6 +75,15 @@ for f in src .; do
     echo "gate: FAIL visitor_test $f"; grep -v ' ok ' "$tmp/vt.log" | head -20; fail=1
   fi
 done
+# v1.72: the figures. Every role and House carved and checked for a whole face and ten parts; one draw a figure; the fine copy near, the far copy far.
+for f in src .; do
+  s=$(date +%s)
+  if python3 tools/tests/figure_test.py "$f" > "$tmp/ft.log" 2>&1; then
+    echo "gate: ok   figure_test $f ($(( $(date +%s) - s ))s) $(grep -c ' ok ' "$tmp/ft.log") checks"
+  else
+    echo "gate: FAIL figure_test $f"; grep -v ' ok ' "$tmp/ft.log" | head -20; fail=1
+  fi
+done
 # v1.67: the walker bot. Every pair of rooms joined by a door, every stair and a circuit of the grounds, walked on foot twice.
 # A fall or a pass-through fails the gate; sticks, missing routes and rooms with no way in are printed.
 s=$(date +%s)

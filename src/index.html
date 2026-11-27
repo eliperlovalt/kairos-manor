@@ -2109,7 +2109,8 @@ function buildPeople(){const groups=new Map();let n=0;
   const mat=FMAT();let quads=0;
   for(const g of groups.values()){quads+=g.fb.n;const m=new THREE.Mesh(g.fb.geo(),mat);m.castShadow=true;m.receiveShadow=true;m.matrixAutoUpdate=false;m.updateMatrix();scene.add(m);GROUPS.push({obj:m,bid:g.bid,band:g.band})}
   return {people:n,quads}}
-function playerModel(){const V=personVox(outfit(null,'player',()=>.5));const grp=new THREE.Group();const mat=FMAT();const hip=9*PS;
+function playerModel(){if(LIVE)return figRig(figSpec('player',null,null,()=>.5,0),FMAT(),true);   /* v1.72: His Grace's own figure is carved as finely as his household */
+  const V=personVox(outfit(null,'player',()=>.5));const grp=new THREE.Group();const mat=FMAT();const hip=9*PS;
   const mk=(part,yOff)=>{const fb=new FB();EP(V,fb,0,0,0,0,part,yOff);const m=new THREE.Mesh(fb.geo(),mat);m.castShadow=true;grp.add(m);return m};
   mk('b',0);const l1=mk('ll',hip),l2=mk('lr',hip);l1.position.y=hip;l2.position.y=hip;grp.userData.l1=l1;grp.userData.l2=l2;return grp}
 /* =========================================================
@@ -2155,6 +2156,304 @@ function figMesh(V,hip,mat,legYOff,arms){const g=new THREE.Group();const mk=(par
   const b=mk(arms?'B':'b',0);b.castShadow=true;const l1=mk('ll',legYOff),l2=mk('lr',legYOff);if(l1)l1.position.y=legYOff;if(l2)l2.position.y=legYOff;g.userData={l1,l2};
   if(arms){const sh=16.5*PS,a1=mk('al',sh),a2=mk('ar',sh);if(a1){a1.position.y=sh;a1.castShadow=true}if(a2){a2.position.y=sh;a2.castShadow=true}g.userData.a1=a1;g.userData.a2=a2}   /* v1.50: Kairos's arms swing from the shoulder as he walks */
   return g}
+/* =========================================================
+   v1.72: the staff's bodies. His Grace, 27 Nov: "they all only have one eye and they aren't detailed ... we need to exponentially enhance them".
+   A figure is carved at Kairos's scale, half a figure voxel fine (FU): 48 high, a head 8 wide with eyes that have whites, brows, a nose, a mouth and ears;
+   hair in a dozen styles, moustaches and beards; hands with a thumb and four fingers; shoes with soles and toe caps; and the dress of 1912 by role,
+   with the House's colour as an accent. Ten parts hang on ten bones (body, head, thighs, shins, upper arms, forearms), so a figure bends at the knee and the
+   elbow, turns its head, and can sit. One figure is one draw (a skinned mesh): the old figure was three.
+   The carving is a small block of bytes, not a map of strings; faces of one colour on one plane are merged; a far copy at half the fineness is made from the
+   same carving, so near and far agree. The fine copy is made only when His Grace comes near (figNear), a few a frame, and the least lately seen are let go.
+   ========================================================= */
+const FBN={B:0,HD:1,TL:2,SL:3,TR:4,SR:5,AL:6,FL:7,AR:8,FR:9},FU=PS/2,FHIP=20,FKNEE=11,FSH=35,FELB=28,FNECK=38,FNX=32,FNY=64,FNZ=28,FOX=16,FOZ=14;
+const SHDC={},shd=(h,f)=>{const k=h+f;let v=SHDC[k];if(!v){const n=parseInt(h.slice(1),16);v=SHDC[k]='#'+[n>>16,n>>8&255,n&255].map(c=>('0'+Math.max(0,Math.min(255,Math.round(c*f))).toString(16)).slice(-2)).join('')}return v};
+const mixc=(a,b,t)=>{const A=parseInt(a.slice(1),16),Bn=parseInt(b.slice(1),16);return'#'+[16,8,0].map(s=>('0'+Math.round((A>>s&255)*(1-t)+(Bn>>s&255)*t).toString(16)).slice(-2)).join('')};
+function figVol(){const c=new Uint8Array(FNX*FNY*FNZ),p=new Uint8Array(FNX*FNY*FNZ),pal=[''],pi=new Map();
+  const ci=h=>{let i=pi.get(h);if(!i){i=pal.length;pal.push(h);pi.set(h,i)}return i},ok=(x,y,z)=>x>=-FOX&&x<FNX-FOX&&y>=0&&y<FNY&&z>=-FOZ&&z<FNZ-FOZ,id=(x,y,z)=>(y*FNZ+z+FOZ)*FNX+x+FOX;
+  const set=(x,y,z,h,q)=>{if(ok(x,y,z)){const i=id(x,y,z);c[i]=ci(h);p[i]=q}},has=(x,y,z)=>ok(x,y,z)&&c[id(x,y,z)]!==0,tint=(x,y,z,h)=>{if(has(x,y,z))c[id(x,y,z)]=ci(h)},del=(x,y,z)=>{if(ok(x,y,z))c[id(x,y,z)]=0},pt=(x,y,z)=>p[id(x,y,z)];
+  const fz=(x,y)=>{for(let z=FNZ-FOZ-1;z>=-FOZ;z--)if(has(x,y,z))return z;return null},bz=(x,y)=>{for(let z=-FOZ;z<FNZ-FOZ;z++)if(has(x,y,z))return z;return null};
+  const pf=(x,y,h)=>{const z=fz(x,y);if(z!=null)c[id(x,y,z)]=ci(h)},af=(x,y,h,n=1)=>{const z=fz(x,y);if(z!=null)for(let k=1;k<=n;k++)set(x,y,z+k,h,pt(x,y,z))};
+  const pb=(x,y,h)=>{const z=bz(x,y);if(z!=null)c[id(x,y,z)]=ci(h)},ab=(x,y,h,n=1)=>{const z=bz(x,y);if(z!=null)for(let k=1;k<=n;k++)set(x,y,z-k,h,pt(x,y,z))};
+  return{c,p,pal,set,has,tint,del,pt,fz,bz,pf,af,pb,ab,at:(x,y,z)=>ok(x,y,z)?pal[c[id(x,y,z)]]:''}}
+function figBuild(o){const V=figVol(),{set,has,tint,del,fz,pf,af,pb,ab}=V,{B,HD,TL,SL,TR,SR,AL,FL,AR,FR}=FBN;
+  const f=o.sex==='f',sk=o.skin,L=o.lower,T=o.top,c=T.c,sh=o.shirt||'#f1ede4',GD='#c9a227';
+  const legP=(x,y)=>x<0?(y<FKNEE?SL:TL):(y<FKNEE?SR:TR),armP=(x,y)=>x<0?(y<FELB?FL:AL):(y<FELB?FR:AR),skirt=L.t==='skirt';
+  /* the legs: a skirt in two halves that hang from the thighs (so she can sit), or trousers, or breeches over gaiters or stockings */
+  let hemF=3;
+  if(skirt){const hem=L.hem||1,fl=L.flare==null?3:L.flare;
+    for(let y=hem;y<=20;y++){const t=Math.round((20-y)/(20-hem)*3)/3,hw=7+fl*t,hd=4+(fl+1)*t*.8,zc=-.3*t*fl;
+      for(let x=-12;x<12;x++)for(let z=-13;z<13;z++){const a=Math.abs(x+.5)/hw,b=Math.abs(z+.5-zc)/hd;if(a*a*a+b*b*b>1)continue;
+        let col=L.c;if(y<=hem+(L.bandN||0)&&L.band)col=L.band;else if(L.pleat&&y<15&&((x+40)%3===0))col=shd(L.c,.84);else if(L.stripe&&((x+40)&1))col=L.stripe;else if(y===hem)col=shd(L.c,.88);
+        set(x,y,z,col,legP(x,y))}}
+    hemF=fz(-3,hem)}
+  else{const br=L.t==='breeches';
+    for(const s of[-1,1]){const x0=s<0?-6:1,x1=s<0?-2:5;
+      for(let y=2;y<=19;y++){const wide=br&&y>FKNEE?1:0,a=x0-(s<0?wide:0),b=x1+(s>0?wide:0),z0=y<=4?-2:-3;
+        for(let x=a;x<=b;x++)for(let z=z0;z<=2;z++){const low=br&&y<=FKNEE;let col=low?(L.c2||'#efe9dc'):L.c;
+          if(L.stripe&&!low&&x===(s<0?a:b)&&(z===-1||z===0))col=L.stripe;else if(!br&&z===2&&x===x0+2)col=shd(L.c,1.16);else if(low&&L.btn&&x===(s<0?a:b)&&y%2===0&&z===0)col=L.btn;else if(low&&y===FKNEE)col=shd(col,.85);
+          if(y===2&&!br)col=shd(col,.85);set(x,y,z,col,legP(x,y))}}}
+    for(let y=17;y<=19;y++)for(let z=-3;z<=2;z++){set(-1,y,z,L.c,TL);set(0,y,z,L.c,TR)}}
+  /* shoes: a sole, a heel, an upper, a toe cap; boots lace up the shin */
+  {const so=o.shoe||'#1a1410';for(const s of[-1,1]){const x0=skirt?(s<0?-5:1):(s<0?-6:1),x1=skirt?(s<0?-2:4):(s<0?-2:5),zb=skirt?hemF-5:-3,zt=skirt?hemF+1:4,P=s<0?SL:SR;
+     for(let x=x0;x<=x1;x++)for(let z=zb;z<=zt;z++){if(z===zt&&(x===x0||x===x1))continue;set(x,0,z,z<=zb+1?shd(so,.5):shd(so,.68),P);set(x,1,z,z>=zt-1?shd(so,1.4):so,P)}
+     if(o.boot&&!skirt)for(let y=2;y<=o.boot;y++)for(let x=x0;x<=x1;x++)for(let z=(y<=4?-2:-3);z<=2;z++)set(x,y,z,z===2&&x===x0+2&&y%2===0?shd(so,1.7):y===o.boot?shd(so,1.25):so,legP(x,y));
+     if(o.buckle){tint(x0+1,1,zt-2,o.buckle);tint(x0+2,1,zt-2,o.buckle);tint(x0+3,1,zt-2,o.buckle)}}}
+  /* the trunk and the neck */
+  const tw=y=>f?(y>=28?7:y>=23?6:7):(y>=30?8:7),y0=skirt?21:20,belly=!f&&o.stout;
+  for(let y=y0;y<=36;y++){const hw=tw(y)+(belly&&y<30?1:0),zf=f?(y>=29&&y<=32?4:3):(belly&&y>=21&&y<=28?4:3);
+    for(let x=-hw;x<hw;x++)for(let z=-4;z<=zf;z++){if(y===36&&(x===-hw||x===hw-1))continue;if(zf===4&&z===4&&(x<-hw+2||x>hw-3))continue;set(x,y,z,c,B)}}
+  for(let y=37;y<=38;y++)for(let x=-2;x<=1;x++)for(let z=-2;z<=1;z++)set(x,y,z,sk,B);
+  /* the head: eight wide, its corners taken off, a narrower jaw */
+  for(let y=39;y<=47;y++)for(let x=-4;x<=3;x++)for(let z=-4;z<=3;z++){const ex=x===-4||x===3,ez=z===-4||z===3;if(ex&&ez)continue;if(y===39&&(ex||z===-4||((x===-3||x===2)&&(z===3||z===-3))))continue;set(x,y,z,sk,HD)}
+  const sk2=shd(sk,.9),sk3=shd(sk,.78),hc=o.grey?(o.grey===2?'#d6d2c8':'#9a9a96'):(o.hair||'#3a2a1e'),hd=shd(hc,.82),hl=shd(hc,1.2),brow=shd(hc,o.grey?.62:.72),EW='#efe9df';
+  set(-3,44,3,EW,HD);set(-2,44,3,o.eye||'#3a2a1e',HD);set(1,44,3,o.eye||'#3a2a1e',HD);set(2,44,3,EW,HD);set(-1,44,3,sk2,HD);set(0,44,3,sk2,HD);
+  for(const x of[-3,-2,1,2])set(x,45,3,brow,HD);
+  set(-1,43,4,sk,HD);set(0,43,4,sk,HD);set(-1,42,4,sk2,HD);set(0,42,4,sk2,HD);
+  if(f){set(-1,40,3,'#b25a5e',HD);set(0,40,3,'#b25a5e',HD);set(-2,40,3,sk2,HD);set(1,40,3,sk2,HD)}else for(let x=-2;x<=1;x++)set(x,40,3,x===-2||x===1?sk2:sk3,HD);
+  for(const x of[-5,4])for(let y=42;y<=44;y++)for(let z=-1;z<=0;z++)set(x,y,z,shd(sk,.93),HD);
+  if(f||o.age<.3){const bl=mixc(sk,'#d98a80',.3);set(-3,42,3,bl,HD);set(2,42,3,bl,HD)}
+  if(o.age>.7&&!f){tint(-3,43,3,sk2);tint(2,43,3,sk2)}
+  /* hair */
+  const H=(x,y,z,k)=>set(x,y,z,k||hc,HD),hs=o.hs||'short';
+  const cap=(yTop,yBack,ySide)=>{for(let x=-4;x<=3;x++)for(let z=-4;z<=3;z++){if((x===-4||x===3)&&(z===-4||z===3))continue;H(x,yTop,z,(x*3+z*5+40)%4===0?hd:hc)}
+    for(let y=yBack;y<yTop;y++)for(let x=-3;x<=2;x++)H(x,y,-5,y===yBack?hd:hc);
+    for(const x of[-5,4])for(let y=ySide;y<yTop;y++)for(let z=-3;z<=(y>=46?2:1);z++){if(y<=44&&z>=-1)continue;H(x,y,z)}
+    for(let x=-3;x<=2;x++)H(x,47,3)};
+  if(hs==='bald'){for(let y=42;y<=45;y++)for(let x=-3;x<=2;x++)H(x,y,-5);for(const x of[-5,4])for(let y=43;y<=45;y++)for(let z=-3;z<=-2;z++)H(x,y,z);tint(-1,47,0,shd(sk,1.08));tint(0,47,-1,shd(sk,1.08))}
+  else if(hs==='crop'){for(let x=-4;x<=3;x++)for(let z=-4;z<=3;z++){tint(x,47,z,hc);if(z<=1){tint(x,46,z,hc);if(z<=-1)for(let y=43;y<=45;y++)if(x===-4||x===3||z===-4)tint(x,y,z,hc)}}}
+  else if(hs==='short'||hs==='part'||hs==='curly'){cap(48,42,43);if(hs==='part'){for(let z=-3;z<=3;z++)H(-2,48,z,hl);H(1,46,3);H(2,46,3)}if(hs==='curly')for(let x=-3;x<=2;x++)for(let z=-3;z<=2;z++)if((x+z+40)%2===0)H(x,49,z,hd)}
+  else if(hs==='slick'){cap(48,40,43);for(let x=-3;x<=2;x++)H(x,48,0,hl)}
+  else if(hs==='bun'){cap(48,41,43);for(let x=-2;x<=1;x++)for(let y=43;y<=46;y++)for(let z=-7;z<=-6;z++)H(x,y,z,(y+z)&1?hd:hc);for(let z=-3;z<=3;z++)H(-1,48,z,hd)}
+  else if(hs==='chignon'){cap(48,40,43);for(let x=-2;x<=1;x++)for(let y=40;y<=43;y++)for(let z=-7;z<=-6;z++)H(x,y,z,(y+z)&1?hd:hc);for(let z=-3;z<=3;z++)H(-1,48,z,hd)}
+  else if(hs==='pomp'){cap(48,41,43);for(const x of[-6,5])for(let y=45;y<=47;y++)for(let z=-3;z<=2;z++)H(x,y,z);for(let x=-4;x<=3;x++)for(let z=-4;z<=2;z++){if((x===-4||x===3)&&z===-4)continue;H(x,49,z,(x+z+40)%3===0?hd:hc)}
+    for(let x=-3;x<=2;x++){H(x,47,4);H(x,48,4,hl)}for(let x=-2;x<=1;x++)for(let y=50;y<=51;y++)for(let z=-3;z<=-1;z++)H(x,y,z,hd)}
+  else if(hs==='plait'){cap(48,41,43);for(let y=27;y<=41;y++)for(let x=-1;x<=0;x++)H(x,y,-6,(y+x)&1?hd:hc);for(let x=-2;x<=1;x++)H(x,28,-6,o.ribbon||'#a4161a')}
+  else if(hs==='long'){cap(48,41,43);for(let y=33;y<=41;y++)for(let x=-3;x<=2;x++)H(x,y,-5,y===33?hd:hc);for(const x of[-5,4])for(let y=37;y<=42;y++)H(x,y,-3)}
+  /* moustache, beard, whiskers */
+  const fh=!f&&o.fh;
+  if(fh==='tache'||fh==='beard'||fh==='goatee'){for(let x=-2;x<=1;x++)H(x,41,4);if(fh==='tache'){tint(-3,41,3,hc);tint(2,41,3,hc)}}
+  if(fh==='beard'){for(let y=39;y<=41;y++)for(let x=-3;x<=2;x++){if(y===40&&(x===-1||x===0))continue;tint(x,y,3,hc)}for(const x of[-4,3])for(let y=40;y<=42;y++)for(let z=0;z<=2;z++)tint(x,y,z,hc);for(let z=-1;z<=2;z++){tint(-3,39,z,hc);tint(2,39,z,hc)}for(let x=-2;x<=1;x++)for(let z=2;z<=3;z++)H(x,38,z,hd)}
+  if(fh==='goatee'){for(let x=-1;x<=0;x++){tint(x,39,3,hc);H(x,38,3,hd)}}
+  if(fh==='chops'){for(const x of[-4,3])for(let y=40;y<=44;y++)for(let z=1;z<=2;z++)tint(x,y,z,hc);for(const x of[-3,2])for(let y=40;y<=41;y++)tint(x,y,3,hc)}
+  /* arms: a sleeve, a cuff, a hand with a thumb and four fingers of stepped lengths */
+  const rolled=o.sleeves==='rolled',slv=o.sleeves==='shirt'||rolled?sh:(T.slv||c),cf=o.cuff===undefined?{c:sh,n:1}:o.cuff,hk=o.gloves||sk,hk2=shd(hk,.9);
+  for(const s of[-1,1]){const x0=s<0?-12:8,out=s<0?x0:x0+3,xi=s<0?x0+2:x0+1;
+    for(let y=21;y<=36;y++)for(let x=x0;x<=x0+3;x++)for(let z=-2;z<=1;z++){if(y===36&&x===out)continue;let col=slv;
+      if(rolled&&y<=25)col=(x+z+y)%7===0?sk2:sk;else if(rolled&&y<=27)col=shd(sh,.88);else if(cf&&y<21+cf.n)col=cf.c;else if(T.rings&&(y===23||y===25))col=T.rings;else if(o.garter&&y===30)col=o.garter;
+      if(o.band&&s>0&&(y===31||y===32))col=o.band;set(x,y,z,col,armP(x,y))}
+    if(T.bell)for(let y=21;y<=25;y++)for(let x=x0;x<=x0+3;x++){set(x,y,-3,slv,armP(x,y));set(x,y,2,slv,armP(x,y))}
+    const P=s<0?FL:FR;for(let x=x0+1;x<=x0+2;x++){for(let z=-1;z<=0;z++)set(x,20,z,hk,P);for(let y=17;y<=19;y++)for(let z=-2;z<=1;z++)set(x,y,z,hk,P);
+      for(const[z,tip]of[[-2,15],[-1,14],[0,14],[1,15]])for(let y=tip;y<=16;y++)set(x,y,z,(z&1)?hk2:hk,P)}
+    for(let y=16;y<=18;y++)set(xi,y,2,y===16?hk2:hk,P)}
+  /* the dress */
+  const V0=T.v||29,btn=T.btn||shd(c,.55),edge=shd(c,.74);
+  const collar=(h,back)=>{if(!h)return;for(let x=-3;x<=2;x++)for(let z=-3;z<=2;z++){if(x>-3&&x<2&&z>-3&&z<2)continue;set(x,37,z,back&&z<=-2?back:h,B)}};
+  const tie=()=>{const t=o.tie;if(!t)return;
+    if(t.t==='bow'){for(let x=-2;x<=1;x++)af(x,36,x===-1||x===0?shd(t.c,.8):t.c)}
+    else if(t.t==='tie'){for(let y=V0+(o.wc?(o.wc.n||4):1);y<=36;y++){pf(-1,y,y>=35?shd(t.c,.8):t.c);pf(0,y,y>=35?shd(t.c,.8):t.c)}}
+    else if(t.t==='kerchief'){collar(t.c,t.c);af(-1,36,t.c);af(0,36,shd(t.c,.85));pf(0,35,t.c);pf(1,34,t.c)}
+    else if(t.t==='ribbon'){for(let x=-2;x<=1;x++)af(x,36,t.c);pf(-1,35,t.c);pf(0,35,t.c);pf(-2,34,t.c);pf(1,34,t.c)}
+    else if(t.t==='stock'){collar(t.c,t.c);for(let y=35;y<=36;y++)for(let x=-2;x<=1;x++)pf(x,y,t.c)}};
+  const coatSkirt=(len,mode,col)=>{   /* the skirt of a coat lies on the thighs and swings with them: all (a frock), cut (cut away in front), tails (the back only, with a vent) */
+    for(let y=len;y<=19;y++)for(let x=-7;x<=6;x++)for(let z=-4;z<=3;z++){const sx=x===-7||x===6,bk=z===-4,fr=z===3;if(!(sx||bk||fr))continue;
+      if(mode==='tails'&&!(bk||(sx&&z<=-2)))continue;if(mode==='tails'&&bk&&(x===-1||x===0)&&y<17)continue;if(mode==='cut'&&(fr||(sx&&z>=1+Math.floor((19-y)/2))))continue;
+      set(x,y,z,(fr&&x===-1)||y===len?shd(col,.78):col,legP(x,y))}};
+  const vee=(v0,wmax,lap)=>{for(let y=v0;y<=36;y++){const w=Math.min(wmax,(y-v0+1)*.5);for(let x=-5;x<=4;x++){const ax=Math.abs(x+.5);if(ax<w){const wr=o.wc&&y<v0+(o.wc.n||4);pf(x,y,wr?(o.wc.stripe&&(x&1)?o.wc.stripe:o.wc.c):sh);if(wr&&x===0&&(y-v0)%2===0)pf(x,y,o.wc.btn||GD)}else if(lap&&ax<w+1.6)af(x,y,lap)}}};
+  const belt=(h,y1=22)=>{for(let y=21;y<=y1;y++)for(let x=-8;x<=7;x++)for(let z=-4;z<=4;z++)tint(x,y,z,h)};
+  switch(T.t){
+   case 'jacket':case 'frock':case 'morning':case 'labcoat':
+     vee(V0,3.4,T.lapel||shd(c,.86));collar(o.collar||sh,c);tie();for(let y=y0;y<V0;y++)pf(-1,y,edge);for(let y=V0-2;y>=21;y-=3)pf(0,y,btn);
+     for(const x of[-6,-5,-4,3,4,5])pf(x,23,edge);if(o.hank){pf(3,32,o.hank);pf(4,32,o.hank);pf(4,33,o.hank)}else{pf(3,32,edge);pf(4,32,edge)}
+     if(T.t==='labcoat'){pf(3,33,'#27408b');pf(4,33,'#a4161a')}
+     if(!skirt)coatSkirt(T.t==='jacket'?17:12,T.t==='morning'?'cut':'all',c);break;
+   case 'tails':
+     vee(V0,3.6,T.lapel||shd(c,.7));collar(o.collar||sh,c);tie();for(let y=20;y<=22;y++)for(let x=-6;x<=5;x++)pf(x,y,o.wc?o.wc.c:sh);
+     for(const y of[24,27])for(const x of[-5,4])if(T.btn)pf(x,y,T.btn);if(!skirt)coatSkirt(11,'tails',c);
+     {for(const x of[-3,2])pb(x,22,T.btn||edge)}break;
+   case 'vest':
+     for(let y=31;y<=36;y++){const hw=tw(y);for(let z=-4;z<=3;z++){tint(-hw,y,z,sh);tint(hw-1,y,z,sh);if(y>=35){tint(-hw+1,y,z,sh);tint(hw-2,y,z,sh)}}}
+     for(let y=31;y<=36;y++){const w=(y-30)*.55;for(let x=-4;x<=3;x++)if(Math.abs(x+.5)<w)pf(x,y,sh)}
+     collar(o.collar===null?null:(o.collar||sh),sh);tie();for(let y=21;y<=30;y++){pf(-1,y,edge);if(y%2)pf(0,y,btn)}for(const x of[-6,-5,-4,3,4,5])pf(x,25,edge);
+     if(o.chain){pf(1,26,GD);pf(2,25,GD);pf(3,25,GD);pf(4,26,GD)}
+     for(let y=21;y<=34;y++)for(let x=-8;x<=7;x++)pb(x,y,T.back||shd(c,1.3));for(let x=-3;x<=2;x++)pb(x,23,shd(c,.7));pf(-2,20,L.c);pf(1,20,L.c);break;
+   case 'bodice':case 'blouse':
+     if(T.yoke)for(let y=32;y<=36;y++)for(let x=(y===32?-3:-4);x<=(y===32?2:3);x++)pf(x,y,T.yoke);
+     if(T.t==='blouse')for(let y=24;y<=34;y++){pf(-3,y,shd(c,.9));pf(2,y,shd(c,.9))}
+     if(T.jabot){for(let y=30;y<=35;y++){pf(-1,y,T.jabot);pf(0,y,T.jabot)}pf(-2,35,T.jabot);pf(1,35,T.jabot);pf(-2,34,T.jabot);pf(1,34,T.jabot)}
+     if(T.btn&&!T.jabot)for(let y=23;y<=33;y+=2)pf(0,y,T.btn);collar(T.collar||c,T.collar||c);tie();if(T.brooch){af(-1,36,T.brooch);af(0,36,T.brooch)}
+     if(T.pearls)for(let x=-3;x<=2;x++)pf(x,Math.abs(x+.5)<1.6?34:35,'#f4f1ea');
+     if(T.sailor){for(let y=31;y<=36;y++){const w=(y-30)*.6;for(let x=-5;x<=4;x++){const ax=Math.abs(x+.5);if(ax<w)pf(x,y,sh);else if(ax<w+1.6)pf(x,y,T.sailor)}}for(let y=32;y<=36;y++)for(let x=-6;x<=5;x++)pb(x,y,y===32||x===-6||x===5?'#f1ede4':T.sailor)}
+     break;
+   case 'tunic':case 'court':
+     collar(T.collar||c,T.collar||c);for(let y=y0;y<=36;y++){pf(-1,y,T.t==='court'?((y&1)?GD:c):edge);pf(0,y,T.t==='court'?((y&1)?c:GD):(y%2===0&&y>21?btn:c))}
+     if(T.pockets!==false)for(const x0 of[-6,2]){for(let x=x0;x<=x0+3;x++)pf(x,31,edge);pf(x0+1,30,btn)}
+     if(T.strap)for(const x0 of[-8,4])for(let x=x0;x<=x0+3;x++)for(let z=-2;z<=1;z++)set(x,37,z,T.strap,B);
+     if(!skirt&&T.long)coatSkirt(T.long,'all',c);break;
+   case 'reefer':
+     vee(33,2,null);collar(sh,c);tie();for(let y=y0;y<33;y++)pf(1,y,edge);for(const y of[23,26,29])for(const x of[-3,2])pf(x,y,T.btn||GD);if(!skirt)coatSkirt(16,'all',c);break;
+   case 'overall':
+     for(let y=24;y<=36;y++)for(let x=-8;x<=7;x++)for(let z=-4;z<=4;z++)tint(x,y,z,sh);for(let y=24;y<=32;y++)for(let x=-4;x<=3;x++)af(x,y,y===32?shd(c,.85):c);
+     for(const x of[-4,3]){for(let y=33;y<=36;y++)pf(x,y,c);for(let z=-4;z<=3;z++)tint(x,36,z,c);for(let y=24;y<=35;y++)pb(x,y,c)}
+     for(let x=-1;x<=0;x++)for(let y=28;y<=29;y++)pf(x,y,shd(c,.8));pf(1,30,'#e3b23c');collar(o.collar===null?null:sh,sh);tie();break;
+   case 'surplice':
+     for(let y=10;y<=20;y++)for(let x=-12;x<12;x++)for(let z=-13;z<13;z++)if(has(x,y,z))tint(x,y,z,y<=11&&((x+z+40)&1)?shd(c,.84):c);
+     collar(L.c,L.c);set(-1,37,2,'#f4f1ea',B);set(0,37,2,'#f4f1ea',B);for(let x=-4;x<=3;x++)pf(x,35,shd(c,.88));
+     if(T.stole)for(const x0 of[-4,2])for(let y=13;y<=36;y++)for(let x=x0;x<=x0+1;x++)af(x,y,y<=14?shd(T.stole,.75):(y===20||y===21)&&x===x0?shd(T.stole,1.25):T.stole);break;
+   case 'cassock':
+     collar(c,c);set(-1,37,2,'#f4f1ea',B);set(0,37,2,'#f4f1ea',B);for(let y=3;y<=36;y++)if(y%2)pf(0,y,shd(c,1.8));belt(T.sash||shd(c,1.4));break;
+   case 'smock':
+     for(let y=31;y<=36;y++)for(let x=-6;x<=5;x++)pf(x,y,(x+y)&1?shd(c,.86):c);collar(c,c);tie();if(!skirt)coatSkirt(11,'all',c);break}
+  if(o.belt)belt(o.belt,T.t==='tunic'||T.t==='court'?22:21);if(o.belt&&o.buckleB!==false){pf(-1,21,o.buckleB||GD);pf(0,21,o.buckleB||GD)}
+  if(o.sam){for(let y=22;y<=36;y++){const x=Math.round(5-(y-22)*11/14);pf(x,y,o.sam);pf(x-1,y,o.sam);pb(x,y,o.sam)}}
+  if(o.cross){for(let y=22;y<=36;y++){const x=Math.round(-6+(y-22)*11/14);pf(x,y,o.cross);pf(x+1,y,o.cross);pb(x,y,o.cross);pb(x+1,y,o.cross)}}
+  if(o.sash){for(let y=22;y<=36;y++){const x=Math.round(5-(y-22)*11/14);pf(x,y,o.sash);pf(x-1,y,o.sash);pf(x-2,y,shd(o.sash,.8));pb(x,y,o.sash);pb(x-1,y,o.sash)}}
+  if(o.medals){const mc=['#a4161a','#1f3a8a','#e3b23c'];for(let k=0;k<3;k++){pf(-6+k,32,mc[k]);pf(-6+k,31,GD)}}
+  if(o.ep)for(const x0 of[-9,5])for(let x=x0;x<=x0+3;x++)for(let z=-2;z<=1;z++){set(x,37,z,o.ep,B);if(x===(x0<0?x0:x0+3))set(x,36,z,shd(o.ep,.8),B)}
+  /* aprons */
+  if(o.apron){const a=o.apron,ac=a.c,a2=shd(ac,.88),len=a.len||6,xw=a.t==='full'||a.t==='leather'?7:6;
+    if(a.t!=='waist'){const bw=a.t==='bib'?4:5,top=a.t==='leather'?33:32;for(let y=23;y<=top;y++)for(let x=-bw;x<bw;x++)af(x,y,y===top?a2:ac);
+      if(a.t==='leather'){for(let y=top+1;y<=36;y++){pf(-3,y,a2);pf(2,y,a2)}for(let z=-3;z<=2;z++){tint(-3,37,z,a2);tint(2,37,z,a2)}}
+      else for(const x of[-4,3]){for(let y=top+1;y<=36;y++)pf(x,y,ac);for(let z=-4;z<=3;z++)tint(x,36,z,ac)}
+      if(a.t!=='leather')for(let y=22;y<=36;y++){const xb=Math.round(-4+(36-y)*7/14);pb(xb,y,ac);pb(-1-xb,y,ac)}}
+    for(let y=21;y<=22;y++)for(let x=-8;x<=7;x++)for(let z=-4;z<=4;z++)tint(x,y,z,ac);
+    if(skirt){for(let y=len;y<=20;y++)for(let x=-xw;x<xw;x++)af(x,y,y===len?a2:(a.stripe&&((x+40)%3===0))?a.stripe:ac);if(a.t!=='leather'){for(let x=-2;x<=1;x++)for(let y=21;y<=22;y++)ab(x,y,ac);for(let y=15;y<=20;y++){ab(-2,y,ac);ab(1,y,y===15?a2:ac)}}}
+    else{for(let y=len;y<=19;y++)for(let x=-xw;x<xw;x++)set(x,y,3,y===len?a2:ac,legP(x,y));for(let x=-xw;x<xw;x++)pf(x,20,ac);if(a.t==='leather')for(let y=len;y<=len+3;y++){del(-1,y,3);del(0,y,3)}}
+    if(a.cross){const rc='#b3262b';pf(-1,29,rc);pf(0,29,rc);pf(-1,28,rc);pf(0,28,rc);pf(-2,29,rc);pf(1,29,rc);pf(-1,30,rc);pf(0,30,rc);pf(-2,28,rc);pf(1,28,rc);pf(-1,27,rc);pf(0,27,rc)}}
+  if(o.keys){const sv='#b9c1cd';for(let y=17;y<=20;y++)af(4,y,sv);af(3,16,'#b8913a');af(4,16,'#b8913a');af(5,16,sv);af(4,15,'#b8913a');af(3,15,sv)}
+  /* what is worn on the head */
+  if(o.hat){const h=o.hat,k=h.c||'#f4f1ea',k2=h.c2||shd(k,.8),W='#f4f1ea',disc=(y,r,col,cx=0,cz=0)=>{for(let x=-8;x<8;x++)for(let z=-8;z<8;z++){const dx=x+.5-cx,dz=z+.5-cz;if(dx*dx+dz*dz<=r*r)H(x,y,z,typeof col==='function'?col(x,z):col)}};
+    switch(h.t){
+     case 'maid':for(let x=-4;x<=3;x++){for(let z=0;z<=4;z++)H(x,48,z,z===4?shd(W,.9):W);for(let z=1;z<=3;z++)H(x,49,z,(x&1)?W:shd(W,.9))}for(let y=37;y<=47;y++){H(-2,y,-6,W);H(1,y,-6,y===37?shd(W,.85):W)}H(-2,48,-5,W);H(1,48,-5,W);break;
+     case 'mob':disc(47,5.6,(x,z)=>(x+z+40)&1?W:shd(W,.86));for(let y=48;y<=50;y++)disc(y,y===50?4.6:5.2,W);disc(51,3.4,shd(W,.94));for(let x=-4;x<=3;x++)for(let z=-3;z<=2;z++)del(x,47,z),set(x,47,z,sk,HD);for(let x=-3;x<=2;x++)H(x,47,3,W);break;
+     case 'flat':for(let y=48;y<=49;y++)disc(y,y===49?4.9:5.5,(x,z)=>(x+z+40)&1?k:k2);for(let x=-4;x<=3;x++)for(let z=5;z<=6;z++)H(x,48,z,k2);H(-1,50,0,k2);H(0,50,0,k2);break;
+     case 'peaked':disc(48,5.2,h.band||k2);disc(49,5.4,k);disc(50,5.9,h.top||k);for(let x=-4;x<=3;x++)for(let z=4;z<=6;z++)if(!(z===6&&(x===-4||x===3)))H(x,47,z,'#0d0d10');for(let x=-1;x<=0;x++)H(x,49,5,h.badge||GD);break;
+     case 'bowler':disc(48,6.4,k2);for(let y=49;y<=51;y++)disc(y,y===51?3.9:4.6,y===49?shd(k,.7):k);disc(52,2.8,k);break;
+     case 'straw':disc(48,7.4,(x,z)=>(x*x+z*z)%3?k:k2);for(let y=49;y<=50;y++)disc(y,4.5,y===49?(h.band||'#1b1b20'):k);disc(51,4.5,shd(k,1.06));break;
+     case 'beret':for(let y=48;y<=49;y++)disc(y,y===49?5:5.6,k,-1);disc(50,3.6,k,-1.5);H(-2,51,0,k2);break;
+     case 'pillbox':for(let y=48;y<=50;y++)disc(y,3.6,y===48?(h.band||GD):k,1,0);for(let y=40;y<=47;y++)tint(3,y,1,'#0d0d10');break;
+     case 'veil':for(let x=-5;x<=4;x++)for(let z=-5;z<=3;z++){if((x===-5||x===4)&&(z===-5||z===3))continue;H(x,48,z,W)}for(let x=-3;x<=2;x++)H(x,47,3,W);for(const x of[-5,4])for(let y=43;y<=47;y++)for(let z=-3;z<=1;z++)H(x,y,z,W);
+       for(let y=33;y<=47;y++){const w=y>=41?3:Math.min(6,3+Math.ceil((41-y)/2));for(let x=-w;x<w;x++)H(x,y,-6,y===33?shd(W,.85):W)}break;
+     case 'tiara':for(let x=-3;x<=2;x++)H(x,49,3,GD);H(-1,50,3,'#e9f3ff');H(0,50,3,'#e9f3ff');break;
+     case 'phones':for(let x=-5;x<=4;x++)for(let z=-1;z<=0;z++)H(x,49,z,'#20252e');for(const x of[-6,5])for(let y=42;y<=45;y++)for(let z=-2;z<=1;z++)H(x,y,z,y===42||y===45?'#20252e':'#3a3f46');for(const x of[-6,5])for(let y=46;y<=48;y++)H(x,y,0,'#20252e');break}}
+  if(o.specs){const g=o.specs===true?'#c9a227':o.specs;for(const x of[-3,-2,1,2]){H(x,45,4,g);H(x,43,4,g)}tint(-4,44,2,g);tint(-4,44,1,g);tint(3,44,2,g);tint(3,44,1,g)}
+  return V}
+/* a carving, at half its fineness: a block of eight cells is filled if four of them are, in the colour most of them carry */
+function figHalf(V){const NX=FNX/2,NY=FNY/2,NZ=FNZ/2,c=new Uint8Array(NX*NY*NZ),p=new Uint8Array(NX*NY*NZ),cnt=new Uint8Array(256),pc=new Uint8Array(16);
+  for(let y=0;y<NY;y++)for(let z=0;z<NZ;z++)for(let x=0;x<NX;x++){let n=0,best=0,bn=0,bp=0,bpn=0;const seen=[];
+    for(let k=0;k<8;k++){const i=((y*2+(k>>2))*FNZ+z*2+(k>>1&1))*FNX+x*2+(k&1),v=V.c[i];if(!v)continue;n++;if(!cnt[v])seen.push(v);if(++cnt[v]>bn){bn=cnt[v];best=v}const q=V.p[i];if(++pc[q]>bpn){bpn=pc[q];bp=q}}
+    for(const v of seen)cnt[v]=0;pc.fill(0);if(n>=4){const i=(y*NZ+z)*NX+x;c[i]=best;p[i]=bp}}
+  return{c,p,pal:V.pal,half:true}}
+/* the faces of a carving, merged where one colour of one part lies on one plane. A face is drawn where the next cell is empty or belongs to another part, so a limb that turns shows no hole */
+function figQuads(V){const half=!!V.half,dims=half?[FNX/2,FNY/2,FNZ/2]:[FNX,FNY,FNZ],NX=dims[0],NZ=dims[2],u=half?FU*2:FU,off=[half?FOX/2:FOX,0,half?FOZ/2:FOZ],c=V.c,p=V.p,E=.012;
+  const rgb=V.pal.map(h=>h?lin(h).map(v=>Math.min(255,v*255)|0):null);let cap=512,n=0,pos=new Float32Array(cap*12),nrm=new Int8Array(cap*12),col=new Uint8Array(cap*12),sk=new Uint8Array(cap*16);
+  const grow=()=>{cap*=2;const a=new Float32Array(cap*12),b=new Int8Array(cap*12),d=new Uint8Array(cap*12),e=new Uint8Array(cap*16);a.set(pos);b.set(nrm);d.set(col);e.set(sk);pos=a;nrm=b;col=d;sk=e};
+  const q=[0,0,0],mask=new Int32Array(64*64);
+  for(let d=0;d<3;d++){const a=(d+1)%3,b=(d+2)%3,W=dims[a],Hh=dims[b],D=dims[d];
+    for(const dir of[1,-1])for(let s=0;s<D;s++){let any=false;
+      for(let j=0;j<Hh;j++)for(let i=0;i<W;i++){q[d]=s;q[a]=i;q[b]=j;const idx=(q[1]*NZ+q[2])*NX+q[0],v=c[idx];let m=0;
+        if(v){const t=s+dir;let open=t<0||t>=D;if(!open){q[d]=t;const ni=(q[1]*NZ+q[2])*NX+q[0];open=!c[ni]||p[ni]!==p[idx]}if(open){m=v|(p[idx]<<8)|4096;any=true}}mask[j*W+i]=m}
+      if(!any)continue;
+      for(let j=0;j<Hh;j++)for(let i=0;i<W;){const m=mask[j*W+i];if(!m){i++;continue}let w=1;while(i+w<W&&mask[j*W+i+w]===m)w++;let h=1;o:for(;j+h<Hh;h++)for(let k=0;k<w;k++)if(mask[(j+h)*W+i+k]!==m)break o;
+        for(let jj=0;jj<h;jj++)for(let k=0;k<w;k++)mask[(j+jj)*W+i+k]=0;
+        if(n===cap)grow();const o12=n*12,o16=n*16,ci=m&255,part=m>>8&15,cc=rgb[ci],pl=s+(dir>0?1:0),cr=dir>0?[[0,0],[1,0],[1,1],[0,1]]:[[0,0],[0,1],[1,1],[1,0]];
+        for(let k=0;k<4;k++){const P=[0,0,0];P[d]=pl;P[a]=i+cr[k][0]*w+(cr[k][0]?E:-E);P[b]=j+cr[k][1]*h+(cr[k][1]?E:-E);const o=o12+k*3;pos[o]=(P[0]-off[0])*u;pos[o+1]=(P[1]-off[1])*u;pos[o+2]=(P[2]-off[2])*u;
+          nrm[o]=d===0?dir*127:0;nrm[o+1]=d===1?dir*127:0;nrm[o+2]=d===2?dir*127:0;col[o]=cc[0];col[o+1]=cc[1];col[o+2]=cc[2];sk[o16+k*4]=part}
+        n++;i+=w}}}
+  return{n,pos:pos.subarray(0,n*12),nrm:nrm.subarray(0,n*12),col:col.subarray(0,n*12),sk:sk.subarray(0,n*16)}}
+function figGeo(Q){const g=new THREE.BufferGeometry(),n=Q.n,w=new Uint8Array(n*16);for(let i=0;i<n*4;i++)w[i*4]=255;
+  g.setAttribute('position',new THREE.BufferAttribute(Q.pos.slice(),3));g.setAttribute('normal',new THREE.BufferAttribute(Q.nrm.slice(),3,true));g.setAttribute('color',new THREE.BufferAttribute(Q.col.slice(),3,true));
+  g.setAttribute('skinIndex',new THREE.BufferAttribute(Q.sk.slice(),4));g.setAttribute('skinWeight',new THREE.BufferAttribute(w,4,true));quadIndex(g,n);g.boundingSphere=FIGSPH;return g}
+/* the bones: a figure's ten parts turn about the hip, the knee, the shoulder, the elbow and the neck */
+const FIG_ID=new THREE.Matrix4(),FIGSPH=new THREE.Sphere(new THREE.Vector3(0,1.5,0),2.4);
+function figRig(o,mat,now){const g=new THREE.Group(),bn=[],mk=(par,x,y,z)=>{const b=new THREE.Bone();b.position.set(x*FU,y*FU,z*FU);(par||g).add(b);bn.push(b);return b};
+  const root=mk(null,0,0,0),head=mk(root,0,FNECK,0),tl=mk(root,-4,FHIP,0),sl=mk(tl,0,FKNEE-FHIP,0),tr=mk(root,4,FHIP,0),sr=mk(tr,0,FKNEE-FHIP,0),al=mk(root,-10,FSH,0),fl=mk(al,0,FELB-FSH,0),ar=mk(root,10,FSH,0),fr=mk(ar,0,FELB-FSH,0);
+  if(o.kid)head.scale.setScalar(1.16);g.updateMatrixWorld(true);const sks=new THREE.Skeleton(bn);
+  g.userData={l1:tl,l2:tr,s1:sl,s2:sr,a1:al,a2:ar,f1:fl,f2:fr,head,far:null,near:null,sks,o,skirt:o.lower.t==='skirt',fig2:1};
+  if(now){const m=new THREE.SkinnedMesh(figGeo(figQuads(figBuild(o))),mat);m.bind(sks,FIG_ID);m.castShadow=true;m.boundingSphere=FIGSPH;g.add(m);g.userData.near=m}return g}
+function figFar(g,mat){const ud=g.userData;if(ud.far)return ud.far;const m=new THREE.SkinnedMesh(figGeo(figQuads(figHalf(figBuild(ud.o)))),mat);m.bind(ud.sks,FIG_ID);m.castShadow=true;m.boundingSphere=FIGSPH;g.add(m);ud.far=m;FIGQ.far++;return m}
+const FIGQ={near:26,keep:40,list:[],made:0,let:0,far:0,bf:0,bn:0};
+function figNear(g,mat){const ud=g.userData;if(ud.near)return ud.near;const m=new THREE.SkinnedMesh(figGeo(figQuads(figBuild(ud.o))),mat);m.bind(ud.sks,FIG_ID);m.castShadow=true;m.boundingSphere=FIGSPH;g.add(m);ud.near=m;FIGQ.list.push(g);FIGQ.made++;
+  if(FIGQ.list.length>FIGQ.keep){let wi=-1,wt=1e18;for(let i=0;i<FIGQ.list.length;i++){const u=FIGQ.list[i].userData;if(FIGQ.list[i]!==g&&!u.near.visible&&(u.seen||0)<wt){wt=u.seen||0;wi=i}}if(wi>=0){const og=FIGQ.list[wi],u=og.userData;og.remove(u.near);u.near.geometry.dispose();u.near=null;FIGQ.list.splice(wi,1);FIGQ.let++}}
+  return m}
+/* the wardrobe of 1912, by role. Below stairs (the Brown house) dress by the room they work in; each other House wears the dress of its office with the House colour as its accent
+   (a waistcoat, a tie, a sash, an armband); the village and the grounds wear working dress. r is the figure's own run of chances, so one figure is always the same person */
+const FEYES=['#3a2a1e','#4a3323','#3d5a7a','#56684a','#2a2a2e','#6b7f8f','#4a3323','#3a2a1e'];
+const BELOW={'The Kitchen':['cook','kitchenmaid','scullery'],"The Butler's Pantry":['footman'],"The Housekeeper's Room":['housekeeper'],"The Servants' Hall":['footman','housemaid','housemaid','hallboy'],'The Wine Cellar':['cellarman'],'The Boot Room':['hallboy','hallboy'],'The Ballroom Cellars':['cellarman']};
+function figSpec(role,h,room,r,i,child){const pick=a=>a[Math.floor(r()*a.length)],WH='#f4f1ea',BK='#1b1b20',GD='#c9a227',A=h&&HOUSES[h]?HOUSES[h][2]:null;
+  const o={sex:r()<.38?'f':'m',skin:pick(SKINS),hair:pick(HAIRS.filter(c=>c!=='#9a9a9a')),eye:pick(FEYES),age:r(),stout:r()<.2,tall:.95+r()*.1,shoe:'#16120f',shirt:'#f1ede4'};
+  const set=x=>Object.assign(o,x),rv=r(),rw=r();
+  const suit=(c,tr,x)=>set(Object.assign({top:{t:'jacket',c},lower:{t:'trousers',c:tr||c},tie:{t:'tie',c:A||'#5a2a2a'}},x||{}));
+  const gown=(c,x)=>set(Object.assign({sex:'f',top:{t:'bodice',c,collar:c},lower:{t:'skirt',c},cuff:null},x||{}));
+  if(role==='below'){const list=BELOW[room]||['housemaid','footman'];role=list[i%list.length]}
+  switch(role){
+   case 'footman':set({sex:'m',fh:null,top:{t:'tails',c:'#1d2b24',v:27,btn:GD,lapel:'#14201a'},wc:{c:'#cdb85a',stripe:'#2a2a22',n:5,btn:GD},tie:{t:'bow',c:WH},lower:{t:'trousers',c:BK},gloves:'#eef1f5',stout:false,age:o.age*.5});break;
+   case 'cellarman':set({sex:'m',top:{t:'vest',c:'#cdb85a',back:'#2a2a22'},wc:null,tie:{t:'bow',c:BK},lower:{t:'trousers',c:BK},apron:{t:'waist',c:'#2f5a3a',len:8},sleeves:'shirt',garter:'#2a2a22'});break;
+   case 'hallboy':set({sex:'m',fh:null,age:o.age*.25,stout:false,tall:.88+r()*.05,top:{t:'vest',c:'#3a342c'},tie:null,collar:null,lower:{t:'trousers',c:'#2a2a33'},apron:{t:'waist',c:'#5b6b4a',len:9},sleeves:'rolled',shirt:'#e2dccd',hs:pick(['short','crop','curly'])});break;
+   case 'housekeeper':gown('#17161b',{age:.6+o.age*.4,top:{t:'bodice',c:'#17161b',collar:'#e9dfc4',jabot:'#e9dfc4',brooch:GD},keys:true,belt:'#2c2c33',hs:'bun',cuff:{c:'#e9dfc4',n:1}});break;
+   case 'housemaid':gown(BK,{age:o.age*.55,stout:false,top:{t:'bodice',c:BK,collar:WH},cuff:{c:WH,n:2},apron:{t:'bib',c:WH},hat:{t:'maid'},hs:pick(['bun','chignon'])});break;
+   case 'cook':gown('#dfe2e6',{age:.45+o.age*.5,stout:true,top:{t:'bodice',c:'#dfe2e6',collar:'#dfe2e6'},sleeves:'rolled',shirt:'#dfe2e6',apron:{t:'full',c:WH},hat:{t:'mob'},hs:'bun'});break;
+   case 'kitchenmaid':gown('#8f86a8',{age:o.age*.4,top:{t:'bodice',c:'#8f86a8',collar:WH},lower:{t:'skirt',c:'#8f86a8',stripe:'#a59dba'},sleeves:'rolled',shirt:'#8f86a8',apron:{t:'bib',c:'#e6dfc8'},hat:{t:'mob'},hs:'bun'});break;
+   case 'scullery':gown('#6f83a8',{age:o.age*.3,top:{t:'bodice',c:'#6f83a8',collar:'#6f83a8'},lower:{t:'skirt',c:'#6f83a8',stripe:'#8296b8'},sleeves:'rolled',shirt:'#6f83a8',apron:{t:'full',c:'#b9ab86',len:5},hat:{t:'mob'},hs:'bun'});break;
+   case 'gardener':set({sex:'m',top:{t:'vest',c:'#6b5a3a'},tie:{t:'kerchief',c:'#a8322a'},collar:null,lower:{t:'trousers',c:'#5a4a36'},apron:{t:'waist',c:'#3f6b4a',len:9},sleeves:'rolled',shirt:'#d8ccae',hat:rv<.3?{t:'straw',c:'#d9c98a',band:'#3a342c'}:{t:'flat',c:'#5b4a36'},boot:6,shoe:'#3a2a1e'});break;
+   case 'groom':set({sex:'m',top:{t:'jacket',c:'#6b5a3a',v:32},wc:{c:'#c9b458',n:3},tie:{t:'stock',c:WH},lower:{t:'breeches',c:'#c2b28c',c2:'#5b3d24',btn:'#2a1d14'},hat:{t:'flat',c:'#5b4a36'},shoe:'#2b2422'});break;
+   case 'farmhand':if(rv<.45)set({sex:'m',top:{t:'smock',c:'#cfc6a8'},tie:{t:'kerchief',c:'#a8322a'},lower:{t:'trousers',c:'#5a4a36'},cuff:null,hat:{t:'straw',c:'#d9c98a',band:'#5a4a36'},boot:6,shoe:'#3a2a1e'});
+     else set({sex:'m',top:{t:'vest',c:'#5a4a36'},tie:{t:'kerchief',c:'#2f4a6e'},collar:null,lower:{t:'trousers',c:'#6b5a3a'},sleeves:'rolled',shirt:'#e2dccd',hat:{t:'flat',c:'#4a3b2a'},boot:6,shoe:'#3a2a1e'});break;
+   case 'priest':set({sex:'m',top:{t:'cassock',c:'#1a1818',sash:'#2a2630'},lower:{t:'skirt',c:'#1a1818',flare:2},cuff:null,fh:rv<.5?'beard':null,hs:rv<.4?'bald':'short',age:.5+o.age*.5});break;
+   case 'villager':{const k=Math.floor(rv*8);if(child){if(o.sex==='f')gown(pick(['#7a2f2f','#2f4a6e','#4a5a2f']),{apron:{t:'bib',c:'#efe6cf'},hs:'plait',ribbon:pick(['#a4161a','#27408b','#e3b23c']),age:.1,lower:{t:'skirt',c:'#6b5a4a',hem:5,flare:2}});
+        else set({top:{t:'jacket',c:pick(['#5a4632','#4a4f5c','#6b5a3a']),v:32},tie:null,lower:{t:'breeches',c:'#4a3b2a',c2:'#2a2a33'},hat:{t:'flat',c:'#4a3b2a'},age:.1,fh:null});break}
+     if(o.sex==='f'){if(k<3)gown(pick(['#7a2f2f','#2f4a6e','#4a5a2f','#6b4a2d']),{apron:{t:k===0?'bib':'waist',c:'#efe6cf'},hat:k===1?{t:'straw',c:'#d9c98a',band:pick(['#7a2f2f','#2f4a6e'])}:null});
+       else if(k<6)gown(pick(['#5a4a5e','#3f5a4a','#7a6a4f','#4a5a6e']),{top:{t:'blouse',c:'#efe9dc',collar:'#efe9dc'},tie:{t:'ribbon',c:pick(['#7a1f25','#27408b','#2a2a2e'])},belt:'#2a1d14',hat:rw<.6?{t:'straw',c:'#e0d2a0',band:'#2a2a2e'}:null,lower:{t:'skirt',c:pick(['#5a4a5e','#3f5a4a','#4a5a6e']),pleat:true}});
+       else gown('#2a2a30',{top:{t:'bodice',c:'#2a2a30',collar:WH,yoke:'#3a3a44'},hat:{t:'straw',c:'#2a2a30',band:'#5a2a4a'},age:.6+o.age*.4})}
+     else if(k===0)set({top:{t:'vest',c:'#7a6a4f'},tie:{t:'kerchief',c:'#a8322a'},collar:null,lower:{t:'trousers',c:'#4a3b2a'},sleeves:'rolled',shirt:'#d8ccae',hat:{t:'flat',c:'#5b4a36'},boot:5});
+     else if(k===1)set({top:{t:'vest',c:'#efe9dc',back:'#d8d2c2'},tie:null,collar:null,lower:{t:'trousers',c:'#5d646d'},apron:{t:'full',c:WH},sleeves:'rolled',hat:{t:'mob'},stout:true});   /* the baker */
+     else if(k===2)set({top:{t:'vest',c:'#3b2a1e'},tie:null,collar:null,lower:{t:'trousers',c:'#2a2a33'},apron:{t:'leather',c:'#6b4a2d',len:8},sleeves:'rolled',shirt:'#c2b28c'});   /* the smith */
+     else if(k===3)suit('#6b5a3a','#3b2e22',{tie:{t:'kerchief',c:'#a8322a'},hat:{t:'flat',c:'#5b4a36'}});
+     else if(k===4)suit('#27344f','#27344f',{top:{t:'tunic',c:'#27344f',collar:'#a4161a',btn:'#c9c2a8'},tie:null,lower:{t:'trousers',c:'#27344f',stripe:'#a4161a'},hat:{t:'peaked',c:'#27344f',band:'#a4161a',badge:'#c9c2a8'},cuff:{c:'#a4161a',n:1}});   /* the postman */
+     else if(k===5)suit('#3a3f4a','#3a3f4a',{wc:{c:'#3a3f4a'},hat:{t:'bowler',c:'#1b1b20'},tie:{t:'tie',c:'#5a2a2a'},chain:true});
+     else if(k===6)suit('#5a4632','#4a3b2a',{hat:{t:'flat',c:'#6b5a3a'},tie:{t:'tie',c:'#2f4a6e'},wc:{c:'#7a6a4f'}});
+     else set({top:{t:'vest',c:'#4a5a3a'},tie:{t:'tie',c:'#2a2a2e'},lower:{t:'trousers',c:'#3b2e22'},apron:{t:'waist',c:WH,len:7},sleeves:'shirt',garter:'#2a2a2e'});break}   /* the shopkeeper */
+   case 'player':set({sex:'m',skin:'#e0b48c',hair:'#3a2a1e',hs:'part',fh:null,eye:'#5b3a1e',age:.35,stout:false,tall:1,top:{t:'jacket',c:'#c9a227',lapel:'#a9861c',btn:'#f2d675'},wc:{c:'#f1ede4',btn:GD},tie:{t:'tie',c:'#7a1f25'},lower:{t:'trousers',c:'#1f2433'},ep:'#f2d675',hank:'#7a1f25'});break;
+   default:{   /* a member of a House, or a guest of none */
+     const fm=o.sex==='f';
+     switch(h){
+      case 'gold':if(fm)gown('#efe6cf',{top:{t:'bodice',c:'#efe6cf',collar:'#efe6cf',pearls:true},sash:'#7a1f25',belt:GD,buckleB:false,hat:{t:'tiara'},hs:'pomp',lower:{t:'skirt',c:'#efe6cf',band:GD,bandN:1,flare:4},gloves:WH});
+        else set({top:{t:'court',c:'#1c2440',collar:GD,long:13},lower:{t:'breeches',c:'#efe9dc',c2:'#f4f1ea'},cuff:{c:GD,n:2},sash:'#7a1f25',ep:'#e6c766',medals:rv<.5,buckle:GD,shoe:'#0d0d10'});break;
+      case 'silver':if(fm)gown('#4a5564',{top:{t:'blouse',c:WH,collar:WH},tie:{t:'ribbon',c:'#aab4bf'},belt:'#1b1b20',lower:{t:'skirt',c:'#4a5564',pleat:true},cuff:{c:WH,n:1}});
+        else suit('#23232a','#6d727b',{top:{t:'morning',c:'#23232a'},wc:{c:'#c0c7cf'},tie:{t:'tie',c:'#aab4bf'},lower:{t:'trousers',c:'#6d727b',stripe:null},chain:true,hank:WH});break;
+      case 'white':set({sex:'m',top:{t:'surplice',c:'#f4f1ea',stole:rv<.5?'#d4af37':null,bell:true},lower:{t:'skirt',c:rv<.5?'#1a1818':'#8a1c22',flare:2},cuff:null});break;
+      case 'copper':if(fm)gown('#5a3a26',{top:{t:'blouse',c:'#efe6d2',collar:'#efe6d2',brooch:'#b87333'},tie:{t:'ribbon',c:'#b87333'},belt:'#2a1d14',lower:{t:'skirt',c:'#5a3a26'},specs:rv<.6,hs:'bun'});
+        else if(rv<.5)set({top:{t:'vest',c:'#b87333',back:'#5a3a26'},tie:{t:'bow',c:'#14224a'},lower:{t:'trousers',c:'#3b2618'},sleeves:'shirt',garter:'#14224a',specs:rw<.7,chain:true});
+        else suit('#6b4a2d','#3b2618',{wc:{c:'#b87333'},tie:{t:'tie',c:'#14224a'},specs:rw<.6});break;
+      case 'blue':if(fm)gown('#1f2f5a',{top:{t:'blouse',c:WH,collar:WH,sailor:'#1f2f5a'},tie:{t:'ribbon',c:'#0b0b0d'},belt:'#1f2f5a',lower:{t:'skirt',c:'#1f2f5a',pleat:true}});
+        else set({top:{t:'reefer',c:'#1a2748',btn:GD,rings:GD},tie:{t:'tie',c:'#0b0b0d'},lower:{t:'trousers',c:'#1a2748'},cuff:null,hat:room==='The Wireless Room'&&rv<.7?{t:'phones'}:{t:'peaked',c:'#1a2748',top:WH,band:'#0b0b0d'}});break;
+      case 'yellow':if(fm&&/Ward/.test(room||''))gown('#7f93ad',{top:{t:'bodice',c:'#7f93ad',collar:WH},cuff:{c:WH,n:2},apron:{t:'bib',c:WH,cross:true},hat:{t:'veil'}});
+        else if(fm)gown('#3a3f4a',{top:{t:'blouse',c:WH,collar:WH},tie:{t:'ribbon',c:'#e3b23c'},belt:'#1b1b20',lower:{t:'skirt',c:'#3a3f4a'},specs:rv<.4});
+        else suit(WH,'#4a4f5c',{top:{t:'labcoat',c:'#f1ede4',lapel:'#dcd7ca',btn:'#b9b3a4'},wc:{c:'#6b5a3a'},tie:{t:'tie',c:'#e3b23c'},specs:rv<.5});break;
+      case 'green':if(fm)gown('#3f5a4a',{top:{t:'blouse',c:'#efe9dc',collar:'#efe9dc'},tie:{t:'ribbon',c:'#3fa34d'},apron:{t:'waist',c:'#2f6b3a',len:7},lower:{t:'skirt',c:'#3f5a4a'}});
+        else set({top:{t:'overall',c:'#4a5d73'},tie:{t:'kerchief',c:'#3fa34d'},collar:null,lower:{t:'trousers',c:'#4a5d73'},sleeves:'rolled',shirt:'#d8ccae',hat:rv<.6?{t:'flat',c:'#3a3f44'}:null,boot:5});break;
+      case 'violet':if(fm)gown('#5e3a85',{top:{t:'bodice',c:'#5e3a85',collar:null,pearls:true,yoke:o.skin},sleeves:'rolled',shirt:'#5e3a85',gloves:WH,belt:'#d4af37',buckleB:false,hs:'pomp',lower:{t:'skirt',c:'#5e3a85',band:'#3f2560',bandN:2,flare:4}});
+        else if(rv<.3)set({top:{t:'smock',c:'#6f7f9a'},tie:{t:'ribbon',c:'#7b4fa0'},lower:{t:'trousers',c:'#2a1d34'},hat:{t:'beret',c:'#2a1d34'},cuff:null});
+        else set({top:{t:'tails',c:'#15151a',v:26,lapel:'#2a2a33'},wc:{c:WH,n:4},tie:{t:'bow',c:WH},lower:{t:'trousers',c:'#15151a',stripe:'#2a2a33'},sash:rw<.5?'#7b4fa0':null,hank:'#7b4fa0'});break;
+      case 'orange':set({sex:'m',top:{t:'vest',c:'#5a4632'},tie:{t:'kerchief',c:'#e07a1f'},collar:null,lower:{t:'trousers',c:'#3b2618'},apron:{t:'leather',c:'#7a4a25',len:8},sleeves:'rolled',shirt:'#c9bfa4',stout:rv<.5,boot:5});break;
+      case 'grey':if(fm)gown('#6d7278',{top:{t:'bodice',c:'#6d7278',collar:WH,btn:'#c9a227'},belt:'#5b3d24',lower:{t:'skirt',c:'#6d7278'},cuff:{c:WH,n:1}});
+        else set({top:{t:'tunic',c:'#6f746c',btn:'#c9a227',strap:'#6f746c',long:16},lower:{t:'breeches',c:'#8a8672',c2:'#5b3d24'},belt:'#5b3d24',sam:'#5b3d24',cuff:null,hat:{t:'peaked',c:'#6f746c',band:'#7d2a2a'},shoe:'#3a2a1e',fh:rw<.6?'tache':null});break;
+      case 'obsidian':set({sex:'m',top:{t:'tunic',c:'#1b1b1f',btn:'#c9c2a8',collar:'#a4161a',pockets:false,long:16},lower:{t:'trousers',c:'#1b1b1f',stripe:'#a4161a'},belt:WH,buckleB:'#c9c2a8',cuff:{c:'#a4161a',n:1},sash:rv<.35?'#a4161a':null,hat:{t:'pillbox',c:'#1b1b1f',band:'#a4161a'},gloves:rv<.5?WH:null});break;
+      case 'red':set({sex:'m',top:{t:'tunic',c:'#a4161a',btn:GD,collar:'#1c2440',long:16},lower:{t:'trousers',c:'#1c2440',stripe:'#a4161a'},belt:WH,cross:WH,cuff:{c:'#1c2440',n:2},hat:{t:'pillbox',c:'#1c2440',band:GD},fh:rw<.7?'tache':null});break;
+      case 'pink':if(fm)gown(pick(['#e8a0b4','#d98aa0','#f0c0cc']),{top:{t:'bodice',c:'#e8a0b4',collar:'#f4e4e8',yoke:'#f4e4e8',brooch:GD},belt:'#b0566e',buckleB:false,hs:'pomp',lower:{t:'skirt',c:'#e8a0b4',band:'#f4e4e8',bandN:1,flare:4},cuff:{c:'#f4e4e8',n:2}});
+        else suit('#8f98a3','#6d727b',{top:{t:'morning',c:'#8f98a3'},wc:{c:'#f1e4e8'},tie:{t:'tie',c:'#e8a0b4'},hank:'#e8a0b4'});break;
+      case 'brown':if(fm)set(figSpec('housemaid',h,room,r,i));else set(figSpec('footman',h,room,r,i));break;
+      default:if(fm)gown(pick(['#5a4a5e','#3f5a4a','#7a2f3a','#2f4a6e','#6b5a3a']),{top:{t:'blouse',c:'#efe9dc',collar:'#efe9dc',brooch:rv<.5?GD:null},tie:rv<.5?{t:'ribbon',c:'#2a2a2e'}:null,belt:'#2a1d14',hs:pick(['pomp','bun']),hat:rw<.35?{t:'straw',c:'#e0d2a0',band:'#2a2a2e'}:null});
+        else suit(pick(['#5a4632','#4a4f5c','#3a3f4a','#6b5a3a','#2f3a4a']),null,{wc:rv<.6?{c:pick(['#7a6a4f','#5a2a2a','#3f5a4a','#c0c7cf'])}:null,tie:{t:rw<.2?'bow':'tie',c:pick(['#5a2a2a','#2f4a6e','#3a3f4a','#6b4a2d'])},hat:rw>.8?{t:'bowler',c:'#1b1b20'}:null,chain:rv<.3})}
+     if(A&&!o.band&&h!=='brown'&&h!=='white'&&T_BAND.has(h))o.band=A}}
+  if(o.sex==='f'){if(!o.hs)o.hs=pick(['pomp','bun','chignon','bun']);o.fh=null}
+  else{if(!o.hs)o.hs=o.age>.55&&r()<.3?'bald':pick(['short','part','part','slick','curly','crop']);if(o.fh===undefined){const q=r();o.fh=o.age<.25?null:q<.42?null:q<.74?'tache':q<.86?'beard':q<.94?'chops':'goatee'}}
+  if(o.age>.74)o.grey=o.age>.88?2:1;if(child){o.grey=0;o.fh=null;o.stout=false}
+  return o}
+const T_BAND=new Set(['silver','copper','yellow','green','pink','violet']);
+/* a figure at rest: the limbs come back to hang, and the head turns to His Grace when he is near and in front */
+function figIdle(e,ud,dt){const k=Math.min(1,dt*7);for(const b of[ud.l1,ud.l2,ud.s1,ud.s2,ud.a1,ud.a2])b.rotation.x-=b.rotation.x*k;ud.f1.rotation.x+=(-.1-ud.f1.rotation.x)*k;ud.f2.rotation.x+=(-.1-ud.f2.rotation.x)*k;
+  let ty=0;if(MODE==='walk'){const dx=PL.x-e.x,dz=PL.z-e.z,d=Math.hypot(dx,dz);if(d<7&&d>.5&&Math.abs(PL.y+.5-e.y)<2.5){let a=Math.atan2(dx,dz)-e.fig.rotation.y;a=Math.atan2(Math.sin(a),Math.cos(a));if(Math.abs(a)<1.9)ty=Math.max(-1.1,Math.min(1.1,a))}}
+  ud.head.rotation.y+=(ty-ud.head.rotation.y)*Math.min(1,dt*3)}
 const walkable=(x,y,z)=>{if(!inb(x,y,z))return false;const a=G(x,y,z),b=G(x,y+1,z);return(!a||(PF[a]&IV))&&(!b||(PF[b]&IV))&&G(x,y-1,z)!==0};
 const groundY=(x,z)=>{if(!inb(x,0,z))return null;const h=H[HI(x,z)];return h<0?null:h+1};
 /* v1.17: bodies. A mover has a radius; furniture's unseen blocks stop it as walls do; two bodies do not pass through each other */
@@ -2450,13 +2749,15 @@ function kchatInit(){$('#kcx').onclick=kchatClose;$('#kcsend').onclick=kcSend;$(
 function wereFig(mat){const g=new THREE.Group(),st=[];for(const s of[0,1]){const r=propGet('werewolf',{step:s}),u=r.unit,fb=new FB();
     for(const q of r.q){if(fb.n===fb.cap)fb.grow();const o=fb.n*12,col=q.f?[1,.85,.45]:lin(q.c);for(let k=0;k<4;k++){const P=q.p[k],j=o+k*3;fb.p[j]=P[0]*u;fb.p[j+1]=P[1]*u;fb.p[j+2]=P[2]*u;fb.nm[j]=q.n[0]*127;fb.nm[j+1]=q.n[1]*127;fb.nm[j+2]=q.n[2]*127;fb.c[j]=Math.min(255,col[0]*255);fb.c[j+1]=Math.min(255,col[1]*255);fb.c[j+2]=Math.min(255,col[2]*255)}fb.n++}
     const m=new THREE.Mesh(fb.geo(),mat);m.castShadow=true;m.visible=!s;g.add(m);st.push(m)}g.userData={st};return g}
-function buildLife(){const pm=FMAT();const hip=9*PS;let n=0;
+function buildLife(){const pm=FMAT();const hip=9*PS,RCNT={};let n=0;
   const mkPerson=p=>{let sd=(p.x*73856093^p.y*19349663^p.z*83492791)>>>0;const r=()=>{sd=(sd*1664525+1013904223)>>>0;return sd/4294967296};
-    let o=outfit(p.role==='villager'||p.role==='gardener'||p.role==='groom'||p.role==='farmhand'||p.role==='priest'?'none':(p.h||'none'),p.role==='kairos'?'kairos':null,r);
-    if(p.role==='villager')villagerOutfit(o,r);else if(p.role)staffOutfit(p.role,o);
-    const K=p.role==='kairos',wrap=new THREE.Group();const fig=K?kairosFig(KMAT()):figMesh(personVox(o),hip,pm,hip);if(K)kairosHead(fig,KMAT());wrap.add(fig);if(p.child)fig.scale.setScalar(.68);wrap.position.set(p.x,p.y-.5,p.z);fig.rotation.y=Math.atan2(p.tx||0,p.tz||1);scene.add(wrap);
+    const K=p.role==='kairos',wrap=new THREE.Group();let fig;
+    if(K){fig=kairosFig(KMAT());kairosHead(fig,KMAT())}
+    else{const Bp=p.bid?BLD[p.bid]:null,Rp=Bp?Bp.rooms.find(q=>p.x>=q.x0&&p.x<=q.x1&&p.z>=q.z0&&p.z<=q.z1&&Math.abs(q.y+1-p.y)<=1):null,rn=Rp?Rp.n:null,ix=rn?(RCNT[rn]=(RCNT[rn]||0)+1)-1:n;
+      const fo=figSpec(p.role||(p.h==='brown'?'below':null),p.h,rn,r,ix,p.child);if(p.child)fo.kid=1;fig=figRig(fo,pm);fig.scale.setScalar(p.child?.68:fo.tall)}   /* v1.72: the fine figure; its dress by role, House and room */
+    wrap.add(fig);wrap.position.set(p.x,p.y-.5,p.z);fig.rotation.y=Math.atan2(p.tx||0,p.tz||1);scene.add(wrap);
     const bid=p.bid||0,band=bid?BLD[bid].band[p.y+OY]:-1;if(bid)GROUPS.push({obj:wrap,bid,band});
-    const B=p.b||[p.x-6,p.x+6,p.z-6,p.z+6];const E={wrap,fig,x:p.x+0,z:p.z+0,y:p.y,indoor:!!bid,b:B,static:p.role==='kairos',speed:p.child?1.5:1.05,wait:rnd()*4,tgt:null,ph:rnd()*6,kind:'person'};if(p.role==='kairos'&&KSEAT){E.seated=true;E.x=KSEAT.x;E.z=KSEAT.z;E.y=KSEAT.y-KHIPV*KRU*KSC+.58;wrap.position.set(E.x,E.y-.5,E.z);fig.rotation.y=KSEAT.yaw;const ud=fig.userData;if(ud.l1){ud.l1.rotation.x=-1.45;ud.l2.rotation.x=-1.45}if(ud.a1){ud.a1.rotation.x=-.35;ud.a2.rotation.x=-.35}if(ud.s1){ud.l1.rotation.x=ud.l2.rotation.x=-1.6;ud.s1.rotation.x=ud.s2.rotation.x=1.6;ud.a1.rotation.x=ud.a2.rotation.x=-.22;ud.f1.rotation.x=-1.25;ud.f2.rotation.x=-1.3}}if(p.role==='kairos')E.kh=true;addLife(E);n++};
+    const B=p.b||[p.x-6,p.x+6,p.z-6,p.z+6];const E={wrap,fig,x:p.x+0,z:p.z+0,y:p.y,indoor:!!bid,b:B,static:p.role==='kairos',speed:p.child?1.5:bid?1.3:1.2,wait:rnd()*4,tgt:null,ph:rnd()*6,kind:'person'};if(p.role==='kairos'&&KSEAT){E.seated=true;E.x=KSEAT.x;E.z=KSEAT.z;E.y=KSEAT.y-KHIPV*KRU*KSC+.58;wrap.position.set(E.x,E.y-.5,E.z);fig.rotation.y=KSEAT.yaw;const ud=fig.userData;if(ud.l1){ud.l1.rotation.x=-1.45;ud.l2.rotation.x=-1.45}if(ud.a1){ud.a1.rotation.x=-.35;ud.a2.rotation.x=-.35}if(ud.s1){ud.l1.rotation.x=ud.l2.rotation.x=-1.6;ud.s1.rotation.x=ud.s2.rotation.x=1.6;ud.a1.rotation.x=ud.a2.rotation.x=-.22;ud.f1.rotation.x=-1.25;ud.f2.rotation.x=-1.3}}if(p.role==='kairos')E.kh=true;addLife(E);n++};
   for(const p of PEOPLE)mkPerson(p);
   for(const p of spawnOutdoorPeople())mkPerson(Object.assign(p,{bid:0}));
   let an=0;for(const a of spawnAnimals()){const{V,hip:ah}=animalVox(a.kind,a);const wrap=new THREE.Group();const fig=a.were?wereFig(pm):figMesh(V,ah,pm,ah);wrap.add(fig);wrap.position.set(a.x,a.y-.5,a.z);fig.rotation.y=a.static?(a.yaw||0):rnd()*6.28;if(a.scale&&!a.were)wrap.scale.setScalar(a.scale);scene.add(wrap);
@@ -2471,9 +2772,14 @@ let BIRDS=null;function makeBirds(){const n=14;const geo=new THREE.BufferGeometr
   BIRDS=new THREE.InstancedMesh(geo,new THREE.MeshBasicMaterial({color:'#2b2626',side:THREE.DoubleSide}),n);BIRDS.frustumCulled=false;BIRDS.userData.f=[...Array(n)].map((_,i)=>({a:i*.45,r:100+(i%5)*8,h:72+(i%4)*3,ox:(i%3)*4,oz:Math.floor(i/3)*3}));scene.add(BIRDS)}
 const _pos=new THREE.Vector3();
 function lifeStep(dt){if(!LIFE_ON)return;const cam=camera.position;const far=MODE==='walk'?(FULL.on?Math.min(GOV.far,320):90):340;   /* v1.40: figures out to 320 on foot; past that they are a few pixels and cost a draw each */
-  for(const e of LIFE){const dx=e.x-cam.x,dz=e.z-cam.z,dd=dx*dx+dz*dz;e.fig.visible=dd<far*far;if(!e.fig.visible||e.static){if(e.static&&e.fig.visible){if(e.kh)kairosStep(e,dt);else e.fig.rotation.y+=Math.sin(tt*.3+e.ph)*.002}continue}
+  FIGQ.bf=6;FIGQ.bn=1;
+  for(const e of LIFE){const dx=e.x-cam.x,dz=e.z-cam.z,dd=dx*dx+dz*dz;e.fig.visible=dd<far*far;
+    {const u2=e.fig.userData;if(u2.fig2){const shown=e.fig.visible&&e.wrap.visible;e.wrap.matrixWorldAutoUpdate=shown;   /* v1.72: a figure out of sight costs nothing: no bones are worked out, no copy is made */
+      if(shown){if(!u2.far&&FIGQ.bf>0){FIGQ.bf--;figFar(e.fig,FMAT())}const dy=cam.y-e.y-1.4,d3=dd+dy*dy,lim=FIGQ.near+(u2.near&&u2.near.visible?4:0),nr=d3<lim*lim;
+        if(nr&&!u2.near&&FIGQ.bn>0){FIGQ.bn--;figNear(e.fig,FMAT())}const on=nr&&!!u2.near;if(u2.near){u2.near.visible=on;if(on)u2.seen=tt}if(u2.far)u2.far.visible=!on}}}
+    if(!e.fig.visible||e.static){if(e.static&&e.fig.visible){if(e.kh)kairosStep(e,dt);else e.fig.rotation.y+=Math.sin(tt*.3+e.ph)*.002}continue}
     const ud=e.fig.userData;
-    if(e.wait>0){e.wait-=dt;if(ud.l1){ud.l1.rotation.x*=.85;ud.l2.rotation.x*=.85}continue}
+    if(e.wait>0){e.wait-=dt;if(ud.fig2)figIdle(e,ud,dt);else if(ud.l1){ud.l1.rotation.x*=.85;ud.l2.rotation.x*=.85}continue}
     if(!e.tgt){if(e.water){for(let t=0;t<6;t++){const x=e.x+(rnd()-.5)*12,z=e.z+(rnd()-.5)*12;if(lakeD(x,z)<.82){e.tgt=[x,z];break}}}
       else if(e.route){e.ri=((e.ri||0)+1)%e.route.length;e.tgt=e.route[e.ri].slice()}
       else{const B=e.b;e.tgt=[B[0]+1+rnd()*(B[1]-B[0]-2),B[2]+1+rnd()*(B[3]-B[2]-2)]}if(!e.tgt){e.wait=1;continue}}
@@ -2484,7 +2790,10 @@ function lifeStep(dt){if(!LIFE_ON)return;const cam=camera.position;const far=MOD
     if(!ok||e.side>2.5){e.tgt=null;e.side=0;e.wait=.4+rnd();continue}
     e.x=nx;e.z=nz;if(ny!==e.y){e.y=ny}const want=Math.atan2(tx,tz);let da=want-e.fig.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));e.fig.rotation.y+=da*Math.min(1,dt*6);
     e.wrap.position.x=e.x;e.wrap.position.z=e.z;const tyy=e.water?-.78:e.y-.5;e.wrap.position.y+=(tyy-e.wrap.position.y)*Math.min(1,dt*8);
-    e.ph+=dt*e.speed*(e.kind==='person'?6.5:7.5);if(ud.l1&&!e.seated){const s=Math.sin(e.ph)*.55;ud.l1.rotation.x=s;ud.l2.rotation.x=-s;if(ud.a1){ud.a1.rotation.x=-s*.75;ud.a2.rotation.x=s*.75}if(ud.s1){const c=Math.cos(e.ph);ud.s1.rotation.x=Math.max(0,-c)*.6;ud.s2.rotation.x=Math.max(0,c)*.6;ud.f1.rotation.x=-.15-Math.max(0,s)*.4;if(ud.rest){ud.f2.rotation.x=ud.rest.f2;ud.a2.rotation.x=s*.15}else ud.f2.rotation.x=-.15-Math.max(0,-s)*.4}}else if(ud.st){const s=Math.sin(e.ph)>0;ud.st[0].visible=s;ud.st[1].visible=!s}if(e.water)e.fig.position.y=Math.sin(e.ph*.4)*.03}
+    e.ph+=dt*e.speed*(ud.fig2?3.34:e.kind==='person'?6.5:7.5);
+    if(ud.fig2){const sk=ud.skirt,s=Math.sin(e.ph)*(sk?.13:.42),c=Math.cos(e.ph),as=Math.sin(e.ph)*(sk?.2:.34);ud.l1.rotation.x=s;ud.l2.rotation.x=-s;ud.s1.rotation.x=sk?0:Math.max(0,-c)*.55;ud.s2.rotation.x=sk?0:Math.max(0,c)*.55;   /* v1.72: the stride matches the ground covered (a leg 1.15 blocks long swinging 0.42 either way is 1.9 blocks a cycle), so feet do not slide; knees and elbows bend */
+      ud.a1.rotation.x=-as;ud.a2.rotation.x=as;ud.f1.rotation.x=-.12-Math.max(0,as)*.5;ud.f2.rotation.x=-.12-Math.max(0,-as)*.5;ud.head.rotation.y*=.9}
+    else if(ud.l1&&!e.seated){const s=Math.sin(e.ph)*.55;ud.l1.rotation.x=s;ud.l2.rotation.x=-s;if(ud.a1){ud.a1.rotation.x=-s*.75;ud.a2.rotation.x=s*.75}if(ud.s1){const c=Math.cos(e.ph);ud.s1.rotation.x=Math.max(0,-c)*.6;ud.s2.rotation.x=Math.max(0,c)*.6;ud.f1.rotation.x=-.15-Math.max(0,s)*.4;if(ud.rest){ud.f2.rotation.x=ud.rest.f2;ud.a2.rotation.x=s*.15}else ud.f2.rotation.x=-.15-Math.max(0,-s)*.4}}else if(ud.st){const s=Math.sin(e.ph)>0;ud.st[0].visible=s;ud.st[1].visible=!s}if(e.water)e.fig.position.y=Math.sin(e.ph*.4)*.03}
   if(BIRDS){const f=BIRDS.userData.f;for(let i=0;i<f.length;i++){const b=f[i],a=tt*.09+b.a*.06,cx=Math.cos(a)*b.r,cz=Math.sin(a)*b.r;M4.makeRotationY(-a);const fl=Math.sin(tt*9+i)*.35;M4.multiply(new THREE.Matrix4().makeScale(1.1,1+fl,1.1));M4.setPosition(cx+b.ox,b.h+Math.sin(tt+i)*.8,cz+b.oz);BIRDS.setMatrixAt(i,M4)}BIRDS.instanceMatrix.needsUpdate=true}}
 /* window detail: frames, a mullion cross and a sill on every outward face of a window. v1.14: a bar is its two broad faces only, the work is cut into 64-block pieces, and a piece too far off to show a bar is not drawn */
 const bx2=(fb,x0,y0,z0,x1,y1,z1,c,mk)=>{for(let d=0;d<6;d++){if(!(mk>>d&1))continue;const N=FACES[d][0],Q=FACES[d][1];if(fb.n===fb.cap)fb.grow();const o=fb.n*12;for(let k=0;k<4;k++){const q=o+k*3;fb.p[q]=Q[k][0]<0?x0:x1;fb.p[q+1]=Q[k][1]<0?y0:y1;fb.p[q+2]=Q[k][2]<0?z0:z1;fb.nm[q]=N[0]*127;fb.nm[q+1]=N[1]*127;fb.nm[q+2]=N[2]*127;fb.c[q]=c[0];fb.c[q+1]=c[1];fb.c[q+2]=c[2]}fb.n++}};
@@ -5299,6 +5608,7 @@ function walkStep(dt){{let b=null,bd=2.4;if(!PL.sit)for(const s of SEATS){const 
   {const r=stairRamp();if(r===null)PL.oy=(PL.oy||0)*(1-Math.min(1,dt*14));else if(r===r){const D=PL.dy==null?PL.y:PL.dy;PL.oy=D+(r-D)*Math.min(1,dt*40)-PL.y}PL.dy=PL.y+(PL.oy||0)}const py=PL.dy;
   player.position.set(PL.x,py,PL.z);if(!ISO){const fw=FOV0*(spr&&mag>.3?1.12:1);if(Math.abs(camera.fov-fw)>.05){camera.fov+=(fw-camera.fov)*Math.min(1,dt*6);camera.updateProjectionMatrix()}}
   const sw=Math.sin(PL.moving*2.4)*.5*(mag>.08?1:0);player.userData.l1.rotation.x=sw;player.userData.l2.rotation.x=-sw;
+  {const U=player.userData;if(U.fig2){const cw=Math.cos(PL.moving*2.4)*(mag>.08?1:0);U.s1.rotation.x=Math.max(0,-cw)*.55;U.s2.rotation.x=Math.max(0,cw)*.55;U.a1.rotation.x=-sw*.7;U.a2.rotation.x=sw*.7;U.f1.rotation.x=-.12-Math.max(0,sw)*.4;U.f2.rotation.x=-.12-Math.max(0,-sw)*.4}}
   /* auto lift the floors above */
   const b=bidUnder();WB=b&&BLD[b]?b:null;WL=WB?BLD[WB].band[Math.round(PL.y-.5)+OY]:0;if(OPEN_B!=null){OPEN_B=null;applyVis()}
   hemi.intensity=TOD[TODK].hemi[2]*(WB?(TODK==="night"?2.1:TODK==="dusk"?1.6:1.35*LDAY.k):(TODK==="night"?1.3:1));
@@ -5908,10 +6218,10 @@ const TM={};async function build(){const t0=performance.now();let tm=t0;TM.start
   for(const g of groups.values()){const obj=new THREE.Group();
     for(const k of['sg','glg']){const geo=g[k];if(!geo)continue;quads+=geo.index.count/6;const m=new THREE.Mesh(geo,k==='sg'?MATS.s:MATS.gl);if(k==='sg'){m.castShadow=true;m.receiveShadow=true}m.matrixAutoUpdate=false;m.updateMatrix();obj.add(m)}
     let wn=null;for(const k of['s','gl','wn','w','gs']){const gb=g[k];if(!gb||!gb.n)continue;quads+=gb.n;const m=new THREE.Mesh(gb.geo(),k==='wn'?MATS.gl:k==='s'&&!g.bid&&!g.vh?MATS.t:MATS[k]);m.scale.setScalar(.5);if(k==='wn')wn=m;if(k==='s'){m.castShadow=true;m.receiveShadow=true;if(g.gq)GRQ.push({m,q:g.gq})}else if(k==='w')m.receiveShadow=true;m.matrixAutoUpdate=false;m.updateMatrix();obj.add(m)}obj.matrixAutoUpdate=false;obj.updateMatrix();scene.add(obj);GROUPS.push({obj,bid:g.bid,band:g.band,si:g.si||0,vh:g.vh||0,x:g.x,z:g.z,wn})}
-  try{TM.water=mergeWater()}catch(e){TM.water=String(e)}tm=performance.now();makeClouds();makeCards();makeExtras();const PPL=LIVE?buildLife():buildPeople();mark('life');await Y();const WIN=LIVE?buildWindowDetail():0;mark('windows');await Y();wdOutdoor();const PRB=buildProps();wdApply();mark('props');await Y();TM.stairq=buildStairs();TM.chapel=chapelGlass();TM.bars=glazeInside()+glazeInsideAll();mark('stairs');await Y();TM.ground=groundDress();const PRF=buildFloors();TM.trim=propTrim();fxInit();fxLightInit();postInit();rail();size();setTime('day');applyVis();styleUI();mark('scene');GOV.base=renderer.getPixelRatio();try{GOV.off=localStorage.getItem('euph_gov')==='off'}catch(e){}seaInit();seaUI();mark('sky');groveInit();mark('grove');flowersInit();mark('beds');if(posLoad())setTimeout(()=>toast('Walk, and you are back where you last stood.'),900);cullStep();
-  window.__vx={THREE,tidyStats:()=>TM.tidy,stood:(x,y,z)=>FSTOOD.has(FKEY(x,y,z)),roomName:n=>RN(n),whereOf:o=>whereOf(o),owner:()=>OWNER,viewUrl:k=>VIEWURL(k),roomOf:()=>ROOMOF,blindBetween:()=>blindPanes.between,trunkN:()=>TRUNKN,glz:()=>({bars:TM.bars,doors:glazeInsideAll.doors}),finOn:()=>FIN_ON,kbot:()=>({P:kairosBot(),H:kairosHeadVox().V,person:personVox(outfit('none',null,()=>.37))}),groundY,get KH(){return KH},GOAL,goalOpen,URLS,WDRESS,wdApply,regRow,holesOf,T20,LMAP,LAMPS,LDAY,FULL,GROVE,IMP,BENCH,benchUI,pq:PQ,palette:PAL,trail:trailAt,settle:SETTLE,skins:CSKINS,windows:windowList,dep:DSTAT,seats:SEATS,kseat:()=>KSEAT,vr:VROOMS,dmap:DMAP,isWin:g=>isPane(g),isBlind:g=>g===C.winB,isInv:g=>!!(g&&(PF[g]&IV)),props:Object.assign({},PRO,PRB,typeof PRF!=="undefined"?PRF:{},typeof PRS!=="undefined"?PRS:{}),FP:()=>FPV,setFP:v=>{FPV=v},life:LIFE,win:WIN,post:postRender,style:SK,quadsTotal:quads,people:PPL,PEOPLE,moveTo,fall,setFly,tapJump,KEYS,PROPS,propGet,pbox,GOV,govSet,cullStep,pickTime,photo,posSave,posLoad,HALLS,GR:GROUPS,TM,pal:()=>PAL.length,grove:()=>({trees:GROVE.n,ready:GROVE.ready,got:GROVE.got||0,ver:TVER,drawn:GROVE.drawn,worker:!!TWORK,bad:TBAD}),pickSeason,seak:()=>SEAK,grassRGB:()=>PAL[C.grass[0]].map(v=>+v.toFixed(3)),flowers:()=>FBED?FBED.stats():null,KIT,SEASONS,sea:()=>SEA,liveAt:d=>{SEAD=d;pickTime('live')},perf:()=>({ms:GOV.ms,worst:GOV.worst,lv:GOV.lv,calls:renderer.info.render.calls,tris:renderer.info.render.triangles}),G,T,renderer,scene,camera,controls,quads,groups:GROUPS.length,trees:TREES,objs:OBJ.length,rooms:BLD.slice(1).reduce((s,b)=>s+b.rooms.length,0),gen:Math.round(t1-t0),mesh:Math.round(t2-t1),setTime,openB,close,setMode,PL,run,catalog,BLD,OBJ,goStairs,pickAt,FLIGHTS,stairRamp};
+  try{TM.water=mergeWater()}catch(e){TM.water=String(e)}tm=performance.now();makeClouds();makeCards();makeExtras();const PPL=LIVE?buildLife():buildPeople();mark('life');await Y();const WIN=LIVE?buildWindowDetail():0;mark('windows');await Y();wdOutdoor();const PRB=buildProps();wdApply();mark('props');await Y();TM.stairq=buildStairs();TM.chapel=chapelGlass();TM.bars=glazeInside()+glazeInsideAll();mark('stairs');await Y();TM.ground=groundDress();const PRF=buildFloors();TM.trim=propTrim();fxInit();fxLightInit();postInit();rail();size();setTime('day');applyVis();styleUI();mark('scene');GOV.base=renderer.getPixelRatio();try{GOV.off=localStorage.getItem('euph_gov')==='off'}catch(e){}seaInit();seaUI();mark('sky');groveInit();mark('grove');flowersInit();mark('beds');if(posLoad())setTimeout(()=>{if(!(VISITOR&&YOU.d&&!/[?&](stats|nowelcome)/.test(location.search)))toast('Walk, and you are back where you last stood.')},900);   /* v1.72: a returning visitor is greeted by name instead; the two notices raced, and whichever came second wiped the other */cullStep();
+  window.__vx={THREE,fig:{Q:FIGQ,spec:figSpec,build:figBuild,quads:figQuads,half:figHalf,rig:figRig,near:figNear,far:figFar,mat:()=>FMAT()},tidyStats:()=>TM.tidy,stood:(x,y,z)=>FSTOOD.has(FKEY(x,y,z)),roomName:n=>RN(n),whereOf:o=>whereOf(o),owner:()=>OWNER,viewUrl:k=>VIEWURL(k),roomOf:()=>ROOMOF,blindBetween:()=>blindPanes.between,trunkN:()=>TRUNKN,glz:()=>({bars:TM.bars,doors:glazeInsideAll.doors}),finOn:()=>FIN_ON,kbot:()=>({P:kairosBot(),H:kairosHeadVox().V,person:personVox(outfit('none',null,()=>.37))}),groundY,get KH(){return KH},GOAL,goalOpen,URLS,WDRESS,wdApply,regRow,holesOf,T20,LMAP,LAMPS,LDAY,FULL,GROVE,IMP,BENCH,benchUI,pq:PQ,palette:PAL,trail:trailAt,settle:SETTLE,skins:CSKINS,windows:windowList,dep:DSTAT,seats:SEATS,kseat:()=>KSEAT,vr:VROOMS,dmap:DMAP,isWin:g=>isPane(g),isBlind:g=>g===C.winB,isInv:g=>!!(g&&(PF[g]&IV)),props:Object.assign({},PRO,PRB,typeof PRF!=="undefined"?PRF:{},typeof PRS!=="undefined"?PRS:{}),FP:()=>FPV,setFP:v=>{FPV=v},life:LIFE,win:WIN,post:postRender,style:SK,quadsTotal:quads,people:PPL,PEOPLE,moveTo,fall,setFly,tapJump,KEYS,PROPS,propGet,pbox,GOV,govSet,cullStep,pickTime,photo,posSave,posLoad,HALLS,GR:GROUPS,TM,pal:()=>PAL.length,grove:()=>({trees:GROVE.n,ready:GROVE.ready,got:GROVE.got||0,ver:TVER,drawn:GROVE.drawn,worker:!!TWORK,bad:TBAD}),pickSeason,seak:()=>SEAK,grassRGB:()=>PAL[C.grass[0]].map(v=>+v.toFixed(3)),flowers:()=>FBED?FBED.stats():null,KIT,SEASONS,sea:()=>SEA,liveAt:d=>{SEAD=d;pickTime('live')},perf:()=>({ms:GOV.ms,worst:GOV.worst,lv:GOV.lv,calls:renderer.info.render.calls,tris:renderer.info.render.triangles}),G,T,renderer,scene,camera,controls,quads,groups:GROUPS.length,trees:TREES,objs:OBJ.length,rooms:BLD.slice(1).reduce((s,b)=>s+b.rooms.length,0),gen:Math.round(t1-t0),mesh:Math.round(t2-t1),setTime,openB,close,setMode,PL,run,catalog,BLD,OBJ,goStairs,pickAt,FLIGHTS,stairRamp};
   TM.wall=Math.round(performance.now()-t0);frame();BENCH.first=performance.now();if(BENCH.on)setTimeout(benchUI,800);$('#bStats').onclick=()=>{const b=$('#bench');if(b)b.remove();else benchUI()};setTimeout(fxWarm,2500);if(!KIT||!GROVE.n||(GROVE.fd||0)>=GROVE.b.size*2)veilOff();else setTimeout(veilOff,8000)}
-function styleUI(){$('#brandS').textContent='Kairos Manor v1.71 . the '+ST.n+' Estate';if(!SHOWCASE)$('#bStyle').hidden=true;$('#styleList').innerHTML=Object.entries(STYLES).map(([k,v])=>`<button class="b${k===SK?' on':''}" data-st="${k}">${esc(v.n)}<small>${esc(v.d)}</small></button>`).join('');
+function styleUI(){$('#brandS').textContent='Kairos Manor v1.72 . the '+ST.n+' Estate';if(!SHOWCASE)$('#bStyle').hidden=true;$('#styleList').innerHTML=Object.entries(STYLES).map(([k,v])=>`<button class="b${k===SK?' on':''}" data-st="${k}">${esc(v.n)}<small>${esc(v.d)}</small></button>`).join('');
   $('#styleList').querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>pickStyle(b.dataset.st));$('#bStyle').onclick=()=>{$('#stylebox').hidden=!$('#stylebox').hidden};
   if(ISO){for(const[id,dd]of[['#bRotL',-1],['#bRotR',1]]){const b=$(id);b.hidden=false;b.onclick=()=>{if(ISOV.rot)return;const a=ISOV.yaw;ISOV.rot={t0:performance.now(),a,b:a+dd*Math.PI/2};if(MODE==='walk'){ISOV.yaw=a+dd*Math.PI/2;ISOV.rot=null}}}}}
 $('#load').innerHTML='Raising Euphrates Hall<i>The '+ST.n+' Estate. Raising the mansion, about ten seconds.</i>';

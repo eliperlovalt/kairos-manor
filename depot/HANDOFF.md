@@ -318,3 +318,13 @@ In `props5.js` after `laundryBasket`; the page's embedded copy is the same text.
 | `cueRack` | A wall rack with six cues; starts 16 voxels above its foot | 274 | 0 |
 | `scoreBoard` | A mahogany scoreboard with two brass rails and markers; starts 20 voxels above its foot | 280 | 0 |
 
+
+## v1.72 (27 Nov 2026): the figures
+Made by the Estate chat, in the page (`figBuild`, `figSpec`, `figQuads`, `figHalf`, `figRig` in `src/index.html`, beside `personVox`); not a kit file, because the page's people have always lived in the page. Measured over 290 figures (every role and every House ten times): `tools/tests/figure_test.py`.
+
+| Figure | What it is | Triangles near (within 26 blocks) | Far | Draws |
+|---|---|---|---|---|
+| The old figure (v1.71) | 12 by 25 voxels, one fineness | 1,578 (mean of 177) | 1,578 | 2.8 |
+| The fine figure | 24 by 48 voxels at half the old voxel: a face, hair, hands, shoes, period dress; ten parts on ten bones | 1,350 mean, 2,116 at most | 664 mean, 892 at most | 1 |
+
+By dress, near: a footman 1,122; a housemaid in cap and apron 2,058; a man in a suit 1,122; a cook 1,900. Faces of one colour on one plane are merged, which is why the fine figure costs no more than the coarse one did.
