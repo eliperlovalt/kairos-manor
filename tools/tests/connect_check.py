@@ -54,7 +54,7 @@ R.clear=[];V.BLD.forEach((B,b)=>{if(!B||!B.rooms||!B.boxes||/Greenhouse/.test(B.
 /* 7: clickable objects */
 /* each clickable object: what a click does. run(a) in the page: nx and v23 open a room of GOLEM or the Datahub (links stood in for here; the real ones are on His Grace's device only),
    doc opens a link set from the private links when the page is wired, cat the Catalog, kchat Kairos, goal the goal slate, info a line of words, room a room card */
-{const keep=Object.assign({},V.URLS||{});if(V.URLS){V.URLS.golem='https://golem.invalid/';V.URLS.datahub='https://datahub.invalid/';V.URLS.globe='https://globe.invalid/'}R.front=[];R.kinds={};
+{const keep=Object.assign({},V.URLS||{});if(V.URLS){V.URLS.golem='https://golem.invalid/';V.URLS.datahub='https://datahub.invalid/';V.URLS.globe='https://globe.invalid/';V.URLS.pardes='https://pardes.invalid/'}R.front=[];R.kinds={};
   for(const o of V.OBJ||[]){R.objects++;const a=o.a;if(!a||!a.length){R.dead.push([o.n,'no action',o.x,o.y,o.z]);continue}const t=a[0],v=a[1];R.kinds[t]=(R.kinds[t]||0)+1;
     if(t==='nx'||t==='v23'){const u=V.viewUrl?V.viewUrl(v):'?';if(!u)R.dead.push([o.n,'key '+v+' gives no link',o.x,o.y,o.z]);else if(u==='https://golem.invalid/'&&String(v)!=='golem')R.front.push([o.n,String(v)])}
     else if(t==='doc'){/* empty on the public page by design: the link is private */}
