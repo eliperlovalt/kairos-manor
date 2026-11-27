@@ -76,6 +76,12 @@ if python3 tools/tests/walkbot.py src 2 --strict > "$tmp/wb.log" 2>&1; then
 else
   echo "gate: FAIL walkbot src"; head -60 "$tmp/wb.log"; fail=1
 fi
+# v1.68: the connection checker (report only): floating and sunk pieces, clashes, doors onto nothing, holes, panes between rooms, dead clicks.
+if python3 tools/tests/connect_check.py src --rows 12 > "$tmp/cc.log" 2>&1; then
+  echo "gate:      $(tail -1 "$tmp/cc.log") ($(sed -n 2p "$tmp/cc.log" | sed 's/^ *//'))"; grep -E '^      ' "$tmp/cc.log" | head -16
+else
+  echo "gate: FAIL connect_check src could not run"; tail -20 "$tmp/cc.log"; fail=1
+fi
 [ $fail = 0 ] || { rm -f .git/eh-gate-ok; exit 1; }
 
 sha256sum src/index.html index.html > .git/eh-gate-ok
