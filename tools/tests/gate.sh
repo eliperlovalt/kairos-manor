@@ -66,6 +66,16 @@ for f in src .; do
     echo "gate: FAIL kairos_turntable $f"; tail -20 "$tmp/kt.log"; fail=1
   fi
 done
+# v1.67: the walker bot. Every pair of rooms joined by a door, every stair and a circuit of the grounds, walked on foot twice.
+# A fall or a pass-through fails the gate; sticks, missing routes and rooms with no way in are printed.
+s=$(date +%s)
+if python3 tools/tests/walkbot.py src 2 --strict > "$tmp/wb.log" 2>&1; then
+  echo "gate: ok   walkbot src ($(( $(date +%s) - s ))s)$(sed -n 2p "$tmp/wb.log")"
+  echo "gate:      walkbot:$(grep -E '^  (falls|pass-throughs|sticks|no route|rooms with no way in) ' "$tmp/wb.log" | tr -s ' ' | tr '\n' ';')"
+  grep -E '^      ' "$tmp/wb.log" | head -20
+else
+  echo "gate: FAIL walkbot src"; head -60 "$tmp/wb.log"; fail=1
+fi
 [ $fail = 0 ] || { rm -f .git/eh-gate-ok; exit 1; }
 
 sha256sum src/index.html index.html > .git/eh-gate-ok

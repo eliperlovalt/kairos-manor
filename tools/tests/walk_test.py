@@ -109,7 +109,7 @@ def main(folder, page='index.html'):
             check('the last spot is remembered', r[0] and r[1:] == [-15, 7.5, -39], str(r))
             pg.evaluate("() => { try { localStorage.removeItem('euph_pos'); localStorage.removeItem('euph_tod') } catch (e) {} const P = __vx.PL; P.x = 0; P.y = .5; P.z = 58 }")
             h = pg.evaluate('() => __vx.dep.halls')
-            check('halls dressed', h and h['halls'] >= 60 and h['pieces'] >= 1500, str(h))
+            check('halls dressed', h and h['halls'] >= 50 and h['pieces'] >= 1500, str(h))   # v1.67: 53 halls. The count was 157 while a glass floor lay over the Saloon: each strip of its frame was taken for a passage and laid with boards
             o = pg.evaluate("() => [[30,-18,8],[22,-18,8],[20,-23,8],[-33,-22,8],[-22,-22,8],[-20,-24,8],[24,-40,18],[22,-40,18],[-24,-38,18]].filter(([x,z,y]) => __vx.G(x,y,z) || __vx.G(x,y+1,z) || !__vx.G(x,y-1,z)).length")
             check('stair halls open', o == 0, '%d cells blocked' % o)
         # v1.12 checks
