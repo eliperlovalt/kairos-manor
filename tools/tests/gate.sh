@@ -93,6 +93,13 @@ for f in src .; do
     echo "gate: FAIL soul_test $f"; grep -v ' ok ' "$tmp/so.log" | head -20; fail=1
   fi
 done
+# v1.74: the chain of command (the source copy; the build check above proves the root copy is the same code). An order from Kairos is carried out and reported.
+s=$(date +%s)
+if python3 tools/tests/cmd_test.py src > "$tmp/cm.log" 2>&1; then
+  echo "gate: ok   cmd_test src ($(( $(date +%s) - s ))s) $(grep -c ' ok ' "$tmp/cm.log") checks"
+else
+  echo "gate: FAIL cmd_test src"; grep -v ' ok ' "$tmp/cm.log" | head -20; fail=1
+fi
 # v1.67: the walker bot. Every pair of rooms joined by a door, every stair and a circuit of the grounds, walked on foot twice.
 # A fall or a pass-through fails the gate; sticks, missing routes and rooms with no way in are printed.
 s=$(date +%s)

@@ -82,6 +82,7 @@ body.photo #walk .b{opacity:0;pointer-events:none}body.photo #walk .cb,body.phot
 .meta{font-family:var(--mono);font-size:11px;color:var(--muted)}
 #load{position:fixed;inset:0;z-index:60;background:#0B1530;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:var(--disp);letter-spacing:.18em;text-transform:uppercase;font-size:13px;color:var(--gold);text-align:center;padding:20px}
 #load i{font-family:var(--body);text-transform:none;letter-spacing:0;font-size:16px;color:var(--muted)}
+#cmdcap{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 78px);transform:translateX(-50%);z-index:66;max-width:min(86vw,560px);background:rgba(10,12,15,.82);border-left:3px solid #c9a227;color:#f1ede4;padding:7px 12px;font:16px/1.3 'EB Garamond',Georgia,serif;text-align:center;pointer-events:none}#cmdcap b{color:#e6c766;font-weight:600;margin-right:4px}
 #toast{position:fixed;left:50%;top:max(60px,env(safe-area-inset-top));transform:translateX(-50%);background:rgba(11,21,48,.95);border:1px solid var(--leaf);padding:8px 14px;font-size:15px;z-index:70;display:none;border-radius:2px;max-width:90vw;text-align:center}
 #stylebox{position:fixed;right:max(12px,env(safe-area-inset-right));top:calc(max(10px,env(safe-area-inset-top)) + 44px);z-index:30;width:min(300px,calc(100vw - 24px));background:rgba(11,21,48,.96);border:1px solid var(--leaf);padding:10px;border-radius:2px;max-height:70vh;overflow:auto}
 #stylebox b{display:block;font-family:var(--disp);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
@@ -90,6 +91,7 @@ body.photo #walk .b{opacity:0;pointer-events:none}body.photo #walk .cb,body.phot
 </style>
 <style>#bFind{position:fixed;left:max(16px,env(safe-area-inset-left));top:calc(env(safe-area-inset-top,0px) + 112px);z-index:30}
 #bGoal{position:fixed;left:max(16px,env(safe-area-inset-left));top:calc(env(safe-area-inset-top,0px) + 178px);z-index:30}
+#bAsk{position:fixed;left:max(16px,env(safe-area-inset-left));top:calc(env(safe-area-inset-top,0px) + 211px);z-index:30}#bAsk.w{left:auto;right:max(12px,env(safe-area-inset-right));top:calc(env(safe-area-inset-top,0px) + 52px)}body.photo #bAsk,body.photo #cmdcap{display:none!important}
 #nextAct{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 50px);z-index:30;max-width:min(80vw,560px);padding:7px 14px;border-radius:999px;background:rgba(11,21,48,.88);color:#f1e7c8;font:15px/1.3 'EB Garamond',Georgia,serif;text-align:center;cursor:pointer}
 #goal{position:fixed;inset:0;z-index:64;background:rgba(10,12,15,.6);display:flex;align-items:center;justify-content:center;padding:12px}
 #goal[hidden]{display:none}
@@ -144,7 +146,7 @@ body.photo #walk .b{opacity:0;pointer-events:none}body.photo #walk .cb,body.phot
 <div id="goal" hidden><div class="gp" id="goalP"></div></div>
 <div id="copy" style="position:fixed;left:max(14px,env(safe-area-inset-left));top:calc(env(safe-area-inset-top,0px) + 36px);z-index:5;font:10px/1.2 system-ui,sans-serif;color:#f1e7c8;opacity:.6;pointer-events:none;text-shadow:0 1px 2px #0008">© 2026 Kairos Manor. All rights reserved.</div>
 <div id="card" hidden></div>
-<button class="b" id="bFind">Find</button><button class="b" id="bStats" title="The phone test: load, frame times, memory">Stats</button><button class="b" id="bGoal">Set a goal</button>
+<button class="b" id="bFind">Find</button><button class="b" id="bStats" title="The phone test: load, frame times, memory">Stats</button><button class="b" id="bGoal">Set a goal</button><button class="b" id="bAsk" title="Give the household an order through Kairos">Ask Kairos</button>
 <div id="kchat" hidden><div id="kchead"><b>Kairos</b><span><button class="b" id="kcvoice">Voice off</button><button class="b" id="kcfull">Full chat</button><button class="b" id="kcx">Close</button></span></div><div id="kcbody"></div><div id="kcform"><textarea id="kcin" rows="2" placeholder="Speak, Your Grace"></textarea><button class="b on" id="kcsend">Send</button></div><button id="kcreset">Disconnect this device</button></div>
 <div id="tourbar" hidden><div id="tourtxt"></div><div id="tourbtn"><button class="b" id="tprev">Back</button><button class="b on" id="tnext">Next</button><button class="b" id="tend">End</button></div></div>
 <div id="findsheet" hidden><div id="findhead"><b>Find anything</b><button class="b" id="findx">Close</button></div><button class="b on" id="findtour">Take the tour with Kairos</button><div id="findlist"></div></div>
@@ -153,7 +155,7 @@ body.photo #walk .b{opacity:0;pointer-events:none}body.photo #walk .cb,body.phot
 <div id="sheet"><div class="sbar"><b id="shT"></b><button class="b" id="shX">Close</button></div><iframe id="shF" title="GOLEM"></iframe></div>
 <div id="cat"><div class="sbar"><button class="b" id="catBack">Back</button><b id="catT">The Catalog</b><button class="b" id="catX">Close</button></div><div id="catBody"></div></div>
 <div id="load">Raising Kairos Manor<i>Raising the mansion, about ten seconds.</i></div>
-<div id="toast"></div>
+<div id="toast"></div><div id="cmdcap" hidden></div>
 <div class="grp" id="seas" hidden><button class="b" data-s="now" title="The real calendar">Now</button><button class="b" data-s="spring">Spring</button><button class="b" data-s="summer">Summer</button><button class="b" data-s="autumn">Autumn</button><button class="b" data-s="winter">Winter</button></div>
 <div id="dbg" hidden></div><div id="photoX"></div>
 <div id="stylebox" hidden><b>The Estate in another style</b><div id="styleList"></div></div>
@@ -2487,7 +2489,7 @@ function furnMap(){const SK=/rug|carpet|runner|door|arch|sash|dado|panel|cornice
    wait, serve with a tray, eat at table. They carry what the task needs. They know His Grace: the head turns, a man bows, a woman curtseys, and they
    wait for him to pass. At night most go up to bed. All of it is scripted and local: nothing is sent anywhere, and nothing costs.
    ========================================================= */
-const SOUL={on:true,fix:null,list:[],paths:new Map(),q:[],job:null,pools:new Map(),taken:new Set(),hour:12,tk:0,stats:{found:0,fails:0,tele:0,nodes:0,bows:0}};
+const SOUL={on:true,rate:1,fix:null,list:[],paths:new Map(),q:[],job:null,pools:new Map(),taken:new Set(),hour:12,tk:0,stats:{found:0,fails:0,tele:0,nodes:0,bows:0}};
 function soulHour(){if(SOUL.fix!=null)return SOUL.fix;const d=SEAD?new Date(SEAD):new Date(),h=d.getHours()+d.getMinutes()/60;if(LIVEON)return h;return TODK==='night'?23.2:TODK==='dusk'?18.6:(h>=7&&h<17?h:11)}
 /* ---- the way from one cell to another: level, one down, or one up (up onto an unseen block only on a stair), never through a standing piece ---- */
 const rtFree=(x,y,z)=>!G(x,y,z)&&!G(x,y+1,z),rtStood=(x,y,z)=>FSTOOD.has(FKEY(x,y,z)),rtFloor=(x,y,z)=>{const g=G(x,y-1,z);return g!==0&&!(PF[g]&WA)};
@@ -2628,8 +2630,9 @@ function soulGreet(e,ud,dt){const s=e.soul;if(MODE!=='walk')return false;const d
 function soulStep(e,ud,dt){const s=e.soul;
   if(s.st==='gone'){if(SOUL.tk%40===s.idx%40)soulOff(e);return}
   if(soulGreet(e,ud,dt)){soulCarry(e,ud);return}
-  /* the hour: a new slot sends the figure on; within a task they move from one place of work to the next */
-  if(SOUL.tk%30===s.idx%30){const k=soulSlot(s,SOUL.hour);
+  /* an order from Kairos comes before the day; else the hour: a new slot sends the figure on, and within a task they move from one place of work to the next */
+  if(s.errand)cmdStep(e,ud,dt);
+  else if(SOUL.tk%30===s.idx%30){const k=soulSlot(s,SOUL.hour);
     if(k!==s.si){s.si=k;s.alt=0;s.carry=s.plan[k][5]||null;if(s.plan[k][2]==='bed'){s.st='bedward';s.until=tt+2+((s.idx*7)%20)}else soulSend(e,0)}
     else if((s.st==='at'||s.st==='sit')&&tt>s.until&&s.plan[k][2]!=='seat')soulSend(e,++s.alt);
     else if(s.st==='free'&&tt>s.until)soulSend(e,s.alt)}
@@ -2675,6 +2678,92 @@ function soulSay(e){const s=e.soul,h=SOUL.hour,part=h<12?'morning':h<17.5?'after
 function soulCard(e){const s=e.soul;if(!s)return;const hs=s.h&&HOUSES[s.h],c=$('#card'),nx=soulNext(e);c.style.setProperty('--c',hs?hs[2]:'#D4AF37');
   c.innerHTML=`<button class="x" aria-label="Close">&times;</button><h2>${esc(s.name)}</h2><div class="h">${esc(s.title)}${hs?' . '+esc(hs[0]+', '+hs[1]):''}</div><p>&ldquo;${esc(soulSay(e))}&rdquo;</p><p>${esc(soulNow(e))}.</p>${nx?`<p class="meta">${esc(nx)}.</p>`:''}`;
   c.hidden=false;c.querySelector('.x').onclick=()=>c.hidden=true}
+/* =========================================================
+   v1.74: the chain of command. His Grace, 27 Nov: "if they worked fully and u truly fully commanded them".
+   Kairos is the head of the household and every servant answers to him. An order (cmdOrder) is given by Kairos in words on the screen; he turns to the
+   nearest servant fit for it; that servant walks by a real way to the room, does the thing there, comes back to Kairos, bows and reports; Kairos says it is
+   done. A servant on an errand carries a small sign over the head. Orders come from the "Ask Kairos" sheet (five verbs), from a goal being set, and from a
+   reel (cmdReel: a list of steps the Studio can film). All of it is scripted and local; a real mind can later feed the same queue (CMD.orders).
+   ========================================================= */
+const CMD={orders:[],seq:0,caps:[],capT:0,log:[],last:-99,icons:{}};
+const CMDV={
+ fetch:{label:'Fetch',role:/^(footman|hallboy|cellarman)$/,icon:'book',things:{'a book from the Library':['The Double Library','bookcase','read','book'],'the letters from the hall':['The Entrance Hall','consoleTable|pedestalTable|hallBench','work','tray'],'a bottle from the cellar':['The Wine Cellar','wineRack|barrelRack|barrel','work','tray'],'the map from the Map Room':['The Map Room','mapTable|deedChest|bureau|globe','read','book']}},
+ prepare:{label:'Prepare',role:/^(footman|housemaid)$/,icon:'tray',things:{'the Dining Room for dinner':[DR,'sideboard|tableDining','work','tray'],'tea in the Drawing Room':['The Drawing Room','teaTable|pedestalTable|consoleTable','work','tray'],'the Morning Room':['The Morning Room','pedestalTable|consoleTable|commode','work','tray']}},
+ tidy:{label:'Tidy',role:/^(housemaid)$/,icon:'duster',things:{'the Library':['The Double Library','bookcase|globe|writingTable','dust','duster'],'the Great Hall':['The Great Hall','tableDining|pedestalTable|settee','dust','duster'],'the Drawing Room':['The Drawing Room','pedestalTable|sofa|displayCabinet','dust','duster'],'the Entrance Hall':['The Entrance Hall','consoleTable|pedestalTable|hallBench','dust','duster']}},
+ light:{label:'Light',role:/^(housemaid|hallboy|footman)$/,icon:'flame',things:{'the fire in the Drawing Room':['The Drawing Room','fireplace','work','scuttle'],'the fire in the Library':['The Double Library','fireplace','work','scuttle'],'the fire in the Great Hall':['The Great Hall','fireplace','work','scuttle'],'the fire in the Dining Room':[DR,'fireplace','work','scuttle']}},
+ summon:{label:'Summon',role:null,icon:'bell',things:{'the housekeeper':'housekeeper','the cook':'cook','the first footman':'footman','the head housemaid':'housemaid','the hall boy':'hallboy'}},
+ record:{label:'Record',role:/^(housekeeper|footman|housemaid)$/,icon:'letter',things:{'the new goal in the book':['The Map Room','mapTable|deskWriting|bureau|deedChest','write','book']}}};
+const cmdWho=()=>OWNER?'His Grace':(YOU.d&&YOU.d.name?YOU.d.name:'our guest'),cmdYou=()=>OWNER?'Your Grace':(YOU.d&&YOU.d.name?YOU.d.name:'');
+function cmdSay(who,text,secs){CMD.caps.push({who,text,secs:secs||4.2});CMD.log.push((who?who+': ':'')+text);if(CMD.log.length>40)CMD.log.shift()}
+function cmdCapStep(dt){const el=$('#cmdcap');if(!el)return;if(CMD.capT>0){CMD.capT-=dt;if(CMD.capT<=0){el.hidden=true}}if(CMD.capT<=0&&CMD.caps.length){const c=CMD.caps.shift();el.innerHTML=(c.who?'<b>'+esc(c.who)+'</b> ':'')+esc(c.text);el.hidden=false;CMD.capT=c.secs}}
+/* the sign over the head of one on an errand: a small roundel with a book, a tray, a duster, a flame, a bell or a letter */
+function cmdIcon(kind){if(CMD.icons[kind])return CMD.icons[kind];const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');x.fillStyle='#10131c';x.beginPath();x.arc(32,32,29,0,6.3);x.fill();x.strokeStyle='#c9a227';x.lineWidth=4;x.stroke();x.fillStyle='#f1ede4';x.strokeStyle='#f1ede4';x.lineWidth=3;
+  if(kind==='book'){x.fillRect(17,20,13,25);x.fillRect(34,20,13,25);x.fillStyle='#c9a227';x.fillRect(30,20,4,25)}
+  else if(kind==='tray'){x.fillRect(14,40,36,4);x.beginPath();x.arc(32,40,13,Math.PI,0);x.fill();x.fillRect(30,22,4,5)}
+  else if(kind==='duster'){x.fillStyle='#c9a227';x.fillRect(30,34,4,16);x.fillStyle='#f1ede4';x.beginPath();x.ellipse(32,24,10,12,0,0,6.3);x.fill()}
+  else if(kind==='flame'){x.fillStyle='#e9a23b';x.beginPath();x.moveTo(32,14);x.quadraticCurveTo(48,32,40,44);x.quadraticCurveTo(32,52,24,44);x.quadraticCurveTo(16,32,32,14);x.fill();x.fillStyle='#f6e6b4';x.beginPath();x.arc(32,41,6,0,6.3);x.fill()}
+  else if(kind==='bell'){x.beginPath();x.moveTo(18,42);x.quadraticCurveTo(20,18,32,18);x.quadraticCurveTo(44,18,46,42);x.closePath();x.fill();x.fillRect(15,42,34,4);x.beginPath();x.arc(32,50,3.5,0,6.3);x.fill()}
+  else{x.fillRect(15,22,34,22);x.strokeStyle='#10131c';x.lineWidth=2.5;x.beginPath();x.moveTo(15,22);x.lineTo(32,36);x.lineTo(49,22);x.stroke()}
+  const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;return CMD.icons[kind]=new THREE.SpriteMaterial({map:t,depthWrite:false})}
+function cmdSign(e,kind){if(e.sign){e.wrap.remove(e.sign);e.sign=null}if(!kind)return;const s=new THREE.Sprite(cmdIcon(kind));s.scale.setScalar(.62);s.position.set(0,3.45*e.fig.scale.x,0);e.wrap.add(s);e.sign=s}
+const cmdKairos=()=>LIFE.find(e=>e.kh)||null;
+/* where a servant stands to report: free floor before Kairos's chair, or before His Grace */
+function cmdSpot(x,z,y,fx,fz,id){for(const d of[2.6,3.4,2,4.2,1.4])for(const sd of[0,.9,-.9,1.8,-1.8]){const px=x+fx*d-fz*sd,pz=z+fz*d+fx*sd,cx=Math.round(px),cz=Math.round(pz);if(rtFree(cx,y,cz)&&rtFloor(cx,y,cz)&&!rtStood(cx,y,cz)&&soulOpen(cx,y,cz))return{id,x:cx,y,z:cz,yaw:Math.atan2(x-cx,z-cz),rn:null,k:'report'}}return null}
+/* an order: Kairos names the servant and the task; the nearest fit servant not already on an errand takes it. Returns the order, or null if nobody can */
+function cmdOrder(verb,thing,opt){opt=opt||{};const V=CMDV[verb];if(!V||!SOUL.ready)return null;const K=cmdKairos(),kx=K?K.x:0,kz=K?K.z:-54,spec=V.things[thing]||V.things[Object.keys(V.things)[0]];if(!V.things[thing])thing=Object.keys(V.things)[0];
+  const role=verb==='summon'?new RegExp('^('+spec+')$'):V.role;let best=null,bd=1e9;
+  for(const e of SOUL.list){const s=e.soul;if(!s.plan||s.errand||!role.test(s.role||''))continue;if(e.gone&&!opt.wake)continue;const d=Math.hypot(e.x-kx,e.z-kz)+Math.abs(e.y-8)*6+(e.gone?500:0)+(verb==='summon'&&/^(First|Head)/.test(s.title)?-300:0);if(d<bd){bd=d;best=e}}
+  if(!best){cmdSay('Kairos',verb==='summon'?'There is nobody to send, '+(cmdYou()||'I regret')+'. The household is abed.':'The household is abed'+(cmdYou()?', '+cmdYou():'')+'. It shall be done at six.');return null}
+  const e=best,s=e.soul;if(e.gone){e.gone=false;const p0=soulPool(SH,'floor')[0];if(p0){s.tn='stand';soulPut(e,p0)}}
+  const o={id:++CMD.seq,verb,thing,e,ph:0,t:0,state:'given',spec,to:opt.to||null};CMD.orders.push(o);if(CMD.orders.length>30)CMD.orders.shift();s.errand=o;cmdSign(e,V.icon);
+  const rm=verb==='summon'?'':(spec[0].replace(/^The /,'the ')+': ');
+  cmdSay('Kairos',s.short+'. '+(verb==='summon'?cmdWho()+' wishes to see you.':verb==='fetch'?thing.charAt(0).toUpperCase()+thing.slice(1)+', for '+cmdWho()+'.':verb==='prepare'?'Prepare '+thing+'.':verb==='tidy'?'See to '+thing+'.':verb==='light'?'Light '+thing+'.':'Enter '+thing+'.'));
+  if(K&&KH){KH.look=[e.x,e.z];KH.lookT=tt+4}CMD.last=tt;return o}
+/* the errand, step by step: go, do, come back, report */
+function cmdStep(e,ud,dt){const s=e.soul,o=s.errand,V=CMDV[o.verb];o.t+=dt;
+  const back=()=>{let st=null;if(o.verb==='summon'||o.to==='me'){const fx=-Math.sin(PL.yaw),fz=-Math.cos(PL.yaw);st=cmdSpot(PL.x,PL.z,Math.round(PL.y+.5),fx,fz,'cmd#'+o.id)}if(!st&&KSEAT){const R=soulRoom('The Great Hall');st=cmdSpot(KSEAT.x,KSEAT.z,R?R.y+1:8,Math.sin(KSEAT.yaw),Math.cos(KSEAT.yaw),'cmd#'+o.id)}return st};
+  if(o.ph===0){o.ph=1;o.state='going';if(o.verb==='summon'){const st=back();if(st){s.tn='stand';s.carry=null;soulGo(e,st)}else o.ph=4}
+    else{const P=soulPool(o.spec[0],o.spec[1]);let st=null,bd=1e9;for(const q of P){if(SOUL.taken.has(q.id))continue;const d=Math.hypot(q.x-e.x,q.z-e.z);if(d<bd){bd=d;st=q}}if(!st)st=soulPool(o.spec[0],'floor').find(q=>!SOUL.taken.has(q.id));if(st){s.tn=o.spec[2];s.carry=o.verb==='fetch'?null:o.spec[3];soulGo(e,st)}else o.ph=4}o.t=0;return}
+  if(o.ph===1){if(s.st==='at'||s.st==='sit'){o.ph=o.verb==='summon'?3:2;o.t=0;o.state=o.verb==='summon'?'reporting':'doing'}else if(s.st==='free'||o.t>240){o.ph=4}return}
+  if(o.ph===2){if(o.t>6){o.t=0;const st=back();if(o.verb==='fetch')s.carry=o.spec[3];else if(o.verb!=='prepare')s.carry=o.spec[3];if(st){s.tn='stand';soulGo(e,st);o.ph=25;o.state='returning'}else o.ph=4}return}
+  if(o.ph===25){if(s.st==='at'){o.ph=3;o.t=0;o.state='reporting'}else if(s.st==='free'||o.t>240)o.ph=4;return}
+  if(o.ph===3){if(o.t<.1){s.bow=1.5;s.met=true}if(o.t>1.7&&!o.said){o.said=1;const you=cmdYou();cmdSay(s.short,o.verb==='summon'?(OWNER?'You sent for me, Your Grace.':'You sent for me'+(you?', '+you:'')+'.'):o.verb==='fetch'?'Here it is, Mr Kairos.':'It is done, Mr Kairos.',3.2);if(o.verb!=='summon')cmdSay('Kairos',(o.verb==='fetch'?cmdThing(o):'It is done')+(you?', '+you:'')+'.',3.6)}
+    if(o.t>(o.verb==='summon'?9:5.5))o.ph=4;return}
+  o.state=o.said?'done':'failed';if(!o.said&&o.ph===4)cmdSay('Kairos','It could not be done just now'+(cmdYou()?', '+cmdYou():'')+'.');s.errand=null;s.carry=null;cmdSign(e,null);s.si=-1;if(s.station&&/^cmd#/.test(s.station.id)){SOUL.taken.delete(s.station.id)}}
+const cmdThing=o=>o.thing.replace(/^a /,'The ').replace(/^the /,'The ').replace(/ from .*$/,'')+' is here';
+/* the sheet: five verbs, and under each what can be asked for */
+function cmdOpen(verb){CMD.verb=verb||CMD.verb||'fetch';SHEET=true;$('#goal').hidden=false;cmdPaint()}
+function cmdPaint(){const V=CMDV[CMD.verb],on=CMD.orders.filter(o=>o.state!=='done'&&o.state!=='failed');
+  $('#goalP').innerHTML=`<button class="x" data-c="close" aria-label="Close">&times;</button><h2>Ask Kairos</h2><p class="meta">He gives the order. One of the household carries it out and comes back to report.</p>
+  <div class="acts">${['fetch','prepare','tidy','light','summon'].map(v=>`<button class="b${v===CMD.verb?' on':''}" data-c="verb" data-v="${v}">${CMDV[v].label}</button>`).join('')}</div>
+  <div class="acts">${Object.keys(V.things).map(t=>`<button class="b" data-c="order" data-t="${esc(t)}">${esc(V.label+' '+t)}</button>`).join('')}</div>
+  ${on.length?`<p class="meta">In hand: ${on.map(o=>esc(o.e.soul.short+', '+CMDV[o.verb].label.toLowerCase()+' '+o.thing+' ('+o.state+')')).join('; ')}.</p>`:''}${CMD.log.length?`<p class="meta">${CMD.log.slice(-3).map(esc).join('<br>')}</p>`:''}`}
+function cmdInit(){const G=$('#goal');G.addEventListener('click',ev=>{const b=ev.target.closest('[data-c]');if(!b)return;ev.stopPropagation();const c=b.dataset.c;if(c==='close'){G.hidden=true;SHEET=false;return}if(c==='verb'){CMD.verb=b.dataset.v;cmdPaint();return}
+    if(c==='order'){const o=cmdOrder(CMD.verb,b.dataset.t,{to:CMD.verb==='fetch'?'me':null});G.hidden=true;SHEET=false;if(o)toast(o.e.soul.short+' is sent.')}},true);
+  const ba=$('#bAsk');if(ba)ba.onclick=()=>cmdOpen();CMD.sig=OWNER?((GOAL.d&&GOAL.d.goal)||''):(YOU.d&&YOU.d.goals?YOU.d.goals.map(g=>g.t).join('|'):'')}   /* the goal as it stands, so that only a new one is entered in the book */
+/* a reel: a list of steps the Studio can film. __vx.reel([{hour:10.5},{at:'The Great Hall',side:'s'},{order:['fetch','a book from the Library']},{follow:'servant',until:'done',max:90},{look:'kairos',secs:5}]) */
+const REEL={on:false,steps:[],i:-1,t:0,cur:null,who:null,order:null,done:null,cam:null};
+function cmdReel(steps){REEL.steps=steps||[];REEL.i=-1;REEL.t=0;REEL.cur=null;REEL.on=true;REEL.cam=null;setMode('walk');FPV=true;setFly(1,1);return new Promise(r=>{REEL.done=r})}
+function reelCam(x,y,z,tx,ty,tz,dt,snap){const c=REEL.cam||(REEL.cam={x,y,z,tx,ty,tz}),k=snap?1:Math.min(1,dt*2.4);c.x+=(x-c.x)*k;c.y+=(y-c.y)*k;c.z+=(z-c.z)*k;c.tx+=(tx-c.tx)*k;c.ty+=(ty-c.ty)*k;c.tz+=(tz-c.tz)*k;
+  const dx=c.tx-c.x,dz=c.tz-c.z,d=Math.hypot(dx,dz)||1;PL.x=c.x;PL.z=c.z;PL.y=c.y-2.35;PL.yaw=Math.atan2(-dx,-dz);PL.pitch=Math.atan2(c.y-c.ty,d);PL.vy=0;PL.sit=null}
+function reelStep(dt){if(!REEL.on)return;let s=REEL.cur;REEL.t+=dt;
+  const next=()=>{REEL.i++;REEL.t=0;REEL.cur=REEL.steps[REEL.i]||null;if(!REEL.cur){REEL.on=false;if(REEL.done)REEL.done({orders:CMD.orders.length,log:CMD.log.slice(-10)})}return REEL.cur};
+  if(!s){s=next();if(!s)return}
+  if(s.hour!=null){SOUL.fix=s.hour;soulJump();next();return}
+  if(s.say){cmdSay(s.who||'',s.say,s.secs||4);next();return}
+  if(s.order){REEL.order=cmdOrder(s.order[0],s.order[1],{wake:true,to:s.to||null});REEL.who=REEL.order?REEL.order.e:null;next();return}
+  if(s.at){const R=typeof s.at==='string'?soulRoom(s.at):null;if(R){const cx=(R.x0+R.x1)/2,cz=(R.z0+R.z1)/2,sd=s.side||'s',p=sd==='s'?[cx,R.z1-1.6]:sd==='n'?[cx,R.z0+1.6]:sd==='e'?[R.x1-1.6,cz]:[R.x0+1.6,cz];reelCam(p[0],R.y+2.9,p[1],cx,R.y+2.2,cz,dt,true)}else if(Array.isArray(s.at))reelCam(s.at[0],s.at[1],s.at[2],s.at[3],s.at[4],s.at[5],dt,true);if(REEL.t>(s.secs||.5))next();return}
+  if(s.look||s.follow){const who=(s.look||s.follow)==='kairos'?cmdKairos():(s.look||s.follow)==='servant'?REEL.who:SOUL.list.find(e=>e.soul.short===(s.look||s.follow)||e.soul.name===(s.look||s.follow));
+    if(who){const front=!!s.look||!!s.front,r=who.fig.rotation.y+(front?0:Math.PI)+(s.angle||0),h=who.kh?3.4:2.2,D=s.dist||(who.kh?6:4.2),ty=who.wrap.position.y+h,cy=ty+(s.height==null?(front?.3:.9):s.height);let q=who.kh?3:.6;
+      for(;q<D;q+=.3){const px=who.x+Math.sin(r)*(q+.5),pz=who.z+Math.cos(r)*(q+.5),g0=G(Math.round(px),Math.round(cy),Math.round(pz)),g1=G(Math.round(px),Math.round(cy-1),Math.round(pz));if((g0&&!(PF[g0]&IV))||(g1&&!(PF[g1]&IV))||(!who.kh&&rtStood(px,Math.round(cy-1.6),pz)))break}   /* out from the figure until a wall or a piece stands in the way: the camera is never through it */
+      q=Math.max(who.kh?3:1.1,q-.2);reelCam(who.x+Math.sin(r)*q,cy,who.z+Math.cos(r)*q,who.x,ty-.2,who.z,dt,REEL.t<dt*1.5&&!!s.cut)}
+    const o=REEL.order,over=s.until==='done'?(!o||o.state==='done'||o.state==='failed'||REEL.t>(s.max||120)):s.until==='doing'?(!o||o.state!=='going'||REEL.t>(s.max||120)):REEL.t>(s.secs||5);if(over)next();return}
+  if(s.wait!=null){if(REEL.t>s.wait)next();return}
+  next()}
+/* a goal newly set is entered in the book: Kairos sends someone to the Map Room to write it down */
+function cmdGoal(sig){sig=sig||'';if(CMD.sig!=null&&sig&&sig!==CMD.sig&&SOUL.ready&&tt-CMD.last>15)cmdOrder('record','the new goal in the book');CMD.sig=sig}
+/* a stroller's next spot is not a doorway or beside one (KAIROS: figures on the thresholds) */
+function strollTo(e){const B=e.b;for(let t=0;t<5;t++){const x=B[0]+1+rnd()*(B[1]-B[0]-2),z=B[2]+1+rnd()*(B[3]-B[2]-2);if(!e.indoor||t===4||!soulDoor(Math.round(x),e.y,Math.round(z)))return[x,z]}return null}
 function lifeNear(x,y,z,r,self){for(const o of LIFE){if(o===self||o.water||o.gone||Math.abs(o.y-y)>1.6)continue;const rr=r+(o.r||.36),dx=o.x-x,dz=o.z-z;if(dx*dx+dz*dz<rr*rr)return o}return null}
 function bodyGo(e,nx,nz){const r=e.r*.7,cx=Math.round(nx),cz=Math.round(nz);let ny=e.y;
   if(cx!==Math.round(e.x)||cz!==Math.round(e.z)){if(e.indoor){if(!walkable(cx,e.y,cz))return null}else{const gy=groundY(cx,cz);if(gy==null||Math.abs(gy-e.y)>1||!walkable(cx,gy,cz))return null;ny=gy}}
@@ -2818,7 +2907,7 @@ function kairosHead(fig,pm){const u=KRU/2,{V,front}=kairosHeadVox();const fb=new
   KH={em,lens,watch:fig.userData.watch,piv,gl,lidL:lid(-4),lidR:lid(4),body:fig.children[0],bs:fig.children[0].scale.y,py:KNECK*KRU,eye:(KNECK*KRU+12*u*KHS)*KSC,t:2,bl:0}}
 function kairosStep(e,dt){const k=KH;if(!k)return;if(KMATW_)KMATW_.emissiveIntensity=Math.max(.12,Math.min(1,sun.intensity/1.5));if(k.lens)k.lens.material.opacity=.22+.4*Math.max(0,1-sun.intensity/1.2);   /* the monocle's warm lens shows more as the light goes */k.t-=dt;if(k.t<=0){k.bl=.16;k.t=6+Math.random()*4}const dim=k.bl>0;if(dim)k.bl-=dt;k.em.color.setScalar(1).set(dim?'#3f5a70':'#a9dcff');if(k.watch)k.watch.material.opacity=.42+.38*Math.pow(Math.max(0,Math.cos(tt*6.2832)),6);   /* his eyes dim for a moment every 6 to 10 seconds; the watch ticks once a second */
   
-  let ty=0,tp=0;const w=MODE==='walk',px=w?PL.x:camera.position.x,pz=w?PL.z:camera.position.z,py=w?PL.y+2.3:camera.position.y;const dx=px-e.x,dz=pz-e.z,d=Math.hypot(dx,dz);
+  let ty=0,tp=0;const w=MODE==='walk';let px=w?PL.x:camera.position.x,pz=w?PL.z:camera.position.z,py=w?PL.y+2.3:camera.position.y;if(k.look&&tt<k.lookT){px=k.look[0];pz=k.look[1];py=e.y-.5+k.eye-1.4}   /* v1.74: he turns to the servant he is giving an order to */const dx=px-e.x,dz=pz-e.z,d=Math.hypot(dx,dz);
   if(d<12&&d>.4){let a=Math.atan2(dx,dz)-e.fig.rotation.y;a=Math.atan2(Math.sin(a),Math.cos(a));ty=Math.max(-1.05,Math.min(1.05,a));tp=Math.max(-.3,Math.min(.35,-Math.atan2(py-(e.y-.5+k.eye),d)))}
   const f=Math.min(1,dt*2.2);k.piv.rotation.y+=(ty-k.piv.rotation.y)*f;k.piv.rotation.x+=(tp-k.piv.rotation.x)*f;
   const br=1+Math.sin(tt*1.3)*.006;if(k.body)k.body.scale.y=k.bs*br;k.piv.position.y=k.py*br}
@@ -2858,7 +2947,7 @@ async function kcSend(){const i=$('#kcin'),t=i.value.trim();if(!t||KC.busy||!KC.
 const GOAL={k:'eh-goal',d:null,draft:null,scr:null,ask:false};
 const gEsc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function goalLoad(){try{GOAL.d=JSON.parse(localStorage.getItem(GOAL.k)||'null')}catch(e){GOAL.d=null}if(GOAL.d&&!(GOAL.d.steps&&GOAL.d.steps.length))GOAL.d=null}
-function goalStore(){try{if(GOAL.d)localStorage.setItem(GOAL.k,JSON.stringify(GOAL.d));else localStorage.removeItem(GOAL.k)}catch(e){}goalLine()}
+function goalStore(){try{if(GOAL.d)localStorage.setItem(GOAL.k,JSON.stringify(GOAL.d));else localStorage.removeItem(GOAL.k)}catch(e){}goalLine();if(OWNER)cmdGoal(GOAL.d&&GOAL.d.goal)}
 function goalNext(){return GOAL.d?GOAL.d.steps.findIndex(s=>!s.done):-1}
 function goalLine(){if(VISITOR)return youLine();const e=$('#nextAct');if(!e)return;const i=goalNext();const on=!!(GOAL.d&&i>=0)&&MODE!=='walk';e.textContent=on?'Next action: '+GOAL.d.steps[i].t:'';e.hidden=!on}
 function goalOpen(){goalLoad();GOAL.ask=false;GOAL.scr=GOAL.d?'path':'goal';GOAL.draft={goal:GOAL.d?GOAL.d.goal:'',steps:GOAL.d?GOAL.d.steps.map(s=>s.t):['']};SHEET=true;$('#goal').hidden=false;goalPaint()}
@@ -2877,7 +2966,7 @@ function goalPaint(){const P=$('#goalP'),D=GOAL.draft,X='<button class="x" data-
    The sheet is drawn in the goal sheet's panel. Screens: welcome (first visit and editing), house (the goals), kairos (the butler's line), founders (the wall) ---------- */
 const YOU={k:'kairos-manor-you',d:null,scr:null,sel:-1,arm:0,draft:null};
 function youLoad(){try{YOU.d=JSON.parse(localStorage.getItem(YOU.k)||'null')}catch(e){YOU.d=null}if(!YOU.d||typeof YOU.d!=='object'||!Array.isArray(YOU.d.goals))YOU.d=null}
-function youStore(){try{if(YOU.d)localStorage.setItem(YOU.k,JSON.stringify(YOU.d));else localStorage.removeItem(YOU.k)}catch(e){}youLine()}
+function youStore(){try{if(YOU.d)localStorage.setItem(YOU.k,JSON.stringify(YOU.d));else localStorage.removeItem(YOU.k)}catch(e){}youLine();if(!OWNER)cmdGoal(YOU.d&&YOU.d.goals?YOU.d.goals.map(g=>g.t).join('|'):'')}
 const youClean=o=>{if(!o||typeof o!=='object'||!Array.isArray(o.goals))return null;const cut=(t,n)=>String(t==null?'':t).replace(/[\u0000-\u001f]/g,' ').trim().slice(0,n);return{v:1,name:cut(o.name,40),seen:1,goals:o.goals.slice(0,5).map(g=>({t:cut(g&&g.t,80),step:cut(g&&g.step,120),done:Math.max(0,Math.min(999,(g&&g.done)|0))})).filter(g=>g.t)}};
 const youNext=()=>{if(!YOU.d)return null;for(const g of YOU.d.goals)if(g.t)return g;return null};
 function youLine(){const e=$('#nextAct');if(!e||!VISITOR)return;const g=youNext(),on=!!g&&MODE!=='walk';e.textContent=on?'Next: '+(g.step||g.t):'';e.hidden=!on}
@@ -2968,18 +3057,18 @@ let BIRDS=null;function makeBirds(){const n=14;const geo=new THREE.BufferGeometr
   BIRDS=new THREE.InstancedMesh(geo,new THREE.MeshBasicMaterial({color:'#2b2626',side:THREE.DoubleSide}),n);BIRDS.frustumCulled=false;BIRDS.userData.f=[...Array(n)].map((_,i)=>({a:i*.45,r:100+(i%5)*8,h:72+(i%4)*3,ox:(i%3)*4,oz:Math.floor(i/3)*3}));scene.add(BIRDS)}
 const _pos=new THREE.Vector3();
 function lifeStep(dt){if(!LIFE_ON)return;const cam=camera.position;const far=MODE==='walk'?(FULL.on?Math.min(GOV.far,320):90):340;   /* v1.40: figures out to 320 on foot; past that they are a few pixels and cost a draw each */
-  FIGQ.bf=6;FIGQ.bn=1;if(!SOUL.ready){SOUL.ready=1;if(window.__EH_HOUR!=null)SOUL.fix=+window.__EH_HOUR;soulInit();soulJump()}SOUL.tk++;if((SOUL.tk&63)===0)SOUL.hour=soulHour();soulSeek();
+  FIGQ.bf=6;FIGQ.bn=1;cmdCapStep(dt);reelStep(dt);if(!SOUL.ready){SOUL.ready=1;if(window.__EH_HOUR!=null)SOUL.fix=+window.__EH_HOUR;soulInit();soulJump()}SOUL.tk++;if((SOUL.tk&63)===0)SOUL.hour=soulHour();soulSeek();
   for(const e of LIFE){const dx=e.x-cam.x,dz=e.z-cam.z,dd=dx*dx+dz*dz;e.fig.visible=dd<far*far&&!e.gone;
     {const u2=e.fig.userData;if(u2.fig2){const shown=e.fig.visible&&e.wrap.visible;e.wrap.matrixWorldAutoUpdate=shown;   /* v1.72: a figure out of sight costs nothing: no bones are worked out, no copy is made */
       if(shown){if(!u2.far&&FIGQ.bf>0){FIGQ.bf--;figFar(e.fig,FMAT())}const dy=cam.y-e.y-1.4,d3=dd+dy*dy,lim=FIGQ.near+(u2.near&&u2.near.visible?4:0),nr=d3<lim*lim;
         if(nr&&!u2.near&&FIGQ.bn>0){FIGQ.bn--;figNear(e.fig,FMAT())}const on=nr&&!!u2.near;if(u2.near){u2.near.visible=on;if(on)u2.seen=tt}if(u2.far)u2.far.visible=!on}}}
-    if(!e.fig.visible||e.static){if(e.soul&&e.soul.plan&&SOUL.tk%30===e.soul.idx%30)soulOff(e);if(e.static&&e.fig.visible){if(e.kh)kairosStep(e,dt);else e.fig.rotation.y+=Math.sin(tt*.3+e.ph)*.002}continue}
+    if(!e.fig.visible||e.static){if(e.soul&&e.soul.plan){if(e.soul.errand&&!e.gone)soulStep(e,e.fig.userData,dt*SOUL.rate);else if(SOUL.tk%30===e.soul.idx%30)soulOff(e)}   /* one on an errand keeps walking though nobody sees */if(e.static&&e.fig.visible){if(e.kh)kairosStep(e,dt);else e.fig.rotation.y+=Math.sin(tt*.3+e.ph)*.002}continue}
     const ud=e.fig.userData;
-    if(e.soul){if(e.soul.plan){soulStep(e,ud,dt);continue}if(soulGreet(e,ud,dt))continue}   /* v1.73: one with a day follows it; the rest still stroll, and know His Grace */
+    if(e.soul){if(e.soul.plan){soulStep(e,ud,dt*SOUL.rate);continue}if(soulGreet(e,ud,dt))continue}   /* v1.73: one with a day follows it; the rest still stroll, and know His Grace */
     if(e.wait>0){e.wait-=dt;if(ud.fig2)figIdle(e,ud,dt);else if(ud.l1){ud.l1.rotation.x*=.85;ud.l2.rotation.x*=.85}continue}
     if(!e.tgt){if(e.water){for(let t=0;t<6;t++){const x=e.x+(rnd()-.5)*12,z=e.z+(rnd()-.5)*12;if(lakeD(x,z)<.82){e.tgt=[x,z];break}}}
       else if(e.route){e.ri=((e.ri||0)+1)%e.route.length;e.tgt=e.route[e.ri].slice()}
-      else{const B=e.b;e.tgt=[B[0]+1+rnd()*(B[1]-B[0]-2),B[2]+1+rnd()*(B[3]-B[2]-2)]}if(!e.tgt){e.wait=1;continue}}
+      else e.tgt=strollTo(e);if(!e.tgt){e.wait=1;continue}}
     const tx=e.tgt[0]-e.x,tz=e.tgt[1]-e.z,dl=Math.hypot(tx,tz);if(dl<.3){e.tgt=null;e.wait=1+rnd()*(e.kind==='person'?5:7);continue}
     const sp=e.speed*dt;let ok=false,nx=0,nz=0,ny=e.y;
     if(e.water){nx=e.x+tx/dl*sp;nz=e.z+tz/dl*sp;ok=lakeD(nx,nz)<.85}
@@ -5720,7 +5809,7 @@ function run(a){if(!a)return;if(a[0]==='soul')return soulCard(a[1]);if(VISITOR&&
   else if(t==='kz')konetz()}
 const TITLE={'people':'The Circle','datahub:fig':'Public Figures','datahub:bridge':'Brief and In-Tray','nepsis':'The Road to the Summit','datahub:desk':'Desks and Alerts','library':'The Library shelves','ledger':'The Ledger','wager':'The Wager Desk','orders':'The Day','rules':'The Rules','datahub:edition':'The Edition','datahub:globe':'The Holo Globe','datahub:ai':'The AI Frontier','pardes':'The Pardes','tree':'The Great Tree','v23:kairos':'The Spire','v23:carving':'The focus tree','v23:people':'The Thought Web','v23:orders':'Orders by Color','roster':'The Registry roll'};
 function konetz(){toast('Konetz acknowledged. Standing down.');return;const b=$('#bKz');if(kz){kz=0;b.textContent='Konetz';toast('Konetz acknowledged. Standing down.')}else{kz=1;b.textContent='Tap again to stand down';setTimeout(()=>{kz=0;b.textContent='Konetz'},4000)}}
-$('#bTabs').hidden=true;tourInit();kchatInit();goalInit();youInit();if(!PRIV.urls&&!/[?&]stats/.test(location.search))$('#bStats').hidden=true;   /* v1.48: Stats is a tool for His Grace's device (or ?stats), not for visitors */
+$('#bTabs').hidden=true;tourInit();kchatInit();goalInit();youInit();cmdInit();if(!PRIV.urls&&!/[?&]stats/.test(location.search))$('#bStats').hidden=true;   /* v1.48: Stats is a tool for His Grace's device (or ?stats), not for visitors */
 /* the catalog */
 let KJ=null,CATS=[];
 async function catalog(h){$('#cat').classList.add('on');SHEET=true;CATS=[];if(!KJ){$('#catBody').innerHTML='<p class="meta">Opening the drawers...</p>';try{KJ=await (await fetch('kits.json')).json()}catch(e){$('#catBody').innerHTML='<p>The catalog could not be read on this connection.</p>';return}}
@@ -5788,7 +5877,7 @@ look.addEventListener('wheel',e=>{PL.dist=Math.max(2.5,Math.min(16,PL.dist+e.del
 let LOOKS=.72;{const names=['Slow','Steady','Quick'],vals=[.45,.72,1];let i=1;try{const s=localStorage.getItem('euph_look');if(s!==null&&vals[+s])i=+s}catch(e){}const lb=$('#bLook'),set=()=>{LOOKS=vals[i];lb.textContent='Look: '+names[i]};set();lb.onclick=()=>{i=(i+1)%3;set();try{localStorage.setItem('euph_look',String(i))}catch(e){}}}
 const KEYS={};addEventListener('keydown',e=>{KEYS[e.key.toLowerCase()]=1;if(MODE==='walk'){if(e.key===' '&&!/^(INPUT|TEXTAREA)$/.test(e.target.tagName||''))e.preventDefault();if(e.key==='e'||e.key==='E')$('#act').click();if(e.key==='r')goStairs(1);if(e.key==='f')goStairs(-1);if(e.key==='Escape'){if(PHOTO){photo(false);return}setMode('over')}if(e.key===' '&&!e.repeat)tapJump();if((e.key==='w'||e.key==='W')&&!e.repeat){const n=performance.now();if(PL.fly&&n-(PL.wtap||0)<320){PL.ffast=1;toast('Fast flight.')}PL.wtap=n}}});addEventListener('keyup',e=>{KEYS[e.key.toLowerCase()]=0;if(e.key==='w'||e.key==='W')PL.ffast=0;if(MODE==='walk'&&e.key===' '&&!/^(INPUT|TEXTAREA)$/.test(e.target.tagName||''))e.preventDefault()});addEventListener('blur',()=>{for(const k in KEYS)KEYS[k]=0});
 let NEAR=null;$('#act').onclick=()=>{if(NEAR)run(NEAR.a)};
-function setMode(m){MODE=m;if(PL.fly)setFly(0,1);$('#walk').classList.toggle('on',m==='walk');$('#rail').hidden=m==='walk';if($('#copy'))$('#copy').hidden=m==='walk';if($('#bGoal'))$('#bGoal').hidden=m==='walk';goalLine();$('#bWalk').textContent=m==='walk'?'Overview':'Walk';$('#bWalk').classList.toggle('on',m==='walk');$('#bFP').hidden=m!=='walk';$('#bLook').hidden=m!=='walk';if(m!=='walk'){PL.auto=0;PL.sprint=0;$('#bAuto').classList.remove('on');$('#bSprint').classList.remove('on')}$('#card').hidden=true;
+function setMode(m){MODE=m;if(PL.fly)setFly(0,1);$('#walk').classList.toggle('on',m==='walk');$('#rail').hidden=m==='walk';if($('#copy'))$('#copy').hidden=m==='walk';if($('#bGoal'))$('#bGoal').hidden=m==='walk';if($('#bAsk'))$('#bAsk').classList.toggle('w',m==='walk');goalLine();$('#bWalk').textContent=m==='walk'?'Overview':'Walk';$('#bWalk').classList.toggle('on',m==='walk');$('#bFP').hidden=m!=='walk';$('#bLook').hidden=m!=='walk';if(m!=='walk'){PL.auto=0;PL.sprint=0;$('#bAuto').classList.remove('on');$('#bSprint').classList.remove('on')}$('#card').hidden=true;
   controls.enabled=m==='over';player.visible=m==='walk';
   if(m==='walk'){if(OPEN_B!=null){const B=BLD[OPEN_B];const R=B.rooms.find(r=>r.l===OPEN_L);if(R){PL.x=R.c[0];PL.z=R.c[2]+1;PL.y=R.y+.5;let ok=false;for(let r=0;r<8&&!ok;r++)for(let dx=-r;dx<=r&&!ok;dx++)for(let dz=-r;dz<=r&&!ok;dz++){const x=R.c[0]+dx,z=R.c[2]+dz;if(!solidAt(x,R.y+1,z)&&!solidAt(x,R.y+2,z)){PL.x=x;PL.z=z;ok=true}}}}else{PL.x=0;PL.z=58;PL.y=.5}PL.yaw=0;OPEN_B=null}
   else{OPEN_B=null;hemi.intensity=TOD[TODK].hemi[2];applyVis();controls.target.set(PL.x,PL.y+2,PL.z);if(ISO){camera.position.copy(controls.target).addScaledVector(isoOff(ISOV.yaw,ISOV.el),ISOV.R);camera.zoom=3;camera.updateProjectionMatrix()}else camera.position.set(PL.x+30,PL.y+38,PL.z+48)}
@@ -6421,9 +6510,9 @@ const TM={};async function build(){const t0=performance.now();let tm=t0;TM.start
     for(const k of['sg','glg']){const geo=g[k];if(!geo)continue;quads+=geo.index.count/6;const m=new THREE.Mesh(geo,k==='sg'?MATS.s:MATS.gl);if(k==='sg'){m.castShadow=true;m.receiveShadow=true}m.matrixAutoUpdate=false;m.updateMatrix();obj.add(m)}
     let wn=null;for(const k of['s','gl','wn','w','gs']){const gb=g[k];if(!gb||!gb.n)continue;quads+=gb.n;const m=new THREE.Mesh(gb.geo(),k==='wn'?MATS.gl:k==='s'&&!g.bid&&!g.vh?MATS.t:MATS[k]);m.scale.setScalar(.5);if(k==='wn')wn=m;if(k==='s'){m.castShadow=true;m.receiveShadow=true;if(g.gq)GRQ.push({m,q:g.gq})}else if(k==='w')m.receiveShadow=true;m.matrixAutoUpdate=false;m.updateMatrix();obj.add(m)}obj.matrixAutoUpdate=false;obj.updateMatrix();scene.add(obj);GROUPS.push({obj,bid:g.bid,band:g.band,si:g.si||0,vh:g.vh||0,x:g.x,z:g.z,wn})}
   try{TM.water=mergeWater()}catch(e){TM.water=String(e)}tm=performance.now();makeClouds();makeCards();makeExtras();const PPL=LIVE?buildLife():buildPeople();mark('life');await Y();const WIN=LIVE?buildWindowDetail():0;mark('windows');await Y();wdOutdoor();const PRB=buildProps();wdApply();mark('props');await Y();TM.stairq=buildStairs();TM.chapel=chapelGlass();TM.bars=glazeInside()+glazeInsideAll();mark('stairs');await Y();TM.ground=groundDress();const PRF=buildFloors();TM.trim=propTrim();fxInit();fxLightInit();postInit();rail();size();setTime('day');applyVis();styleUI();mark('scene');GOV.base=renderer.getPixelRatio();try{GOV.off=localStorage.getItem('euph_gov')==='off'}catch(e){}seaInit();seaUI();mark('sky');groveInit();mark('grove');flowersInit();mark('beds');if(posLoad())setTimeout(()=>{if(!(VISITOR&&YOU.d&&!/[?&](stats|nowelcome)/.test(location.search)))toast('Walk, and you are back where you last stood.')},900);   /* v1.72: a returning visitor is greeted by name instead; the two notices raced, and whichever came second wiped the other */cullStep();
-  window.__vx={THREE,soul:{S:SOUL,setHour:h=>{SOUL.fix=h;soulJump()},clock:h=>{SOUL.fix=h;SOUL.hour=soulHour()},jump:soulJump,hourNow:soulHour,path:(a,b,cap)=>{const J=soulJob(a,b,cap);while(!soulWork(J,5000));return J.path?soulSmooth(J.path):null},pool:soulPool,now:soulNow,next:soulNext,say:soulSay,card:soulCard,send:soulSend,day:SOULDAY},fig:{Q:FIGQ,spec:figSpec,build:figBuild,quads:figQuads,half:figHalf,rig:figRig,near:figNear,far:figFar,mat:()=>FMAT()},tidyStats:()=>TM.tidy,stood:(x,y,z)=>FSTOOD.has(FKEY(x,y,z)),roomName:n=>RN(n),whereOf:o=>whereOf(o),owner:()=>OWNER,viewUrl:k=>VIEWURL(k),roomOf:()=>ROOMOF,blindBetween:()=>blindPanes.between,trunkN:()=>TRUNKN,glz:()=>({bars:TM.bars,doors:glazeInsideAll.doors}),finOn:()=>FIN_ON,kbot:()=>({P:kairosBot(),H:kairosHeadVox().V,person:personVox(outfit('none',null,()=>.37))}),groundY,get KH(){return KH},GOAL,goalOpen,URLS,WDRESS,wdApply,regRow,holesOf,T20,LMAP,LAMPS,LDAY,FULL,GROVE,IMP,BENCH,benchUI,pq:PQ,palette:PAL,trail:trailAt,settle:SETTLE,skins:CSKINS,windows:windowList,dep:DSTAT,seats:SEATS,kseat:()=>KSEAT,vr:VROOMS,dmap:DMAP,isWin:g=>isPane(g),isBlind:g=>g===C.winB,isInv:g=>!!(g&&(PF[g]&IV)),props:Object.assign({},PRO,PRB,typeof PRF!=="undefined"?PRF:{},typeof PRS!=="undefined"?PRS:{}),FP:()=>FPV,setFP:v=>{FPV=v},life:LIFE,win:WIN,post:postRender,style:SK,quadsTotal:quads,people:PPL,PEOPLE,moveTo,fall,setFly,tapJump,KEYS,PROPS,propGet,pbox,GOV,govSet,cullStep,pickTime,photo,posSave,posLoad,HALLS,GR:GROUPS,TM,pal:()=>PAL.length,grove:()=>({trees:GROVE.n,ready:GROVE.ready,got:GROVE.got||0,ver:TVER,drawn:GROVE.drawn,worker:!!TWORK,bad:TBAD}),pickSeason,seak:()=>SEAK,grassRGB:()=>PAL[C.grass[0]].map(v=>+v.toFixed(3)),flowers:()=>FBED?FBED.stats():null,KIT,SEASONS,sea:()=>SEA,liveAt:d=>{SEAD=d;pickTime('live')},perf:()=>({ms:GOV.ms,worst:GOV.worst,lv:GOV.lv,calls:renderer.info.render.calls,tris:renderer.info.render.triangles}),G,T,renderer,scene,camera,controls,quads,groups:GROUPS.length,trees:TREES,objs:OBJ.length,rooms:BLD.slice(1).reduce((s,b)=>s+b.rooms.length,0),gen:Math.round(t1-t0),mesh:Math.round(t2-t1),setTime,openB,close,setMode,PL,run,catalog,BLD,OBJ,goStairs,pickAt,FLIGHTS,stairRamp};
+  window.__vx={THREE,cmd:{C:CMD,order:cmdOrder,verbs:CMDV,open:cmdOpen,say:cmdSay,goal:cmdGoal},reel:cmdReel,reelState:()=>REEL,soul:{S:SOUL,setHour:h=>{SOUL.fix=h;soulJump()},clock:h=>{SOUL.fix=h;SOUL.hour=soulHour()},jump:soulJump,hourNow:soulHour,path:(a,b,cap)=>{const J=soulJob(a,b,cap);while(!soulWork(J,5000));return J.path?soulSmooth(J.path):null},pool:soulPool,now:soulNow,next:soulNext,say:soulSay,card:soulCard,send:soulSend,day:SOULDAY},fig:{Q:FIGQ,spec:figSpec,build:figBuild,quads:figQuads,half:figHalf,rig:figRig,near:figNear,far:figFar,mat:()=>FMAT()},tidyStats:()=>TM.tidy,stood:(x,y,z)=>FSTOOD.has(FKEY(x,y,z)),roomName:n=>RN(n),whereOf:o=>whereOf(o),owner:()=>OWNER,viewUrl:k=>VIEWURL(k),roomOf:()=>ROOMOF,blindBetween:()=>blindPanes.between,trunkN:()=>TRUNKN,glz:()=>({bars:TM.bars,doors:glazeInsideAll.doors}),finOn:()=>FIN_ON,kbot:()=>({P:kairosBot(),H:kairosHeadVox().V,person:personVox(outfit('none',null,()=>.37))}),groundY,get KH(){return KH},GOAL,goalOpen,URLS,WDRESS,wdApply,regRow,holesOf,T20,LMAP,LAMPS,LDAY,FULL,GROVE,IMP,BENCH,benchUI,pq:PQ,palette:PAL,trail:trailAt,settle:SETTLE,skins:CSKINS,windows:windowList,dep:DSTAT,seats:SEATS,kseat:()=>KSEAT,vr:VROOMS,dmap:DMAP,isWin:g=>isPane(g),isBlind:g=>g===C.winB,isInv:g=>!!(g&&(PF[g]&IV)),props:Object.assign({},PRO,PRB,typeof PRF!=="undefined"?PRF:{},typeof PRS!=="undefined"?PRS:{}),FP:()=>FPV,setFP:v=>{FPV=v},life:LIFE,win:WIN,post:postRender,style:SK,quadsTotal:quads,people:PPL,PEOPLE,moveTo,fall,setFly,tapJump,KEYS,PROPS,propGet,pbox,GOV,govSet,cullStep,pickTime,photo,posSave,posLoad,HALLS,GR:GROUPS,TM,pal:()=>PAL.length,grove:()=>({trees:GROVE.n,ready:GROVE.ready,got:GROVE.got||0,ver:TVER,drawn:GROVE.drawn,worker:!!TWORK,bad:TBAD}),pickSeason,seak:()=>SEAK,grassRGB:()=>PAL[C.grass[0]].map(v=>+v.toFixed(3)),flowers:()=>FBED?FBED.stats():null,KIT,SEASONS,sea:()=>SEA,liveAt:d=>{SEAD=d;pickTime('live')},perf:()=>({ms:GOV.ms,worst:GOV.worst,lv:GOV.lv,calls:renderer.info.render.calls,tris:renderer.info.render.triangles}),G,T,renderer,scene,camera,controls,quads,groups:GROUPS.length,trees:TREES,objs:OBJ.length,rooms:BLD.slice(1).reduce((s,b)=>s+b.rooms.length,0),gen:Math.round(t1-t0),mesh:Math.round(t2-t1),setTime,openB,close,setMode,PL,run,catalog,BLD,OBJ,goStairs,pickAt,FLIGHTS,stairRamp};
   TM.wall=Math.round(performance.now()-t0);frame();BENCH.first=performance.now();if(BENCH.on)setTimeout(benchUI,800);$('#bStats').onclick=()=>{const b=$('#bench');if(b)b.remove();else benchUI()};setTimeout(fxWarm,2500);if(!KIT||!GROVE.n||(GROVE.fd||0)>=GROVE.b.size*2)veilOff();else setTimeout(veilOff,8000)}
-function styleUI(){$('#brandS').textContent='Kairos Manor v1.73 . the '+ST.n+' Estate';if(!SHOWCASE)$('#bStyle').hidden=true;$('#styleList').innerHTML=Object.entries(STYLES).map(([k,v])=>`<button class="b${k===SK?' on':''}" data-st="${k}">${esc(v.n)}<small>${esc(v.d)}</small></button>`).join('');
+function styleUI(){$('#brandS').textContent='Kairos Manor v1.74 . the '+ST.n+' Estate';if(!SHOWCASE)$('#bStyle').hidden=true;$('#styleList').innerHTML=Object.entries(STYLES).map(([k,v])=>`<button class="b${k===SK?' on':''}" data-st="${k}">${esc(v.n)}<small>${esc(v.d)}</small></button>`).join('');
   $('#styleList').querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>pickStyle(b.dataset.st));$('#bStyle').onclick=()=>{$('#stylebox').hidden=!$('#stylebox').hidden};
   if(ISO){for(const[id,dd]of[['#bRotL',-1],['#bRotR',1]]){const b=$(id);b.hidden=false;b.onclick=()=>{if(ISOV.rot)return;const a=ISOV.yaw;ISOV.rot={t0:performance.now(),a,b:a+dd*Math.PI/2};if(MODE==='walk'){ISOV.yaw=a+dd*Math.PI/2;ISOV.rot=null}}}}}
 $('#load').innerHTML='Raising Euphrates Hall<i>The '+ST.n+' Estate. Raising the mansion, about ten seconds.</i>';
