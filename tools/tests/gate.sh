@@ -66,6 +66,15 @@ for f in src .; do
     echo "gate: FAIL kairos_turntable $f"; tail -20 "$tmp/kt.log"; fail=1
   fi
 done
+# v1.70: owner and visitor. No private link in the files; nothing of the owner's shown to a visitor; the visitor's own house works at phone size.
+for f in src .; do
+  s=$(date +%s)
+  if python3 tools/tests/visitor_test.py "$f" > "$tmp/vt.log" 2>&1; then
+    echo "gate: ok   visitor_test $f ($(( $(date +%s) - s ))s) $(grep -c ' ok ' "$tmp/vt.log") checks"
+  else
+    echo "gate: FAIL visitor_test $f"; grep -v ' ok ' "$tmp/vt.log" | head -20; fail=1
+  fi
+done
 # v1.67: the walker bot. Every pair of rooms joined by a door, every stair and a circuit of the grounds, walked on foot twice.
 # A fall or a pass-through fails the gate; sticks, missing routes and rooms with no way in are printed.
 s=$(date +%s)

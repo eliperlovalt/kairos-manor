@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Euphrates Hall: the Voxel Estate</title>
+<title>Kairos Manor</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
@@ -132,7 +132,7 @@ body.photo #walk .b{opacity:0;pointer-events:none}body.photo #walk .cb,body.phot
 <canvas id="c"></canvas>
 <div id="labels"></div>
 <div id="top">
-  <div class="brand"><b>EUPHRATES HALL</b><span id="brandS">GOLEM v0.27 . the Voxel Estate</span></div>
+  <div class="brand"><b>KAIROS MANOR</b><span id="brandS">GOLEM v0.27 . the Voxel Estate</span></div>
   <div class="grp" id="tod"><button class="b on" data-t="day">Day</button><button class="b" data-t="dusk">Dusk</button><button class="b" data-t="night">Night</button><button class="b" data-t="live" title="The real hour">Live</button></div><button class="b" id="bSea" title="Choose the season">Season</button><button class="b" id="bFP" hidden>First person</button><button class="b" id="bLook" hidden title="How fast the view turns">Look</button>
   <button class="b" id="bRotL" hidden title="Turn the view left">Turn L</button><button class="b" id="bRotR" hidden title="Turn the view right">Turn R</button><button class="b" id="bStyle" hidden>Style</button><button class="b" id="bWalk">Walk</button>
   <button class="b" id="bTabs" title="The tabbed GOLEM">Tabs</button><button class="b" id="bPhoto" title="Hide the buttons for a clean shot">Photo</button>
@@ -142,7 +142,7 @@ body.photo #walk .b{opacity:0;pointer-events:none}body.photo #walk .cb,body.phot
 <div id="rail"></div>
 <div id="nextAct" hidden></div>
 <div id="goal" hidden><div class="gp" id="goalP"></div></div>
-<div id="copy" style="position:fixed;left:max(14px,env(safe-area-inset-left));top:calc(env(safe-area-inset-top,0px) + 36px);z-index:5;font:10px/1.2 system-ui,sans-serif;color:#f1e7c8;opacity:.6;pointer-events:none;text-shadow:0 1px 2px #0008">© 2026 Euphrates Hall. All rights reserved.</div>
+<div id="copy" style="position:fixed;left:max(14px,env(safe-area-inset-left));top:calc(env(safe-area-inset-top,0px) + 36px);z-index:5;font:10px/1.2 system-ui,sans-serif;color:#f1e7c8;opacity:.6;pointer-events:none;text-shadow:0 1px 2px #0008">© 2026 Kairos Manor. All rights reserved.</div>
 <div id="card" hidden></div>
 <button class="b" id="bFind">Find</button><button class="b" id="bStats" title="The phone test: load, frame times, memory">Stats</button><button class="b" id="bGoal">Set a goal</button>
 <div id="kchat" hidden><div id="kchead"><b>Kairos</b><span><button class="b" id="kcvoice">Voice off</button><button class="b" id="kcfull">Full chat</button><button class="b" id="kcx">Close</button></span></div><div id="kcbody"></div><div id="kcform"><textarea id="kcin" rows="2" placeholder="Speak, Your Grace"></textarea><button class="b on" id="kcsend">Send</button></div><button id="kcreset">Disconnect this device</button></div>
@@ -152,7 +152,7 @@ body.photo #walk .b{opacity:0;pointer-events:none}body.photo #walk .cb,body.phot
 <div id="turn"><div class="ph"></div><div>Turn the phone sideways to walk the estate.</div><button class="b" id="bTurnBack">Back to the overview</button></div>
 <div id="sheet"><div class="sbar"><b id="shT"></b><button class="b" id="shX">Close</button></div><iframe id="shF" title="GOLEM"></iframe></div>
 <div id="cat"><div class="sbar"><button class="b" id="catBack">Back</button><b id="catT">The Catalog</b><button class="b" id="catX">Close</button></div><div id="catBody"></div></div>
-<div id="load">Raising Euphrates Hall<i>Raising the mansion, about ten seconds.</i></div>
+<div id="load">Raising Kairos Manor<i>Raising the mansion, about ten seconds.</i></div>
 <div id="toast"></div>
 <div class="grp" id="seas" hidden><button class="b" data-s="now" title="The real calendar">Now</button><button class="b" data-s="spring">Spring</button><button class="b" data-s="summer">Summer</button><button class="b" data-s="autumn">Autumn</button><button class="b" data-s="winter">Winter</button></div>
 <div id="dbg" hidden></div><div id="photoX"></div>
@@ -2160,6 +2160,19 @@ const BODYR={person:.36,deer:.6,horse:.75,cow:.75,sheep:.5,dog:.4,cat:.26,hen:.2
 /* v1.65: where furniture stands, in half-block cells, so the people of the house walk round a chair and not through it (KAIROS: a man stood in a kitchen chair's seat).
    Solid pieces already stop them with unseen blocks; this is the rest: chairs, stools, benches, small tables. A body that starts inside one may walk out of it */
 const FSTOOD=new Set(),FKEY=(x,y,z)=>((Math.round(x*2)+2*OX)*4096+(Math.round(z*2)+2*OZ))*128+(y+OY);
+/* v1.70: the Founders' wall. One hundred frames on two boards in the Entrance Hall, either side of a visitor as he comes in at the front door: No. 1 to 50 on the west wall, 51 to 100 on the east.
+   A frame carries its number and its founder's name once FOUNDERS holds one; the next free frame carries its number alone ("No. 1" while the list is empty); the rest are blank. Each board is one painted plane, two triangles */
+function foundersWall(){const B=BLD[1],R=B&&B.rooms.find(r=>r.n==='The Entrance Hall');if(!R)return 0;const W=9,H=4.4,y0=R.y+.5+2.45,z0=R.z1-10.2,zc=z0+W/2,band=B.band[R.y+1+OY];let n=0;
+  /* what hung or stood tall where the boards go is taken down */
+  for(let q=PQ.length-1;q>=0;q--){const it=PQ[q];if(it.bid!==R.bid||!it.r||it.z<z0-.4||it.z>z0+W+.4||(Math.abs(it.x-(R.x0+.5))>1.1&&Math.abs(it.x-(R.x1-.5))>1.1))continue;const Bx=pbox(it.r);if(it.y+Bx.y1>y0-.05&&it.y+(Bx.y0||0)<y0+H+.05&&!/^(dado|panelling|cornice|sash)$/.test(it.r.kind)){PQ.splice(q,1);n++}}
+  for(const[sx,first]of[[-1,0],[1,50]]){const cv=document.createElement('canvas');cv.width=1800;cv.height=880;const x=cv.getContext('2d'),fw=180,fh=176;x.fillStyle='#3a2416';x.fillRect(0,0,1800,880);x.strokeStyle='#5b3a22';x.lineWidth=10;x.strokeRect(5,5,1790,870);
+    for(let i=0;i<50;i++){const c=i%10,r=(i/10)|0,X=c*fw,Y=r*fh,no=first+i+1,name=FOUNDERS[no-1],next=no===FOUNDERS.length+1;x.fillStyle='#8a6a1c';x.fillRect(X+14,Y+12,fw-28,fh-24);x.fillStyle='#c9a227';x.fillRect(X+18,Y+16,fw-36,fh-32);x.fillStyle='#e6c766';x.fillRect(X+22,Y+20,fw-44,3);x.fillStyle='#8a6a1c';x.fillRect(X+28,Y+26,fw-56,fh-52);x.fillStyle=name?'#f4f1ea':'#e9dfc4';x.fillRect(X+32,Y+30,fw-64,fh-60);
+      if(name||next){x.fillStyle='#b8913a';x.fillRect(X+52,Y+fh-60,fw-104,22);x.fillStyle='#2a1d14';x.font='600 15px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.fillText('No. '+no,X+fw/2,Y+fh-49)}
+      if(name){x.fillStyle='#2a1d14';x.font='600 17px Georgia,serif';const ws=String(name).slice(0,40).split(' '),ls=[''];for(const w of ws){const t=(ls[ls.length-1]+' '+w).trim();if(x.measureText(t).width>fw-76&&ls[ls.length-1])ls.push(w);else ls[ls.length-1]=t}ls.slice(0,3).forEach((l,k)=>x.fillText(l,X+fw/2,Y+58+k*20))}}
+    const tx=new THREE.CanvasTexture(cv);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=4;const ge=new THREE.PlaneGeometry(W,H);ge.rotateY(sx<0?Math.PI/2:-Math.PI/2);const m=new THREE.Mesh(ge,new THREE.MeshLambertMaterial({map:tx}));
+    const wx=sx<0?R.x0+.5+.34:R.x1-.5-.34;m.position.set(wx,y0+H/2,zc);m.receiveShadow=true;m.matrixAutoUpdate=false;m.updateMatrix();m.userData.k='foundersWall';scene.add(m);GROUPS.push({obj:m,bid:R.bid,band,d:1,x:wx,z:zc});
+    OBJ.push({n:"The Founders' wall",a:['founders',0],k:'founders',x:Math.round(wx-sx*1.5),y:R.y+1,z:Math.round(zc),bid:R.bid,l:R.l,room:R})}
+  visitorWire();return n}
 function furnMap(){const SK=/rug|carpet|runner|door|arch|sash|dado|panel|cornice|skirt|curtain|balustr|rail|stair|beam|truss/i;let n=0;
   for(const it of PQ){const r=it.r;if(!r||!r.b||SK.test(r.kind))continue;const u=r.unit,fy=it.y-.5;if((r.b.y1+1)*u<.3||Math.abs(fy-Math.round(fy))>.13)continue;
     const hx=(r.b.x1-r.b.x0+1)*u/2+.08,hz=(r.b.z1-r.b.z0+1)*u/2+.08;if(hx<.25||hz<.25||hx*hz>9)continue;const th=it.th||0,lx=(r.b.x0+r.b.x1)/2*u,lz=(r.b.z0+r.b.z1)/2*u,c=Math.cos(th),sn=Math.sin(th),ax=it.x+lx*c+lz*sn,az=it.z-lx*sn+lz*c,R=Math.hypot(hx,hz),yb=Math.round(fy)+1;
@@ -2314,20 +2327,20 @@ function kairosStep(e,dt){const k=KH;if(!k)return;if(KMATW_)KMATW_.emissiveInten
   const br=1+Math.sin(tt*1.3)*.006;if(k.body)k.body.scale.y=k.bs*br;k.piv.position.y=k.py*br}
 /* the tour: Kairos walks His Grace to every object that opens a record */
 let TOUR=null;
-function stopsList(){const seen=new Set(),L=[];for(const o of OBJ){if(!o.a||o.a[0]==='info'||seen.has(o.n))continue;seen.add(o.n);L.push(o)}
+function stopsList(){const seen=new Set(),L=[];for(const o of OBJ){const kk=VISITOR?o.n+'|'+(o.room?o.room.n:''):o.n;if(!o.a||o.a[0]==='info'||seen.has(kk))continue;seen.add(kk);L.push(o)}
   const key=o=>o.k==='kairos'?-1:o.room?o.room.bid*1e4+o.room.l*100:9e5;return L.sort((a,b)=>key(a)-key(b))}
 function goObj(o){setMode('walk');const y=o.room?o.room.y+1:null;let best=null;
   for(let r=2;r<=7&&!best;r++)for(let i=0;i<16;i++){const x=Math.round(o.x+Math.cos(i*.3927)*r),z=Math.round(o.z+Math.sin(i*.3927)*r);const yy=y!=null?y:groundY(x,z);if(yy==null)continue;
     if(o.room&&(x<=o.room.x0||x>=o.room.x1||z<=o.room.z0||z>=o.room.z1))continue;if(walkable(x,yy,z)){best=[x,yy,z];break}}
   if(!best)best=[o.x,y!=null?y:1,o.z];PL.sit=null;PL.x=best[0];PL.z=best[2];PL.y=best[1]-.5;if('vy' in PL)PL.vy=0;PL.yaw=Math.atan2(best[0]-o.x,best[2]-o.z);PL.pitch=0}
-function whereOf(o){return o.room?o.room.n+(o.room.w?', '+o.room.w:''):(o.out||'The grounds')}
-function tourShow(){const L=TOUR.L,i=TOUR.i,o=L[i];goObj(o);const nm=o.n.split(':'),t=$('#tourbar');t.hidden=false;$('#bFind').hidden=true;
+function whereOf(o){return o.room?RN(o.room.n)+(o.room.w&&OWNER?', '+o.room.w:''):(o.out||'The grounds')}
+function tourShow(){const L=TOUR.L,i=TOUR.i,o=L[i];if(o.pose){setMode('walk');PL.sit=null;PL.x=o.pose[0];PL.y=o.pose[1]-.5;PL.z=o.pose[2];PL.yaw=o.pose[3];PL.pitch=o.pose[4];PL.vy=0}else goObj(o);if(o.say){$('#tourbar').hidden=false;$('#bFind').hidden=true;$('#tourtxt').innerHTML='<b>Kairos, stop '+(i+1)+' of '+L.length+'</b>'+o.say;return}const nm=o.n.split(':'),t=$('#tourbar');t.hidden=false;$('#bFind').hidden=true;
   $('#tourtxt').innerHTML='<b>Kairos, stop '+(i+1)+' of '+L.length+'</b>'+(o.k==='kairos'?'This is my seat in the Great Hall. Touch me and we speak.':esc(nm[0])+'. '+esc(whereOf(o))+'.'+(nm[1]?' Touch it to open'+esc(nm[1])+'.':' Touch it to open its record.'))}
 function tourEnd(){TOUR=null;$('#tourbar').hidden=true;$('#bFind').hidden=false}
 function findOpen(){const L=stopsList(),s=$('#findsheet');SHEET=true;s.hidden=false;
   $('#findlist').innerHTML=L.map((o,i)=>'<button class="frow" data-i="'+i+'"><b>'+esc(o.n)+'</b><span>'+esc(whereOf(o))+'</span></button>').join('');
   $('#findlist').onclick=e=>{const b=e.target.closest('.frow');if(!b)return;findClose();tourEnd();goObj(L[+b.dataset.i])};
-  $('#findtour').onclick=()=>{findClose();TOUR={L,i:0};tourShow()}}
+  $('#findtour').onclick=()=>{findClose();if(VISITOR)youTour();else{TOUR={L,i:0};tourShow()}}}
 function findClose(){$('#findsheet').hidden=true;SHEET=false}
 function tourInit(){$('#bFind').onclick=findOpen;$('#findx').onclick=findClose;$('#tnext').onclick=()=>{if(!TOUR)return;if(TOUR.i<TOUR.L.length-1){TOUR.i++;tourShow()}else tourEnd()};
   $('#tprev').onclick=()=>{if(TOUR&&TOUR.i>0){TOUR.i--;tourShow()}};$('#tend').onclick=tourEnd;window.__tour={go:goObj,stops:stopsList}}
@@ -2350,7 +2363,7 @@ const gEsc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 function goalLoad(){try{GOAL.d=JSON.parse(localStorage.getItem(GOAL.k)||'null')}catch(e){GOAL.d=null}if(GOAL.d&&!(GOAL.d.steps&&GOAL.d.steps.length))GOAL.d=null}
 function goalStore(){try{if(GOAL.d)localStorage.setItem(GOAL.k,JSON.stringify(GOAL.d));else localStorage.removeItem(GOAL.k)}catch(e){}goalLine()}
 function goalNext(){return GOAL.d?GOAL.d.steps.findIndex(s=>!s.done):-1}
-function goalLine(){const e=$('#nextAct');if(!e)return;const i=goalNext();const on=!!(GOAL.d&&i>=0)&&MODE!=='walk';e.textContent=on?'Next action: '+GOAL.d.steps[i].t:'';e.hidden=!on}
+function goalLine(){if(VISITOR)return youLine();const e=$('#nextAct');if(!e)return;const i=goalNext();const on=!!(GOAL.d&&i>=0)&&MODE!=='walk';e.textContent=on?'Next action: '+GOAL.d.steps[i].t:'';e.hidden=!on}
 function goalOpen(){goalLoad();GOAL.ask=false;GOAL.scr=GOAL.d?'path':'goal';GOAL.draft={goal:GOAL.d?GOAL.d.goal:'',steps:GOAL.d?GOAL.d.steps.map(s=>s.t):['']};SHEET=true;$('#goal').hidden=false;goalPaint()}
 function goalClose(){$('#goal').hidden=true;SHEET=false;goalLine()}
 function goalPaint(){const P=$('#goalP'),D=GOAL.draft,X='<button class="x" data-g="close" aria-label="Close">&times;</button>';let h='';
@@ -2363,6 +2376,51 @@ function goalPaint(){const P=$('#goalP'),D=GOAL.draft,X='<button class="x" data-
     else{h=X+'<p class="note">'+gEsc(d.goal)+'</p><div class="na"><b>Next action:</b><p>'+gEsc(d.steps[i].t)+'</p><button class="go" data-g="done">Done</button></div><ul>'+d.steps.map((st,j)=>'<li class="'+(st.done?'d':'')+'"><input type="checkbox" data-g="tick" data-i="'+j+'"'+(st.done?' checked':'')+' aria-label="Done"><span>'+gEsc(st.t)+'</span></li>').join('')+'</ul>'+
       (GOAL.ask?'<p>Clear this goal and its steps?</p><div class="lk"><button data-g="clear">Yes, clear it</button><button data-g="keep">Keep it</button></div>':'<div class="lk"><button data-g="edit">Edit steps</button><button data-g="over">Start over</button></div>')}}
   P.innerHTML=h;const f=P.querySelector('input[type=text]');if(f&&GOAL.scr==='goal'){f.focus();f.setSelectionRange(f.value.length,f.value.length)}}
+/* ---------- v1.70: the visitor's own house. A name and up to five goals, each with one next step to tick off. Kept under one key in this browser's own storage (every read and write wrapped), never sent anywhere.
+   The sheet is drawn in the goal sheet's panel. Screens: welcome (first visit and editing), house (the goals), kairos (the butler's line), founders (the wall) ---------- */
+const YOU={k:'kairos-manor-you',d:null,scr:null,sel:-1,arm:0,draft:null};
+function youLoad(){try{YOU.d=JSON.parse(localStorage.getItem(YOU.k)||'null')}catch(e){YOU.d=null}if(!YOU.d||typeof YOU.d!=='object'||!Array.isArray(YOU.d.goals))YOU.d=null}
+function youStore(){try{if(YOU.d)localStorage.setItem(YOU.k,JSON.stringify(YOU.d));else localStorage.removeItem(YOU.k)}catch(e){}youLine()}
+const youClean=o=>{if(!o||typeof o!=='object'||!Array.isArray(o.goals))return null;const cut=(t,n)=>String(t==null?'':t).replace(/[\u0000-\u001f]/g,' ').trim().slice(0,n);return{v:1,name:cut(o.name,40),seen:1,goals:o.goals.slice(0,5).map(g=>({t:cut(g&&g.t,80),step:cut(g&&g.step,120),done:Math.max(0,Math.min(999,(g&&g.done)|0))})).filter(g=>g.t)}};
+const youNext=()=>{if(!YOU.d)return null;for(const g of YOU.d.goals)if(g.t)return g;return null};
+function youLine(){const e=$('#nextAct');if(!e||!VISITOR)return;const g=youNext(),on=!!g&&MODE!=='walk';e.textContent=on?'Next: '+(g.step||g.t):'';e.hidden=!on}
+/* a room of the owner's is the visitor's own: "His Grace's Study" reads "Your Study" */
+const RN=n=>VISITOR?String(n).replace(/His Grace's/g,'Your'):n;
+function youOpen(scr,sel){youLoad();YOU.scr=scr||(YOU.d?'house':'welcome');YOU.sel=sel==null?-1:sel;YOU.arm=0;if(YOU.scr==='welcome')YOU.draft={name:YOU.d?YOU.d.name:'',goals:[0,1,2,3,4].map(i=>YOU.d&&YOU.d.goals[i]?YOU.d.goals[i].t:'')};SHEET=true;$('#goal').hidden=false;youPaint()}
+function youPaint(){const P=$('#goalP'),X='<button class="x" data-y="close" aria-label="Close">&times;</button>',D=YOU.d,nm=D&&D.name?gEsc(D.name):'';let h='';
+  if(YOU.scr==='welcome'){const F=YOU.draft;h=X+'<h2>'+(D?'Your name and your goals':'Welcome to Kairos Manor.')+'</h2><p class="sub">'+(D?'Change what you like. A blank line is dropped.':'I am Kairos, the butler. The house is yours. What shall I call you?')+'</p><input type="text" id="yName" maxlength="40" placeholder="Your name" value="'+gEsc(F.name)+'"><p class="sub">Up to five things you mean to get done. Leave any blank.</p>';
+    F.goals.forEach((t,i)=>{h+='<div class="row"><input type="text" data-yg="'+i+'" maxlength="80" placeholder="'+(i?'Another goal':'A goal: something you could finish in a few weeks')+'" value="'+gEsc(t)+'"></div>'});
+    h+='<p class="sub">Kept in this browser only. Nothing is sent anywhere.</p><button class="go" data-y="begin">'+(D?'Save':'Begin')+'</button>'+(D?'':'<button class="go" data-y="skip" style="opacity:.75">Not now</button>')}
+  else if(YOU.scr==='house'){h=X+'<h2>'+(nm?nm+', your house':'Your house')+'</h2>';
+    if(!D||!D.goals.length)h+='<p class="sub">No goals yet. Set one and it is laid out in the Map Room, on your study desk and through the house.</p>';
+    else{const ord=D.goals.map((g,i)=>i);if(YOU.sel>=0&&YOU.sel<ord.length){ord.splice(YOU.sel,1);ord.unshift(YOU.sel)}h+='<p class="sub">Each goal has one next step. Tick it when it is done and write the next.</p>';
+      for(const i of ord){const g=D.goals[i];h+='<div class="row" style="flex-wrap:wrap"><b style="flex:1 0 100%;margin:6px 0 2px">'+gEsc(g.t)+(g.done?' <span style="opacity:.6;font-weight:400">('+g.done+' done)</span>':'')+'</b><input type="text" data-ys="'+i+'" maxlength="120" placeholder="The next step: something you can start today" value="'+gEsc(g.step)+'"><button class="ib" data-y="tick" data-i="'+i+'" aria-label="Step done"'+(g.step?'':' disabled')+'>&#10003;</button></div>'}}
+    h+='<button class="go" data-y="edit">'+(D&&D.goals.length?'Change my name and goals':'Set my name and goals')+'</button><button class="go" data-y="tour" style="opacity:.85">Take the tour with Kairos</button><div class="row" style="gap:6px;margin-top:8px"><button class="ib" style="flex:1;width:auto" data-y="save">Save to a file</button><button class="ib" style="flex:1;width:auto" data-y="load">Load a file</button><button class="ib" style="flex:1;width:auto" data-y="clear">'+(YOU.arm?'Tap again to clear':'Clear all')+'</button></div><input type="file" id="yFile" accept=".json,application/json" hidden>'}
+  else if(YOU.scr==='kairos'){const g=youNext();h=X+'<h2>Kairos</h2><p class="sub">'+(D?(nm?'Welcome back, '+nm+'. ':'Welcome back. ')+(g?(g.step?'Your next step: '+gEsc(g.step)+'.':'You have not yet said what comes next for "'+gEsc(g.t)+'". I can wait. Briefly.'):'Nothing is pressing. A rare condition. I advise enjoying it.'):'Good day. I am Kairos, butler of this house. It is yours now. Shall I show you round?')+'</p><button class="go" data-y="tour">Take the tour</button><button class="go" data-y="house" style="opacity:.85">'+(D?'My house':'Set my name and goals')+'</button>'}
+  else if(YOU.scr==='founders'){h=X+'<h2>The Founders&rsquo; wall</h2><p class="sub">One hundred frames. '+(FOUNDERS.length?FOUNDERS.length+' of them carry a name.':'No. 1 is waiting for its name.')+'</p>'+(FOUNDERS.length?'<p class="sub">'+FOUNDERS.slice(0,100).map((n,i)=>'No. '+(i+1)+' '+gEsc(n)).join('<br>')+'</p>':'')}
+  P.innerHTML=h;const f=P.querySelector('#yName');if(f&&!D)try{f.focus()}catch(e){}}
+function youClose(){$('#goal').hidden=true;SHEET=false;YOU.scr=null;youLine()}
+function youTour(){youClose();const fo=OBJ.find(o=>o.k==='founders'),ka=OBJ.find(o=>o.k==='kairos'),st=OBJ.find(o=>o.room&&o.room.n==="His Grace's Study"),mp=OBJ.find(o=>o.room&&o.room.n==='The Map Room'&&/map table/.test(o.n)),L=[{n:'The forecourt',k:'tour',pose:[0,1,74,0,-.12],out:'The forecourt',say:'The forecourt. The house has stood here some time. It has merely been waiting for you.'}];
+  if(fo)L.push(Object.assign({},fo,{say:'The Entrance Hall, and the Founders&rsquo; wall. One hundred frames. I dust all of them.'}));if(ka)L.push(Object.assign({},ka,{say:'The Great Hall. That chair is mine. I am rarely in it.'}));
+  if(st)L.push(Object.assign({},st,{say:'Your study. The desk keeps your next step in plain sight, where it cannot hide.'}));if(mp)L.push(Object.assign({},mp,{say:'The Map Room. Your goals are laid out on the table. Touch it. That is the tour. I shall be about.'}));TOUR={L,i:0};tourShow()}
+function youInit(){const G=$('#goal');if(!G)return;
+  G.addEventListener('input',e=>{const t=e.target;if(!YOU.scr)return;if(t.id==='yName')YOU.draft.name=t.value;else if(t.dataset.yg!=null)YOU.draft.goals[+t.dataset.yg]=t.value;else if(t.dataset.ys!=null&&YOU.d){const i=+t.dataset.ys;YOU.d.goals[i].step=t.value.slice(0,120);youStore();const b=G.querySelector('[data-y=tick][data-i="'+i+'"]');if(b)b.disabled=!t.value.trim()}});
+  G.addEventListener('change',e=>{const t=e.target;if(t.id!=='yFile'||!t.files||!t.files[0])return;const r=new FileReader();r.onload=()=>{let o=null;try{o=youClean(JSON.parse(String(r.result)))}catch(x){}if(!o){toast('That file is not a house saved from Kairos Manor.');return}YOU.d=o;youStore();YOU.scr='house';youPaint();toast('Loaded.')};r.readAsText(t.files[0])});
+  G.addEventListener('click',e=>{if(!YOU.scr)return;if(e.target===G){e.stopImmediatePropagation();youClose();return}const b=e.target.closest('[data-y]');if(!b)return;const y=b.dataset.y,i=+b.dataset.i;
+    if(y==='close')return youClose();
+    if(y==='skip'){YOU.d=youClean({name:'',goals:[]})||{v:1,name:'',seen:1,goals:[]};youStore();return youClose()}
+    if(y==='begin'){const first=!YOU.d,old=YOU.d?YOU.d.goals:[],o=youClean({name:YOU.draft.name,goals:YOU.draft.goals.map(t=>{const was=old.find(g=>g.t===String(t).trim().slice(0,80));return{t,step:was?was.step:'',done:was?was.done:0}})})||{v:1,name:'',seen:1,goals:[]};YOU.d=o;youStore();if(first)return youTour();YOU.scr='house'}
+    else if(y==='edit')return youOpen('welcome');
+    else if(y==='house')return youOpen(YOU.d?'house':'welcome');
+    else if(y==='tour')return youTour();
+    else if(y==='tick'&&YOU.d&&YOU.d.goals[i]){const g=YOU.d.goals[i];if(!g.step)return;g.done=(g.done|0)+1;g.step='';youStore();toast('Done. What comes next?')}
+    else if(y==='save'){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(Object.assign({app:'kairos-manor'},YOU.d||{v:1,name:'',goals:[]}),null,1)],{type:'application/json'}));a.download='kairos-manor-my-house.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}catch(x){toast('This browser would not save the file.')}return}
+    else if(y==='load'){const f=G.querySelector('#yFile');if(f)f.click();return}
+    else if(y==='clear'){if(!YOU.arm){YOU.arm=1}else{YOU.d=null;YOU.arm=0;try{localStorage.removeItem(YOU.k)}catch(x){}youLine();return youOpen('welcome')}}
+    youPaint()},true);
+  if(!VISITOR)return;youLoad();const bg=$('#bGoal');if(bg){bg.textContent='My house';bg.onclick=()=>youOpen()}const na=$('#nextAct');if(na)na.onclick=()=>youOpen('house');youLine();
+  /* a first visit: the welcome, once the house stands. Later visits: Kairos greets by name and names the next step */
+  const greet=()=>{if(!window.__vx||!window.__vx.BLD){setTimeout(greet,700);return}if(/[?&](stats|nowelcome)/.test(location.search))return;if(!YOU.d)youOpen('welcome');else{const g=youNext();toast((YOU.d.name?'Welcome back, '+YOU.d.name+'. ':'Welcome back. ')+(g?(g.step?'Next: '+g.step:'Kairos is waiting to hear your next step.'):'Nothing is pressing.'))}};setTimeout(greet,1200)}
 function goalInit(){const G=$('#goal');if(!G)return;G.addEventListener('keydown',e=>e.stopPropagation());G.addEventListener('keyup',e=>e.stopPropagation());
   G.addEventListener('input',e=>{const t=e.target,D=GOAL.draft;if(t.id==='gGoal'){D.goal=t.value;const b=G.querySelector('[data-g=next]');if(b)b.disabled=!t.value.trim()}else if(t.dataset.i!=null&&GOAL.scr==='steps'){const was=D.steps[+t.dataset.i].length>80;D.steps[+t.dataset.i]=t.value;const now=t.value.length>80;if(was!==now){const pos=t.selectionStart;goalPaint();const n=G.querySelector('input[data-i="'+t.dataset.i+'"]');if(n){n.focus();n.setSelectionRange(pos,pos)}}else{const b=G.querySelector('[data-g=save]');if(b)b.disabled=!(D.goal.trim()&&D.steps.some(x=>x.trim())&&!D.steps.some(x=>x.length>80))}}});
   G.addEventListener('click',e=>{if(e.target===G){goalClose();return}const b=e.target.closest('[data-g]');if(!b)return;const g=b.dataset.g,i=+b.dataset.i,D=GOAL.draft;
@@ -4444,7 +4502,11 @@ function fxStep(ts){if(!fxDrop)return;let k=0;for(const f of FOUNTS)for(let i=0;
 const TEMPLATE=false;
 /* v1.46: His Grace's private links are not in the public page (GOLEM's rule 5). On his own device they come from 'eh-links' in local storage, set once by opening the Estate at #links=<his private blob>; the address is cleared at once. A stranger's page holds no link and no private title; every record says it is not yet linked */
 const PRIV=(()=>{try{const h=location.hash||'';if(h.indexOf('#links=')===0){const t=h.slice(7).replace(/-/g,'+').replace(/_/g,'/');const j=decodeURIComponent(escape(atob(t)));JSON.parse(j);localStorage.setItem('eh-links',j);history.replaceState(null,'',location.pathname+location.search)}}catch(e){}try{return JSON.parse(localStorage.getItem('eh-links')||'null')||{}}catch(e){return{}}})();
-const URLS=Object.assign({golem:null,datahub:null,globe:null,chat:null,pardes:null},PRIV.urls||{});   /* v1.69: pardes, the Pardes page's own link (it is not a room of GOLEM). Private like the rest: it comes in the links given to His Grace's device, never from this file */
+const URLS=Object.assign({golem:null,datahub:null,globe:null,chat:null,pardes:null},PRIV.urls||{});
+/* v1.70, the Founders' Edition: owner and visitor. The owner's device is the one that holds his private links ('eh-links'); every other browser is a visitor's.
+   A visitor sees none of his record names, links or words: each record of the house is theirs to fill, kept in their own browser and sent nowhere */
+const OWNER=!!(PRIV.urls&&PRIV.urls.golem),VISITOR=!OWNER;
+const FOUNDERS=[];   /* the Founders' wall in the Entrance Hall: a name added here shows in the next frame, in order. One hundred places */   /* v1.69: pardes, the Pardes page's own link (it is not a room of GOLEM). Private like the rest: it comes in the links given to His Grace's device, never from this file */
 /* v1.6: every record opens its own room in GOLEM, not the front page */
 const ROOMOF={people:'people','v23:people':'people',roster:'people',nepsis:'carving',tree:'carving','v23:carving':'carving',library:'library',ledger:'ledger',wager:'ledger',orders:'orders','v23:orders':'orders',rules:'rules','v23:kairos':'kairos',genizah:'genizah',pantry:'pantry',notes:'notes',carving:'carving'};   /* v1.52: the Genizah, the Pantry Book and his Notes open their rooms in GOLEM, on his device only (the link is private) */
 const DHOF={'datahub:globe':'globe'};
@@ -4581,13 +4643,19 @@ function genHalls(){const t0=performance.now();let halls=0,bare=0,top=0,pieces=0
     if(c===0){pieces+=hallDress(R,hallTheme(R),'bare');bare++}else if(c*100/area<3.2||/Stair|Landing|Corridor/.test(R.n)){pieces+=hallDress(R,hallTheme(R),'top');top++}}
   for(const R of hallGaps()){HALLS.push(R);pieces+=hallDress(R,hallTheme(R),'hall');halls++}
   DSTAT.halls={halls,bare,top,pieces,ms:Math.round(performance.now()-t0)};return DSTAT.halls}
+function visitorWire(){if(!VISITOR)return;const PLAIN={'The Money Desks':'The desks','The week in review':'The side table','The house files':'The cabinet of files','The Manual':'The house book','The Thought Web':'The cabinet','Orders by Color':'The orders board','The alert desk':'The desk','The AI Frontier':'The cabinet','The workbench terminal':'The workbench','The focus tree':'The tree of goals','The Pantry Book':'The pantry book','The Seeing Stone':'The seeing stone'};
+  const SLOT=o=>!o.room?-1:o.room.n==='The Map Room'&&/map table/.test(o.n)?0:o.room.n==="His Grace's Study"?1:o.room.n==='The Estate Office'&&o.k==='ledger'?2:o.room.n==='The Calendar Room'&&o.k==='cal'?3:o.room.n==='The Long Gallery'?4:-1;
+  for(const o of OBJ){if(o.vw||o.k==='founders')continue;o.vw=1;if(o.k==='kairos'){o.n='Kairos: speak with him';o.a=['kbutler',0];continue}const sl=SLOT(o),b=o.n.split(':')[0];o.n=(PLAIN[b]||b)+(sl===0?': your goals':sl===1?': your next step':sl>1?': a goal of yours':'');o.a=o.k==='altar'?['info','A quiet place.']:['you',sl]}}   /* run more than once: a record that joins the list late (the Great Cedar, the wall) is wired when it comes */
 function wireRecords(){for(const o of OBJ){if(o.k==='kairos'&&!TEMPLATE){o.n='Kairos: speak with him';o.a=['kchat',0]}if(o.room&&o.room.n==='The Map Room'&&o.k==='globe'){OBJ.push(Object.assign({},o,{n:'The focus tree',k:'c2'}));o.n='The globe: the newest Globe';o.a=['doc',URLS.globe]}
     if(o.room&&o.room.n==='The Observatory'&&o.k==='globe'){o.n='The holo globe: the newest Globe';o.a=['doc',URLS.globe]}}
   /* v1.16: every globe in the estate, wherever it stands, opens the newest Globe */
   if(!TEMPLATE){for(const o of OBJ)if(o.k==='globe'&&o.a&&o.a[0]==='doc'&&String(o.a[1]).indexOf(URLS.datahub)===0){o.a=['doc',URLS.globe];o.n='The globe: the newest Globe'}
     for(const it of PQ){if(it.r.kind!=='globe'||!it.bid)continue;const fy=Math.round(it.y-.5),R=BLD[it.bid].rooms.find(r=>r.y===fy&&it.x>r.x0&&it.x<r.x1&&it.z>r.z0&&it.z<r.z1);if(!R)continue;
       if(OBJ.some(o=>o.k==='globe'&&o.bid===it.bid&&Math.abs(o.x-it.x)<2.5&&Math.abs(o.z-it.z)<2.5&&Math.abs(o.y-(fy+1))<2))continue;OBJ.push({n:'The globe: the newest Globe',a:['doc',URLS.globe],k:'globe',x:Math.round(it.x),y:fy+1,z:Math.round(it.z),bid:it.bid,l:R.l,room:R})}}
-  if(TEMPLATE)for(const o of OBJ){o.n=o.n.split(':')[0].replace('Kairos','The Steward');o.a=['info','Empty. This record is yours to fill.']}}
+  if(TEMPLATE)for(const o of OBJ){o.n=o.n.split(':')[0].replace('Kairos','The Steward');o.a=['info','Empty. This record is yours to fill.']}
+  /* v1.70: a visitor's house. Each record keeps its furniture and loses the owner's title: the name before the colon, or a plain one where that name was his.
+     Five of them carry the visitor's goals (the map table, the study desk, the ledger, the calendar, the gallery desk); every other one opens their house. Nothing opens a link */
+  visitorWire()}
 
 
 /* ---------- v1.15: the settling pass. It runs once everything is placed and before anything is drawn.
@@ -5094,8 +5162,8 @@ function frameOpen(){const B=BLD[OPEN_B];let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;for(c
 let FLY=null;function fly(p,dist){const tgt=new THREE.Vector3(...p);if(ISO){const off=camera.position.clone().sub(controls.target);FLY={t0:performance.now(),a:controls.target.clone(),b:tgt,ca:camera.position.clone(),cb:tgt.clone().add(off),za:camera.zoom,zb:Math.max(1,Math.min(10,170/dist))};return}const dir=camera.position.clone().sub(controls.target);dir.y=Math.max(dir.y,0);dir.normalize();if(dir.y<.55){dir.y=.75;dir.normalize()}FLY={t0:performance.now(),a:controls.target.clone(),b:tgt,ca:camera.position.clone(),cb:tgt.clone().add(dir.multiplyScalar(dist))}}
 const actBtn=(o,i)=>`<button class="b${o.a[0]==='cat'?'':' on'}" data-a="${i}">${esc(o.n)}</button>`;
 let CARD_ACTS=[];
-function showRoomCard(R){const hs=HOUSES[R.h];const acts=OBJ.filter(o=>o.room===R).map(o=>({n:o.n,a:o.a}));if(hs&&!TEMPLATE){for(const d of HOUSEDOCS[R.h]||[])acts.push({n:d[0],a:['doc',d[1]]});acts.push({n:'The '+hs[0]+' toolkits',a:['cat',R.h]})}CARD_ACTS=acts;
-  const c=$('#card');c.style.setProperty('--c',hs?hs[2]:'#D4AF37');c.innerHTML=`<button class="x" aria-label="Close">&times;</button><h2>${esc(R.n)}${hs&&hs[1]===R.n?' (main room)':''}</h2><div class="h">${esc(BLD[R.bid].short||BLD[R.bid].name)} . ${esc(BLD[R.bid].levels[R.l].n)}${hs?' . '+esc(hs[0]+', '+hs[1]):''}</div>${R.w?`<p>${esc(R.w)}</p>`:''}<div class="acts">${acts.map(actBtn).join('')||'<span class="meta">Nothing to open here yet.</span>'}</div>`;
+function showRoomCard(R){const hs=HOUSES[R.h];const acts=OBJ.filter(o=>o.room===R).map(o=>({n:o.n,a:o.a}));if(hs&&!TEMPLATE&&OWNER){for(const d of HOUSEDOCS[R.h]||[])acts.push({n:d[0],a:['doc',d[1]]});acts.push({n:'The '+hs[0]+' toolkits',a:['cat',R.h]})}CARD_ACTS=acts;
+  const c=$('#card');c.style.setProperty('--c',hs?hs[2]:'#D4AF37');c.innerHTML=`<button class="x" aria-label="Close">&times;</button><h2>${esc(RN(R.n))}${hs&&hs[1]===R.n?' (main room)':''}</h2><div class="h">${esc(BLD[R.bid].short||BLD[R.bid].name)} . ${esc(BLD[R.bid].levels[R.l].n)}${hs?' . '+esc(hs[0]+', '+hs[1]):''}</div>${R.w&&OWNER?`<p>${esc(R.w)}</p>`:''}<div class="acts">${acts.map(actBtn).join('')||'<span class="meta">Nothing to open here yet.</span>'}</div>`;
   c.hidden=false;c.querySelector('.x').onclick=()=>c.hidden=true;c.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>run(CARD_ACTS[+b.dataset.a].a))}
 function showObjCard(o){if(!o)return;CARD_ACTS=[{n:o.n,a:o.a}];const c=$('#card');c.style.setProperty('--c','#D4AF37');c.innerHTML=`<button class="x">&times;</button><h2>${esc(o.out||o.n)}</h2><div class="acts">${actBtn(o,0)}</div>`;c.hidden=false;c.querySelector('.x').onclick=()=>c.hidden=true;c.querySelector('[data-a]').onclick=()=>run(o.a)}
 /* labels */
@@ -5128,18 +5196,19 @@ function sheet(title,src){$('#shT').textContent=title;const f=$('#shF');SHEET=tr
   if(src.startsWith('nepsis.html')&&lastSrc.startsWith('nepsis.html')){try{f.contentWindow.location.hash=src.split('#')[1];lastSrc=src;return}catch(e){}}f.src=src;lastSrc=src}
 $('#shX').onclick=()=>{$('#sheet').classList.remove('on');SHEET=false;if(lastSrc.startsWith('index.html')){$('#shF').src='about:blank';lastSrc=''}};
 let kz=0;
-function run(a){if(!a)return;const[t,v]=a;if(t==='doc'&&!v){toast('Not yet linked.');return}
+function run(a){if(!a)return;if(VISITOR&&/^(nx|v23|doc|cat|kchat|goal|room)$/.test(a[0])){visitorWire();return youOpen()}   /* belt and braces: no click of a visitor's opens a link, a toolkit or the owner's chat */
+  const[t,v]=a;if(t==='doc'&&!v){toast('Not yet linked.');return}
   if(t==='nx'||t==='v23'){const u=VIEWURL(v);if(u)run(['doc',u]);else toast('Not yet linked.')}
   else if(t==='room')showRoomCard(v);
   else if(t==='cat')catalog(v);
   else if(t==='kchat')kchatOpen();
-  else if(t==='goal')goalOpen();
+  else if(t==='goal'){if(VISITOR)youOpen();else goalOpen()}   else if(t==='you')youOpen(YOU.d||v<0?'house':'welcome',v);   else if(t==='kbutler')youOpen('kairos');   else if(t==='founders')youOpen('founders');
   else if(t==='doc'){const a2=document.createElement('a');a2.href=v;a2.target='_blank';a2.rel='noopener';document.body.appendChild(a2);a2.click();a2.remove()}
   else if(t==='info')toast(v);
   else if(t==='kz')konetz()}
 const TITLE={'people':'The Circle','datahub:fig':'Public Figures','datahub:bridge':'Brief and In-Tray','nepsis':'The Road to the Summit','datahub:desk':'Desks and Alerts','library':'The Library shelves','ledger':'The Ledger','wager':'The Wager Desk','orders':'The Day','rules':'The Rules','datahub:edition':'The Edition','datahub:globe':'The Holo Globe','datahub:ai':'The AI Frontier','pardes':'The Pardes','tree':'The Great Tree','v23:kairos':'The Spire','v23:carving':'The focus tree','v23:people':'The Thought Web','v23:orders':'Orders by Color','roster':'The Registry roll'};
 function konetz(){toast('Konetz acknowledged. Standing down.');return;const b=$('#bKz');if(kz){kz=0;b.textContent='Konetz';toast('Konetz acknowledged. Standing down.')}else{kz=1;b.textContent='Tap again to stand down';setTimeout(()=>{kz=0;b.textContent='Konetz'},4000)}}
-$('#bTabs').hidden=true;tourInit();kchatInit();goalInit();if(!PRIV.urls&&!/[?&]stats/.test(location.search))$('#bStats').hidden=true;   /* v1.48: Stats is a tool for His Grace's device (or ?stats), not for visitors */
+$('#bTabs').hidden=true;tourInit();kchatInit();goalInit();youInit();if(!PRIV.urls&&!/[?&]stats/.test(location.search))$('#bStats').hidden=true;   /* v1.48: Stats is a tool for His Grace's device (or ?stats), not for visitors */
 /* the catalog */
 let KJ=null,CATS=[];
 async function catalog(h){$('#cat').classList.add('on');SHEET=true;CATS=[];if(!KJ){$('#catBody').innerHTML='<p class="meta">Opening the drawers...</p>';try{KJ=await (await fetch('kits.json')).json()}catch(e){$('#catBody').innerHTML='<p>The catalog could not be read on this connection.</p>';return}}
@@ -5243,7 +5312,7 @@ function walkStep(dt){{let b=null,bd=2.4;if(!PL.sit)for(const s of SEATS){const 
   else{player.visible=true;if(camera.near!==.3){camera.near=.3;camera.updateProjectionMatrix()}}
   /* where am I, what is near */
   let where='The park';if(WB!=null){const R=roomAt(WB,WL,Math.round(PL.x),Math.round(PL.z));PL.tall=R&&R.tall?1:0;where=R?R.n:(BLD[WB].short||BLD[WB].name)}else{let best=1e9;for(const B of BLD.slice(1)){if(B.hideWith)continue;const d=Math.hypot(B.lab[0]-PL.x,B.lab[2]-PL.z);if(d<best&&d<40){best=d;where='Near '+(B.short||B.name)}}if(PL.z>204&&vilD(PL.x,PL.z)<VILR){where=PL.x<0?'Lower Euphrates':'Kitezh Green';const py=PL.y-.5;for(const R of VROOMS)if(PL.x>R.x0&&PL.x<R.x1&&PL.z>R.z0&&PL.z<R.z1&&py>=R.y-.6&&py<R.yt+1){where=R.n;break}}else if(Math.max(Math.abs(PL.x),Math.abs(PL.z))>WALL)where='Beyond the wall'}
-  $('#where').textContent=where;
+  $('#where').textContent=RN(where);
   NEAR=null;let nd=3.4;for(const o of OBJ){const dd=Math.hypot(o.x-PL.x,o.z-PL.z);const dy=Math.abs(o.y-(PL.y+.5));if(dd<(o.out?7:nd)&&dy<3.5){nd=dd;NEAR=o}}
   if(!NEAR&&WB!=null){const R=roomAt(WB,WL,Math.round(PL.x),Math.round(PL.z));if(R&&HOUSES[R.h]){const d2=Math.hypot(R.c[0]-PL.x,R.c[2]-PL.z);if(d2<4)NEAR={n:'The '+HOUSES[R.h][0]+' files',a:['room',R]}}}
   const ab=$('#act');ab.hidden=!NEAR;if(NEAR&&ab.textContent!==NEAR.n)ab.textContent=NEAR.n;
@@ -5832,15 +5901,15 @@ function wallPlanDoors(){const B=BLD[1];if(!B)return[];CUR=1;const out=[];const 
     if((ways.get(r.R)||0)<2||(ways.get(r.other)||0)<2){out.push([r.R.n,r.other.n,'kept: the only other way']);continue}
     for(const[x,z]of r.cells){let y=r.f;while(!G(x,y,z)&&y<r.R.yt){S(x,y,z,wall);y++}}done.add(key);ways.set(r.R,ways.get(r.R)-1);ways.set(r.other,ways.get(r.other)-1);out.push([r.R.n,r.other.n])}
   CUR=0;return out}
-const TM={};async function build(){const t0=performance.now();let tm=t0;TM.start=Math.round(t0);const mark=k=>{const n=performance.now();TM[k]=Math.round(n-tm);tm=n};const Y=async()=>{await new Promise(r=>setTimeout(r,0));tm=performance.now()};genGround();mark('ground');await Y();const hall=genBuildings();chapelCeil();TM.blind=blindPanes();TM.sealed=sealBlind();TM.terrace=terraceSeal();TM.gholes=groundHoles();TM.alley=alleySeal();TM.belv=belvCeil();TM.chapelDress=chapelDress();TM.gunScreen=gunScreen();TM.walled=wallPlanDoors();TM.strings=stringClear();mark('buildings');await Y();const PRO=genProps2();TM.treads=stairTreads();TM.doorsMoved=doorsOffStairs();TM.casings=doorCasings();TM.boards=passageBoards();mark('rooms');await Y();genGrounds();mark('grounds');try{fitContours()}catch(e){}const PRS=genSets();mark('sets');await Y();genTrees();mark('trees');genFlowers();mark('flowers');settle();TM.unclip=unclip();TM.trusses=dropTrusses();TM.tidy=tidy();TM.cases=doorArchitraves();TM.furn=furnMap();mark('settle');await Y();TM.blind+=blindPanes();const t1=performance.now();
+const TM={};async function build(){const t0=performance.now();let tm=t0;TM.start=Math.round(t0);const mark=k=>{const n=performance.now();TM[k]=Math.round(n-tm);tm=n};const Y=async()=>{await new Promise(r=>setTimeout(r,0));tm=performance.now()};genGround();mark('ground');await Y();const hall=genBuildings();chapelCeil();TM.blind=blindPanes();TM.sealed=sealBlind();TM.terrace=terraceSeal();TM.gholes=groundHoles();TM.alley=alleySeal();TM.belv=belvCeil();TM.chapelDress=chapelDress();TM.gunScreen=gunScreen();TM.walled=wallPlanDoors();TM.strings=stringClear();mark('buildings');await Y();const PRO=genProps2();TM.treads=stairTreads();TM.doorsMoved=doorsOffStairs();TM.casings=doorCasings();TM.boards=passageBoards();mark('rooms');await Y();genGrounds();mark('grounds');try{fitContours()}catch(e){}const PRS=genSets();mark('sets');await Y();genTrees();mark('trees');genFlowers();mark('flowers');settle();TM.unclip=unclip();TM.trusses=dropTrusses();TM.tidy=tidy();TM.cases=doorArchitraves();TM.founders=foundersWall();TM.furn=furnMap();mark('settle');await Y();TM.blind+=blindPanes();const t1=performance.now();
   const groups=ST.net?netMesh():mesh();const t2=performance.now();await Y();let quads=0;
   for(const g of groups.values()){const obj=new THREE.Group();
     for(const k of['sg','glg']){const geo=g[k];if(!geo)continue;quads+=geo.index.count/6;const m=new THREE.Mesh(geo,k==='sg'?MATS.s:MATS.gl);if(k==='sg'){m.castShadow=true;m.receiveShadow=true}m.matrixAutoUpdate=false;m.updateMatrix();obj.add(m)}
     let wn=null;for(const k of['s','gl','wn','w','gs']){const gb=g[k];if(!gb||!gb.n)continue;quads+=gb.n;const m=new THREE.Mesh(gb.geo(),k==='wn'?MATS.gl:k==='s'&&!g.bid&&!g.vh?MATS.t:MATS[k]);m.scale.setScalar(.5);if(k==='wn')wn=m;if(k==='s'){m.castShadow=true;m.receiveShadow=true;if(g.gq)GRQ.push({m,q:g.gq})}else if(k==='w')m.receiveShadow=true;m.matrixAutoUpdate=false;m.updateMatrix();obj.add(m)}obj.matrixAutoUpdate=false;obj.updateMatrix();scene.add(obj);GROUPS.push({obj,bid:g.bid,band:g.band,si:g.si||0,vh:g.vh||0,x:g.x,z:g.z,wn})}
   try{TM.water=mergeWater()}catch(e){TM.water=String(e)}tm=performance.now();makeClouds();makeCards();makeExtras();const PPL=LIVE?buildLife():buildPeople();mark('life');await Y();const WIN=LIVE?buildWindowDetail():0;mark('windows');await Y();wdOutdoor();const PRB=buildProps();wdApply();mark('props');await Y();TM.stairq=buildStairs();TM.chapel=chapelGlass();TM.bars=glazeInside()+glazeInsideAll();mark('stairs');await Y();TM.ground=groundDress();const PRF=buildFloors();TM.trim=propTrim();fxInit();fxLightInit();postInit();rail();size();setTime('day');applyVis();styleUI();mark('scene');GOV.base=renderer.getPixelRatio();try{GOV.off=localStorage.getItem('euph_gov')==='off'}catch(e){}seaInit();seaUI();mark('sky');groveInit();mark('grove');flowersInit();mark('beds');if(posLoad())setTimeout(()=>toast('Walk, and you are back where you last stood.'),900);cullStep();
-  window.__vx={THREE,tidyStats:()=>TM.tidy,stood:(x,y,z)=>FSTOOD.has(FKEY(x,y,z)),viewUrl:k=>VIEWURL(k),roomOf:()=>ROOMOF,blindBetween:()=>blindPanes.between,trunkN:()=>TRUNKN,glz:()=>({bars:TM.bars,doors:glazeInsideAll.doors}),finOn:()=>FIN_ON,kbot:()=>({P:kairosBot(),H:kairosHeadVox().V,person:personVox(outfit('none',null,()=>.37))}),groundY,get KH(){return KH},GOAL,goalOpen,URLS,WDRESS,wdApply,regRow,holesOf,T20,LMAP,LAMPS,LDAY,FULL,GROVE,IMP,BENCH,benchUI,pq:PQ,palette:PAL,trail:trailAt,settle:SETTLE,skins:CSKINS,windows:windowList,dep:DSTAT,seats:SEATS,kseat:()=>KSEAT,vr:VROOMS,dmap:DMAP,isWin:g=>isPane(g),isBlind:g=>g===C.winB,isInv:g=>!!(g&&(PF[g]&IV)),props:Object.assign({},PRO,PRB,typeof PRF!=="undefined"?PRF:{},typeof PRS!=="undefined"?PRS:{}),FP:()=>FPV,setFP:v=>{FPV=v},life:LIFE,win:WIN,post:postRender,style:SK,quadsTotal:quads,people:PPL,PEOPLE,moveTo,fall,setFly,tapJump,KEYS,PROPS,propGet,pbox,GOV,govSet,cullStep,pickTime,photo,posSave,posLoad,HALLS,GR:GROUPS,TM,pal:()=>PAL.length,grove:()=>({trees:GROVE.n,ready:GROVE.ready,got:GROVE.got||0,ver:TVER,drawn:GROVE.drawn,worker:!!TWORK,bad:TBAD}),pickSeason,seak:()=>SEAK,grassRGB:()=>PAL[C.grass[0]].map(v=>+v.toFixed(3)),flowers:()=>FBED?FBED.stats():null,KIT,SEASONS,sea:()=>SEA,liveAt:d=>{SEAD=d;pickTime('live')},perf:()=>({ms:GOV.ms,worst:GOV.worst,lv:GOV.lv,calls:renderer.info.render.calls,tris:renderer.info.render.triangles}),G,T,renderer,scene,camera,controls,quads,groups:GROUPS.length,trees:TREES,objs:OBJ.length,rooms:BLD.slice(1).reduce((s,b)=>s+b.rooms.length,0),gen:Math.round(t1-t0),mesh:Math.round(t2-t1),setTime,openB,close,setMode,PL,run,catalog,BLD,OBJ,goStairs,pickAt,FLIGHTS,stairRamp};
+  window.__vx={THREE,tidyStats:()=>TM.tidy,stood:(x,y,z)=>FSTOOD.has(FKEY(x,y,z)),roomName:n=>RN(n),whereOf:o=>whereOf(o),owner:()=>OWNER,viewUrl:k=>VIEWURL(k),roomOf:()=>ROOMOF,blindBetween:()=>blindPanes.between,trunkN:()=>TRUNKN,glz:()=>({bars:TM.bars,doors:glazeInsideAll.doors}),finOn:()=>FIN_ON,kbot:()=>({P:kairosBot(),H:kairosHeadVox().V,person:personVox(outfit('none',null,()=>.37))}),groundY,get KH(){return KH},GOAL,goalOpen,URLS,WDRESS,wdApply,regRow,holesOf,T20,LMAP,LAMPS,LDAY,FULL,GROVE,IMP,BENCH,benchUI,pq:PQ,palette:PAL,trail:trailAt,settle:SETTLE,skins:CSKINS,windows:windowList,dep:DSTAT,seats:SEATS,kseat:()=>KSEAT,vr:VROOMS,dmap:DMAP,isWin:g=>isPane(g),isBlind:g=>g===C.winB,isInv:g=>!!(g&&(PF[g]&IV)),props:Object.assign({},PRO,PRB,typeof PRF!=="undefined"?PRF:{},typeof PRS!=="undefined"?PRS:{}),FP:()=>FPV,setFP:v=>{FPV=v},life:LIFE,win:WIN,post:postRender,style:SK,quadsTotal:quads,people:PPL,PEOPLE,moveTo,fall,setFly,tapJump,KEYS,PROPS,propGet,pbox,GOV,govSet,cullStep,pickTime,photo,posSave,posLoad,HALLS,GR:GROUPS,TM,pal:()=>PAL.length,grove:()=>({trees:GROVE.n,ready:GROVE.ready,got:GROVE.got||0,ver:TVER,drawn:GROVE.drawn,worker:!!TWORK,bad:TBAD}),pickSeason,seak:()=>SEAK,grassRGB:()=>PAL[C.grass[0]].map(v=>+v.toFixed(3)),flowers:()=>FBED?FBED.stats():null,KIT,SEASONS,sea:()=>SEA,liveAt:d=>{SEAD=d;pickTime('live')},perf:()=>({ms:GOV.ms,worst:GOV.worst,lv:GOV.lv,calls:renderer.info.render.calls,tris:renderer.info.render.triangles}),G,T,renderer,scene,camera,controls,quads,groups:GROUPS.length,trees:TREES,objs:OBJ.length,rooms:BLD.slice(1).reduce((s,b)=>s+b.rooms.length,0),gen:Math.round(t1-t0),mesh:Math.round(t2-t1),setTime,openB,close,setMode,PL,run,catalog,BLD,OBJ,goStairs,pickAt,FLIGHTS,stairRamp};
   TM.wall=Math.round(performance.now()-t0);frame();BENCH.first=performance.now();if(BENCH.on)setTimeout(benchUI,800);$('#bStats').onclick=()=>{const b=$('#bench');if(b)b.remove();else benchUI()};setTimeout(fxWarm,2500);if(!KIT||!GROVE.n||(GROVE.fd||0)>=GROVE.b.size*2)veilOff();else setTimeout(veilOff,8000)}
-function styleUI(){$('#brandS').textContent='Euphrates Hall v1.69 . the '+ST.n+' Estate';if(!SHOWCASE)$('#bStyle').hidden=true;$('#styleList').innerHTML=Object.entries(STYLES).map(([k,v])=>`<button class="b${k===SK?' on':''}" data-st="${k}">${esc(v.n)}<small>${esc(v.d)}</small></button>`).join('');
+function styleUI(){$('#brandS').textContent='Kairos Manor v1.70 . the '+ST.n+' Estate';if(!SHOWCASE)$('#bStyle').hidden=true;$('#styleList').innerHTML=Object.entries(STYLES).map(([k,v])=>`<button class="b${k===SK?' on':''}" data-st="${k}">${esc(v.n)}<small>${esc(v.d)}</small></button>`).join('');
   $('#styleList').querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>pickStyle(b.dataset.st));$('#bStyle').onclick=()=>{$('#stylebox').hidden=!$('#stylebox').hidden};
   if(ISO){for(const[id,dd]of[['#bRotL',-1],['#bRotR',1]]){const b=$(id);b.hidden=false;b.onclick=()=>{if(ISOV.rot)return;const a=ISOV.yaw;ISOV.rot={t0:performance.now(),a,b:a+dd*Math.PI/2};if(MODE==='walk'){ISOV.yaw=a+dd*Math.PI/2;ISOV.rot=null}}}}}
 $('#load').innerHTML='Raising Euphrates Hall<i>The '+ST.n+' Estate. Raising the mansion, about ten seconds.</i>';

@@ -36,11 +36,17 @@ def _route(route):
     return route.abort()  # fonts, worker, anything else outside
 
 
-def open_estate(p, base, page='index.html', w=844, h=390, timeout=180000):
+OWNER_LINKS = "try{localStorage.setItem('eh-links',JSON.stringify({urls:{golem:'https://golem.invalid/',datahub:'https://datahub.invalid/',globe:'https://globe.invalid/',chat:'https://chat.invalid/',pardes:'https://pardes.invalid/'}}))}catch(e){}"
+
+def open_estate(p, base, page='index.html', w=844, h=390, timeout=180000, owner=None):
+    # v1.70: the house is tested as its owner sees it unless a test asks for a visitor (owner=False, or EH_VISITOR=1).
+    # The owner's device is the one that holds private links; the tests give it stand-in links that lead nowhere.
+    if owner is None: owner = os.environ.get('EH_VISITOR') != '1'
     browser = p.chromium.launch(executable_path=(os.environ.get('CHROME') or None), args=['--no-sandbox','--use-gl=angle', '--use-angle=swiftshader',
                                       '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = browser.new_context(viewport={'width': w, 'height': h}, has_touch=True,
                               is_mobile=False, device_scale_factor=1)
+    if owner: ctx.add_init_script(OWNER_LINKS)
     pg = ctx.new_page()
     errors = []
     pg.on('pageerror', lambda e: errors.append(str(e)))

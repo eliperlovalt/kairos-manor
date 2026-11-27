@@ -58,7 +58,7 @@ R.clear=[];V.BLD.forEach((B,b)=>{if(!B||!B.rooms||!B.boxes||/Greenhouse/.test(B.
   for(const o of V.OBJ||[]){R.objects++;const a=o.a;if(!a||!a.length){R.dead.push([o.n,'no action',o.x,o.y,o.z]);continue}const t=a[0],v=a[1];R.kinds[t]=(R.kinds[t]||0)+1;
     if(t==='nx'||t==='v23'){const u=V.viewUrl?V.viewUrl(v):'?';if(!u)R.dead.push([o.n,'key '+v+' gives no link',o.x,o.y,o.z]);else if(u==='https://golem.invalid/'&&String(v)!=='golem')R.front.push([o.n,String(v)])}
     else if(t==='doc'){/* empty on the public page by design: the link is private */}
-    else if(!/^(cat|kchat|goal|info|room|kz)$/.test(t))R.dead.push([o.n,'unknown action '+t,o.x,o.y,o.z])}
+    else if(!/^(cat|kchat|goal|info|room|kz|founders|you|kbutler)$/.test(t))R.dead.push([o.n,'unknown action '+t,o.x,o.y,o.z])}
   if(V.URLS){for(const k in V.URLS)delete V.URLS[k];Object.assign(V.URLS,keep)}}
 return R}"""
 with serve(folder) as base, sync_playwright() as p:
