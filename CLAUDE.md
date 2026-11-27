@@ -1,6 +1,6 @@
 # Euphrates Hall: the Voxel Estate
 
-One big self-contained three.js (0.160.0) voxel page. Live at https://eliperlovalt.github.io/Eh/ (this repo's root `index.html`, served by GitHub Pages from `main`). Current version: v1.70. The brand line in the page says the version; bump it on every release.
+One big self-contained three.js (0.160.0) voxel page. Live at https://eliperlovalt.github.io/Eh/ (this repo's root `index.html`, served by GitHub Pages from `main`). Current version: v1.71. The brand line in the page says the version; bump it on every release.
 
 ## Where things are
 - `src/index.html`: THE SOURCE (about 760 KB, one file, ES module importing three from a CDN). Edit this, never the root file.

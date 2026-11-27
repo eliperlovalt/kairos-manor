@@ -430,3 +430,8 @@ Since v1.70 (the Founders' Edition, His Grace's answer by quiz on 27 Nov: build 
 - Searched before building, as KAIROS asked: the goal slate (`GOAL`, one goal with steps) existed and is kept for the owner; the tour (`#tourbar`) existed and is extended; a stranger's mode existed as a constant (`TEMPLATE`, off) that blanked every record: it is left, and `VISITOR` does the work.
 - Not done: Kairos walking the visitor round; the staff's bodies, souls and chain of command (His Grace's words relayed 27 Nov: the next big version); KAIROS's extras (AR, Call Kairos, link preview, Kairos's portrait), which wait on His Grace's choice.
 
+Since v1.71 (the staff, first step: faces; still in `tools/shots/v171/`, six faces, v1.70 above and v1.71 below):
+- Every figure has two eyes (`personVox`). The head is drawn six wide and folded to four ("v1.6: smaller heads"); the fold laid the right cheek's skin over the right eye and the right brow, so every figure in the house had one eye (His Grace, 27 Nov: "they all only have one eye"). A feature is no longer painted over by the skin beside it.
+- A nose that stands out one block in a darker tone of the figure's own skin, and ears.
+- Not done, the next big version (His Grace's words, relayed 27 Nov): figures at Kairos's fine scale with period dress by role, hands, variety; a calm pace and daily rounds tied to rooms and the hour; carried things and tasks; awareness of His Grace; a card on each figure; then the chain of command (Kairos gives orders, staff carry them out, an "Ask Kairos" panel, a scriptable reel sequence). Adults already walk at 1.05 blocks a second (`speed`), children at 1.5.
+
