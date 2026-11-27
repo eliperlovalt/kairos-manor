@@ -100,6 +100,16 @@ if python3 tools/tests/cmd_test.py src > "$tmp/cm.log" 2>&1; then
 else
   echo "gate: FAIL cmd_test src"; grep -v ' ok ' "$tmp/cm.log" | head -20; fail=1
 fi
+# v1.75: the extras. The model files for AR are sound in both folders (no browser); the preview tags, the portrait, Call Kairos and the sheet (the source copy).
+for f in src .; do
+  if python3 tools/tests/ar_test.py "$f" > "$tmp/ar.log" 2>&1; then echo "gate: ok   ar_test $f $(grep -c ' ok ' "$tmp/ar.log") checks"; else echo "gate: FAIL ar_test $f"; grep -v ' ok ' "$tmp/ar.log" | head -12; fail=1; fi
+done
+s=$(date +%s)
+if python3 tools/tests/extras_test.py src > "$tmp/ex.log" 2>&1; then
+  echo "gate: ok   extras_test src ($(( $(date +%s) - s ))s) $(grep -c ' ok ' "$tmp/ex.log") checks"
+else
+  echo "gate: FAIL extras_test src"; grep -v ' ok ' "$tmp/ex.log" | head -20; fail=1
+fi
 # v1.67: the walker bot. Every pair of rooms joined by a door, every stair and a circuit of the grounds, walked on foot twice.
 # A fall or a pass-through fails the gate; sticks, missing routes and rooms with no way in are printed.
 s=$(date +%s)
