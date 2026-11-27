@@ -19,7 +19,7 @@ const WATER=new Set();{const g0=G(-40,-1,90);if(g0)WATER.add(g0)}
 const solid=(x,y,z)=>G(x,y,z)!==0,free=(x,y,z)=>!solid(x,y,z)&&!solid(x,y+1,z),stood=(x,y,z)=>V.stood?V.stood(x,y,z):false;
 const floorOK=(x,y,z)=>{const g=G(x,y-1,z);return g!==0&&!WATER.has(g)};
 const key=(x,y,z)=>x+','+y+','+z;
-const BODY=new Set();for(const e of V.life||[])if(e.static||e.seated||(e.r||0)>=.7){const r=Math.ceil((e.r||.4)+.3);for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++)for(let dy=-1;dy<=1;dy++)BODY.add(key(Math.round(e.x)+dx,Math.round(e.y)+dy,Math.round(e.z)+dz))}
+const BODY=new Set();for(const e of V.life||[])if(e.static||(e.seated&&!e.soul)||(e.r||0)>=.7){const r=Math.ceil((e.r||.4)+.3);for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++)for(let dy=-1;dy<=1;dy++)BODY.add(key(Math.round(e.x)+dx,Math.round(e.y)+dy,Math.round(e.z)+dz))}
 const onStair=(x,y,z)=>{for(const f of V.FLIGHTS){const st=f.e0+f.dir*.5,en=st+f.dir*(f.L+1),p=f.axis==='z'?z:x,l=f.axis==='z'?x:z;if(l>=f.l0-1&&l<=f.l1+1&&p>=Math.min(st,en)-1&&p<=Math.max(st,en)+1&&y>=f.base&&y<=f.base+f.H+2)return true}return false};
 /* a move: level, one down, or one up. Up onto an unseen block only on a stair (stairs are climbed on unseen steps; a rail is an unseen block too, and nobody climbs a rail) */
 function nbrs(x,y,z){const o=[];for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,nz=z+dz;

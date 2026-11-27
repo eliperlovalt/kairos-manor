@@ -60,15 +60,20 @@ R.clear=[];V.BLD.forEach((B,b)=>{if(!B||!B.rooms||!B.boxes||/Greenhouse/.test(B.
     else if(t==='doc'){/* empty on the public page by design: the link is private */}
     else if(!/^(cat|kchat|goal|info|room|kz|founders|you|kbutler)$/.test(t))R.dead.push([o.n,'unknown action '+t,o.x,o.y,o.z])}
   if(V.URLS){for(const k in V.URLS)delete V.URLS[k];Object.assign(V.URLS,keep)}}
+/* 8 (v1.73): the household at four hours of its day: nobody stands in a piece of furniture, in a wall, or inside another */
+R.figs=[];R.people=0;if(V.soul&&V.soul.S.list.length){const S=V.soul.S;for(const h of[10.5,12.2,13.2,19.6]){V.soul.setHour(h);const L=S.list.filter(e=>!e.gone&&e.soul.plan);R.people=Math.max(R.people,L.length);
+    for(const e of L){if(e.seated)continue;const cx=Math.round(e.x),cz=Math.round(e.z);if(G(cx,e.y,cz)||G(cx,e.y+1,cz))R.figs.push([e.soul.name,'in a wall at '+h,cx,e.y,cz]);else if(V.stood(e.x,e.y,e.z))R.figs.push([e.soul.name,'in furniture at '+h,+e.x.toFixed(1),e.y,+e.z.toFixed(1)])}
+    for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){const a=L[i],b=L[j];if(Math.abs(a.y-b.y)>1)continue;const d=Math.hypot(a.x-b.x,a.z-b.z);if(d<.45)R.figs.push([a.soul.name,'inside '+b.soul.name+' at '+h,+a.x.toFixed(1),a.y,+a.z.toFixed(1)])}}V.soul.setHour(10.5)}
 return R}"""
 with serve(folder) as base, sync_playwright() as p:
     b,pg,err=open_estate(p,base,w=480,h=300)
     pg.wait_for_timeout(1500)
+    for _ in range(3): pg.screenshot(clip={'x':0,'y':0,'width':8,'height':8})   # a frame, so the household has taken its places
     R=pg.evaluate(JS)
     b.close()
 print('CONNECTION CHECK  %s'%folder)
-print('  %d pieces (%d standing), %d rooms, %d door cells, %d clickable objects'%(R['pieces'],R['standing'],R['rooms'],R['doors'],R['objects']))
-LAB=[('float','floating pieces'),('sunk','sunk pieces'),('clash','pieces run into one another'),('door','doors onto nothing'),('hole','holes in room floors'),('glass','glass at eye level between rooms'),('clear','see-through at eye height inside a house'),('dead','clickable objects that open nothing')]
+print('  %d pieces (%d standing), %d rooms, %d door cells, %d clickable objects, %d of the household at four hours'%(R['pieces'],R['standing'],R['rooms'],R['doors'],R['objects'],R.get('people',0)))
+LAB=[('float','floating pieces'),('sunk','sunk pieces'),('clash','pieces run into one another'),('door','doors onto nothing'),('hole','holes in room floors'),('glass','glass at eye level between rooms'),('clear','see-through at eye height inside a house'),('dead','clickable objects that open nothing'),('figs','figures in furniture, walls or one another')]
 for k,l in LAB:
     v=R[k]; print('  %-36s %d'%(l,len(v)))
     for row in v[:rows]: print('      '+' | '.join(str(x) for x in row))

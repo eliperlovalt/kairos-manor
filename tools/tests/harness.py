@@ -47,6 +47,8 @@ def open_estate(p, base, page='index.html', w=844, h=390, timeout=180000, owner=
     ctx = browser.new_context(viewport={'width': w, 'height': h}, has_touch=True,
                               is_mobile=False, device_scale_factor=1)
     if owner: ctx.add_init_script(OWNER_LINKS)
+    # v1.73: the household keeps the real hour; the tests hold the clock at half past ten in the morning so every run sees the same house
+    ctx.add_init_script('window.__EH_HOUR=%s' % os.environ.get('EH_HOUR','10.5'))
     pg = ctx.new_page()
     errors = []
     pg.on('pageerror', lambda e: errors.append(str(e)))

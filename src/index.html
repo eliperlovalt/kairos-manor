@@ -2366,9 +2366,9 @@ function figGeo(Q){const g=new THREE.BufferGeometry(),n=Q.n,w=new Uint8Array(n*1
 /* the bones: a figure's ten parts turn about the hip, the knee, the shoulder, the elbow and the neck */
 const FIG_ID=new THREE.Matrix4(),FIGSPH=new THREE.Sphere(new THREE.Vector3(0,1.5,0),2.4);
 function figRig(o,mat,now){const g=new THREE.Group(),bn=[],mk=(par,x,y,z)=>{const b=new THREE.Bone();b.position.set(x*FU,y*FU,z*FU);(par||g).add(b);bn.push(b);return b};
-  const root=mk(null,0,0,0),head=mk(root,0,FNECK,0),tl=mk(root,-4,FHIP,0),sl=mk(tl,0,FKNEE-FHIP,0),tr=mk(root,4,FHIP,0),sr=mk(tr,0,FKNEE-FHIP,0),al=mk(root,-10,FSH,0),fl=mk(al,0,FELB-FSH,0),ar=mk(root,10,FSH,0),fr=mk(ar,0,FELB-FSH,0);
+  const body=mk(null,0,FHIP,0),head=mk(body,0,FNECK-FHIP,0),tl=mk(null,-4,FHIP,0),sl=mk(tl,0,FKNEE-FHIP,0),tr=mk(null,4,FHIP,0),sr=mk(tr,0,FKNEE-FHIP,0),al=mk(body,-10,FSH-FHIP,0),fl=mk(al,0,FELB-FSH,0),ar=mk(body,10,FSH-FHIP,0),fr=mk(ar,0,FELB-FSH,0);   /* v1.73: the trunk turns at the hip (a bow), so the legs hang from the figure and the arms and head from the trunk */
   if(o.kid)head.scale.setScalar(1.16);g.updateMatrixWorld(true);const sks=new THREE.Skeleton(bn);
-  g.userData={l1:tl,l2:tr,s1:sl,s2:sr,a1:al,a2:ar,f1:fl,f2:fr,head,far:null,near:null,sks,o,skirt:o.lower.t==='skirt',fig2:1};
+  g.userData={l1:tl,l2:tr,s1:sl,s2:sr,a1:al,a2:ar,f1:fl,f2:fr,head,body,far:null,near:null,sks,o,skirt:o.lower.t==='skirt',fig2:1};
   if(now){const m=new THREE.SkinnedMesh(figGeo(figQuads(figBuild(o))),mat);m.bind(sks,FIG_ID);m.castShadow=true;m.boundingSphere=FIGSPH;g.add(m);g.userData.near=m}return g}
 function figFar(g,mat){const ud=g.userData;if(ud.far)return ud.far;const m=new THREE.SkinnedMesh(figGeo(figQuads(figHalf(figBuild(ud.o)))),mat);m.bind(ud.sks,FIG_ID);m.castShadow=true;m.boundingSphere=FIGSPH;g.add(m);ud.far=m;FIGQ.far++;return m}
 const FIGQ={near:26,keep:40,list:[],made:0,let:0,far:0,bf:0,bn:0};
@@ -2448,7 +2448,7 @@ function figSpec(role,h,room,r,i,child){const pick=a=>a[Math.floor(r()*a.length)
   if(o.sex==='f'){if(!o.hs)o.hs=pick(['pomp','bun','chignon','bun']);o.fh=null}
   else{if(!o.hs)o.hs=o.age>.55&&r()<.3?'bald':pick(['short','part','part','slick','curly','crop']);if(o.fh===undefined){const q=r();o.fh=o.age<.25?null:q<.42?null:q<.74?'tache':q<.86?'beard':q<.94?'chops':'goatee'}}
   if(o.age>.74)o.grey=o.age>.88?2:1;if(child){o.grey=0;o.fh=null;o.stout=false}
-  return o}
+  if(!o.role)o.role=role||null;o.h=h||null;return o}
 const T_BAND=new Set(['silver','copper','yellow','green','pink','violet']);
 /* a figure at rest: the limbs come back to hang, and the head turns to His Grace when he is near and in front */
 function figIdle(e,ud,dt){const k=Math.min(1,dt*7);for(const b of[ud.l1,ud.l2,ud.s1,ud.s2,ud.a1,ud.a2])b.rotation.x-=b.rotation.x*k;ud.f1.rotation.x+=(-.1-ud.f1.rotation.x)*k;ud.f2.rotation.x+=(-.1-ud.f2.rotation.x)*k;
@@ -2479,7 +2479,203 @@ function furnMap(){const SK=/rug|carpet|runner|door|arch|sash|dado|panel|cornice
     const hx=(r.b.x1-r.b.x0+1)*u/2+.08,hz=(r.b.z1-r.b.z0+1)*u/2+.08;if(hx<.25||hz<.25||hx*hz>9)continue;const th=it.th||0,lx=(r.b.x0+r.b.x1)/2*u,lz=(r.b.z0+r.b.z1)/2*u,c=Math.cos(th),sn=Math.sin(th),ax=it.x+lx*c+lz*sn,az=it.z-lx*sn+lz*c,R=Math.hypot(hx,hz),yb=Math.round(fy)+1;
     for(let gx=Math.ceil((ax-R)*2);gx<=Math.floor((ax+R)*2);gx++)for(let gz=Math.ceil((az-R)*2);gz<=Math.floor((az+R)*2);gz++){const dx=gx/2-ax,dz=gz/2-az;if(Math.abs(dx*c-dz*sn)<=hx&&Math.abs(dx*sn+dz*c)<=hz){FSTOOD.add(FKEY(gx/2,yb,gz/2));n++}}}
   return n}
-function lifeNear(x,y,z,r,self){for(const o of LIFE){if(o===self||o.water||Math.abs(o.y-y)>1.6)continue;const rr=r+(o.r||.36),dx=o.x-x,dz=o.z-z;if(dx*dx+dz*dz<rr*rr)return o}return null}
+/* =========================================================
+   v1.73: the staff's souls. His Grace, 27 Nov: "ensouling all of the milling AI agents".
+   Until now a figure paced at random inside its room. Now each person of the household has a name, a place in it, and a day: a timetable by the hour
+   (SOULDAY) that sends them to real places (a station: a free cell beside a piece of furniture, or a seat) by a real way, found on the block grid through
+   doors and up and down stairs (soulPath, a few hundred cells a frame, kept once found). At a station they do the task: work with the hands, dust, write,
+   wait, serve with a tray, eat at table. They carry what the task needs. They know His Grace: the head turns, a man bows, a woman curtseys, and they
+   wait for him to pass. At night most go up to bed. All of it is scripted and local: nothing is sent anywhere, and nothing costs.
+   ========================================================= */
+const SOUL={on:true,fix:null,list:[],paths:new Map(),q:[],job:null,pools:new Map(),taken:new Set(),hour:12,tk:0,stats:{found:0,fails:0,tele:0,nodes:0,bows:0}};
+function soulHour(){if(SOUL.fix!=null)return SOUL.fix;const d=SEAD?new Date(SEAD):new Date(),h=d.getHours()+d.getMinutes()/60;if(LIVEON)return h;return TODK==='night'?23.2:TODK==='dusk'?18.6:(h>=7&&h<17?h:11)}
+/* ---- the way from one cell to another: level, one down, or one up (up onto an unseen block only on a stair), never through a standing piece ---- */
+const rtFree=(x,y,z)=>!G(x,y,z)&&!G(x,y+1,z),rtStood=(x,y,z)=>FSTOOD.has(FKEY(x,y,z)),rtFloor=(x,y,z)=>{const g=G(x,y-1,z);return g!==0&&!(PF[g]&WA)};
+function rtStair(x,y,z){for(const f of FLIGHTS){const st=f.e0+f.dir*.5,en=st+f.dir*(f.L+1),p=f.axis==='z'?z:x,l=f.axis==='z'?x:z;if(l>=f.l0-1&&l<=f.l1+1&&p>=Math.min(st,en)-1&&p<=Math.max(st,en)+1&&y>=f.base&&y<=f.base+f.H+2)return true}return false}
+function rtNbrs(x,y,z,o){o.length=0;for(const[dx,dz]of RT4){const nx=x+dx,nz=z+dz;
+    if(rtFree(nx,y,nz)){if(rtStood(nx,y,nz)||rtStood(x+dx/2,y,z+dz/2))continue;let ny=y;if(!G(nx,ny-1,nz))ny--;if(rtFloor(nx,ny,nz)&&rtFree(nx,ny,nz)&&!rtStood(nx,ny,nz))o.push(nx,ny,nz,ny===y?1:3)}
+    else if(G(nx,y,nz)&&rtFree(nx,y+1,nz)&&!G(x,y+2,z)&&!rtStood(nx,y+1,nz)&&rtFloor(nx,y+1,nz)&&(!(PF[G(nx,y,nz)]&IV)||rtStair(nx,y,nz)))o.push(nx,y+1,nz,3)}return o}
+const RT4=[[1,0],[-1,0],[0,1],[0,-1]];
+/* a search is a job that is worked a little each frame, so no frame waits for a long way to be found */
+function soulJob(a,b,cap){const h=(x,y,z)=>Math.abs(x-b[0])+Math.abs(z-b[2])+2*Math.abs(y-b[1]),f0=h(a[0],a[1],a[2]),B=[];B[0]=[[a[0],a[1],a[2],0,null]];return{a,b,cap:cap||40000,g:new Map([[I(a[0],a[1],a[2]),0]]),B,f0,f:0,n:0,h,done:false,path:null}}
+function soulWork(J,budget){const kb=I(J.b[0],J.b[1],J.b[2]),nb=[];let n=0;
+  while(J.f<J.B.length&&n<budget){const L=J.B[J.f];if(!L||!L.length){J.f++;continue}const c=L.pop(),kc=I(c[0],c[1],c[2]);if(J.g.get(kc)<c[3])continue;n++;J.n++;
+    if(kc===kb){const p=[];for(let q=c;q;q=q[4])p.push([q[0],q[1],q[2]]);J.path=p.reverse();J.done=true;return true}
+    if(J.n>J.cap)break;rtNbrs(c[0],c[1],c[2],nb);
+    for(let i=0;i<nb.length;i+=4){const x=nb[i],y=nb[i+1],z=nb[i+2],nd=c[3]+nb[i+3],k=I(x,y,z);if(!(J.g.get(k)<=nd)){J.g.set(k,nd);const f=nd+J.h(x,y,z)-J.f0;(J.B[f]||(J.B[f]=[])).push([x,y,z,nd,c])}}}
+  if(J.f>=J.B.length||J.n>J.cap){J.done=true;return true}return false}
+/* corners cut: on one level a run of cells becomes a straight line where the line is clear */
+function soulClear(x0,z0,x1,z1,y){const d=Math.hypot(x1-x0,z1-z0),n=Math.ceil(d/.25),px=-(z1-z0)/(d||1)*.32,pz=(x1-x0)/(d||1)*.32;
+  for(let i=0;i<=n;i++){const t=i/n,x=x0+(x1-x0)*t,z=z0+(z1-z0)*t;for(const s of[-1,0,1]){const ax=x+px*s,az=z+pz*s,cx=Math.round(ax),cz=Math.round(az);if(!rtFree(cx,y,cz)||!G(cx,y-1,cz)||rtStood(ax,y,az))return false}}return true}
+function soulSmooth(P){const out=[P[0]];let i=0;while(i<P.length-1){let j=i+1;for(let k=Math.min(P.length-1,i+14);k>i+1;k--){let lvl=true;for(let q=i;q<=k;q++)if(P[q][1]!==P[i][1]){lvl=false;break}if(lvl&&soulClear(P[i][0],P[i][2],P[k][0],P[k][2],P[i][1])){j=k;break}}out.push(P[j]);i=j}return out}
+/* ---- stations: the free cells round a piece of furniture, and the seats ---- */
+function soulRoom(n){if(!n)return null;for(const B of BLD.slice(1))if(B&&B.rooms)for(const r of B.rooms)if(r.n===n)return r;return null}
+function soulStand(x,z,y,R){let best=null,bd=9;for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){const cx=Math.round(x)+dx,cz=Math.round(z)+dz;if(R&&(cx<=R.x0||cx>=R.x1||cz<=R.z0||cz>=R.z1))continue;if(!rtFree(cx,y,cz)||!rtFloor(cx,y,cz)||rtStood(cx,y,cz))continue;
+    let open=0;for(const[ax,az]of RT4)if(rtFree(cx+ax,y,cz+az)&&!rtStood(cx+ax,y,cz+az))open++;if(!open)continue;const d=Math.hypot(cx-x,cz-z);if(d<bd){bd=d;best=[cx,y,cz]}}return best}
+function soulOpen(x,y,z){const seen=new Set([I(x,y,z)]),q=[x,y,z],nb=[];let n=0;while(q.length&&seen.size<48&&n<200){const cz=q.pop(),cy=q.pop(),cx=q.pop();n++;rtNbrs(cx,cy,cz,nb);for(let i=0;i<nb.length;i+=4){const k=I(nb[i],nb[i+1],nb[i+2]);if(!seen.has(k)){seen.add(k);q.push(nb[i],nb[i+1],nb[i+2])}}}return seen.size>=48}   /* a place to stand has somewhere to go: not a pocket shut in by furniture */
+const soulGap=(x,y,z)=>{const w=(a,b)=>{const g=G(a,y,b)||G(a,y+1,b);return g&&!(PF[g]&IV)},n=(dx,dz)=>w(x+dx,z+dz)?0:w(x+2*dx,z+2*dz)?1:9;return n(-1,0)+n(1,0)<=1||n(0,-1)+n(0,1)<=1};   /* a way one or two blocks wide between walls: a doorway */
+function soulDoor(x,y,z){if(soulGap(x,y,z))return true;for(const[dx,dz]of RT4)for(let d=1;d<=2;d++)if(soulGap(x+dx*d,y,z+dz*d)&&rtFree(x+dx*d,y,z+dz*d))return true;return false}   /* nobody's place of work is in a doorway or within two blocks of one (KAIROS: staff on the thresholds; the walker bot stuck on one in the Ballroom door) */
+function soulPool(rn,kind){const key=rn+'|'+kind;let P=SOUL.pools.get(key);if(P)return P;P=soulPool0(rn,kind,key).filter(st=>soulOpen(st.x,st.y,st.z)&&!soulDoor(st.x,st.y,st.z));P.forEach((st,i)=>{st.id=key+'#'+i});SOUL.pools.set(key,P);return P}
+function soulPool0(rn,kind,key){const P=[];const R=soulRoom(rn);if(!R)return P;const y=R.y+1,seen=new Set();
+  if(kind==='seat'||kind==='desk'){for(const s of SEATS){if(s.x<R.x0||s.x>R.x1||s.z<R.z0||s.z>R.z1||s.y<R.y+.5||s.y>R.y+2.2)continue;if(kind==='seat'&&!/windsor|chairDining|chairHall|hallBench|settle|sideChair/.test(s.k))continue;const c=soulStand(s.x,s.z,y,R);if(!c)continue;P.push({id:key+'#'+P.length,x:c[0],y,z:c[2],yaw:s.yaw,seat:s,rn,k:s.k})}return P}
+  if(kind==='floor'){for(let t=0;t<60&&P.length<10;t++){const x=R.x0+2+((t*7919)%Math.max(1,R.x1-R.x0-3)),z=R.z0+2+((t*104729)%Math.max(1,R.z1-R.z0-3)),k=x+','+z;if(seen.has(k))continue;seen.add(k);if(rtFree(x,y,z)&&rtFloor(x,y,z)&&!rtStood(x,y,z)&&soulStand(x,z,y,R))P.push({id:key+'#'+P.length,x,y,z,yaw:Math.atan2((R.x0+R.x1)/2-x,(R.z0+R.z1)/2-z),rn,k:'floor'})}return P}
+  const re=new RegExp('^('+kind+')$');
+  for(const it of PQ){if(!it.r||it.bid!==R.bid||!re.test(it.r.kind))continue;if(it.x<R.x0||it.x>R.x1||it.z<R.z0||it.z>R.z1||Math.abs(it.y-.5-y)>1.2)continue;const Bx=pbox(it.r),th=it.th||0,c=Math.cos(th),sn=Math.sin(th),hx=(Bx.x1-Bx.x0)/2+.75,hz=(Bx.z1-Bx.z0)/2+.75,mx=(Bx.x0+Bx.x1)/2,mz=(Bx.z0+Bx.z1)/2;
+    const pts=[];for(let u=-hx+.75;u<=hx-.74;u+=1.1){pts.push([u,hz]);pts.push([u,-hz])}for(let v=-hz+.75;v<=hz-.74;v+=1.1){pts.push([hx,v]);pts.push([-hx,v])}if(!pts.length)pts.push([0,hz],[0,-hz],[hx,0],[-hx,0]);
+    for(const[lx,lz]of pts){const wx=it.x+(mx+lx)*c+(mz+lz)*sn,wz=it.z-(mx+lx)*sn+(mz+lz)*c,cx=Math.round(wx),cz=Math.round(wz),k=cx+','+cz;if(seen.has(k)||cx<=R.x0||cx>=R.x1||cz<=R.z0||cz>=R.z1)continue;if(!rtFree(cx,y,cz)||!rtFloor(cx,y,cz)||rtStood(cx,y,cz)||rtStood(wx,y,wz))continue;seen.add(k);
+      P.push({id:key+'#'+P.length,x:cx,y,z:cz,yaw:Math.atan2(it.x+mx*c+mz*sn-cx,it.z-mx*sn+mz*c-cz),rn,k:it.r.kind})}}
+  return P}
+/* ---- the household: names, and each role's day ---- */
+const SN_M=['Thomas','William','James','Arthur','George','Albert','Henry','Frederick','Walter','Ernest','Harold','Edward','Charles','Alfred','Percy','Herbert','Sidney','Stanley','Leonard','Reginald','Cecil','Hugh','Edgar','Samuel','Joseph','John','Robert','Frank','Jack','Tom'],
+ SN_F=['Mary','Annie','Elsie','Florence','Edith','Alice','Ethel','Lily','Rose','Daisy','Ada','Mabel','Gladys','Hilda','Ivy','Nellie','Maud','Beatrice','Winifred','Agnes','Emily','Clara','Dorothy','Violet','Hannah','Sarah','Kate','Ruth','Margaret','Eliza'],
+ SN_S=['Ashby','Booth','Calder','Dunn','Eaves','Farrow','Garland','Hale','Ingram','Jessop','Kemp','Lowe','Marsh','Nash','Oakes','Pike','Quince','Reeve','Sayer','Thorne','Upton','Vane','Webb','Yates','Alder','Birch','Coombe','Dale','Fenn','Gorse','Holt','Lark','Moss','Penn','Rudd','Stile','Tarn','Wold'];
+const SOULT={footman:'Footman',cellarman:'Under-butler',hallboy:'Hall boy',housekeeper:'Housekeeper',housemaid:'Housemaid',cook:'Cook',kitchenmaid:'Kitchen maid',scullery:'Scullery maid',gardener:'Gardener',groom:'Groom',farmhand:'Farm hand',priest:'Vicar',villager:'Of the village',
+ gold:['Gentleman of the Crown','Lady in waiting'],silver:['Clerk of the Exchequer','Typist to the Exchequer'],white:['Chaplain','Chaplain'],copper:['Keeper of the Rolls','Archivist'],blue:['Officer of the Admiralty','Of the Admiralty'],yellow:['Fellow of the Royal Society','Of the Royal Society'],green:['Engineer','Botanist'],
+ violet:['Of the Revels','Of the Revels'],orange:['Armourer','Armourer'],grey:['Officer of the Horse Guards','Of the Horse Guards'],obsidian:['Drill sergeant','Drill sergeant'],pink:['Gentleman of the Drawing Room','Lady of the Drawing Room'],red:['Yeoman','Yeoman'],brown:['Footman','Housemaid']};
+const SOULR={blue:['Lieutenant','Commander','Captain'],grey:['Captain','Major','Colonel'],obsidian:['Sergeant','Corporal','Sergeant'],red:['Trooper','Corporal','Sergeant'],yellow:['Dr','Dr','Professor'],white:['The Reverend Mr','The Reverend Mr','Canon']};
+function soulName(o,role,h,r,i){const f=o.sex==='f',first=(f?SN_F:SN_M)[Math.floor(r()*30)],sur=SN_S[Math.floor(r()*SN_S.length)];let name,short,title;
+  if(role==='housekeeper'||role==='cook'){name='Mrs '+sur;short=name}else if(role==='cellarman'){name='Mr '+sur;short=name}
+  else if(/^(footman|hallboy|housemaid|kitchenmaid|scullery|groom|farmhand)$/.test(role||'')){name=first+' '+sur;short=first}
+  else if(role==='gardener'){name='Mr '+sur;short=sur}else if(role==='priest'){name='The Reverend Mr '+sur;short='Mr '+sur}
+  else if(role==='villager'){name=o.kid?first+' '+sur:(f?(o.age>.45?'Mrs ':'Miss '):'Mr ')+sur;short=o.kid?first:name}
+  else{const rk=!f&&SOULR[h]?SOULR[h][Math.min(2,Math.floor(o.age*3))]:null;name=(rk?rk+' ':f?(o.age>.45?'Mrs ':'Miss '):'Mr ')+sur;short=name}
+  if(SOULT[role])title=role==='footman'?['First footman','Second footman','Third footman','Footman'][Math.min(3,SOUL.nFoot=(SOUL.nFoot||0)+1)-1]:role==='housemaid'?(SOUL.nMaid=(SOUL.nMaid||0)+1)===1?'Head housemaid':'Housemaid':SOULT[role];
+  else title=h&&SOULT[h]?SOULT[h][f?1:0]:'Guest of the house';
+  return{name,short,title,f}}
+/* a day is a list of [hour it begins, room, what to stand at (a pattern of furniture kinds, or seat, desk, floor), task, what the card says, what is carried]; "home" is the room the figure began in */
+const SH="The Servants' Hall",DR='The State Dining Room',MEAL=[[8,SH,'seat','eat','At breakfast in the Servants\' Hall'],[12,SH,'seat','eat','At the servants\' dinner'],[21.5,SH,'seat','eat','At supper']],BED=[22.5,null,'bed','bed','Gone up to bed'];
+const day=(...a)=>a.concat(MEAL,[BED]).sort((p,q)=>p[0]-q[0]);
+const SOULDAY={
+ footman:day([6.5,"The Butler's Pantry",'sideboard|strongbox|bookcase','work','Cleaning the silver in the pantry'],[9,DR,'sideboard|tableDining','work','Laying the table','tray'],[10.5,'The Entrance Hall','consoleTable|hallBench|pedestalTable|doorDouble','stand','On duty in the hall'],[13,DR,'sideboard','stand','Waiting at luncheon','tray'],[14.5,"The Butler's Pantry",'sideboard|bookcase','work','Washing the glass'],[16,'The Drawing Room','teaTable|pedestalTable|consoleTable','work','Bringing in the tea','tray'],[17,'The Entrance Hall','consoleTable|hallBench|pedestalTable|doorDouble','stand','On duty in the hall'],[19.5,DR,'sideboard','stand','Waiting at dinner','tray']),
+ cellarman:day([6.5,'home','wineRack|barrelRack|barrel|crateStack','work','Counting the bottles'],[9,"The Butler's Pantry",'sideboard|strongbox','work','Decanting the wine','tray'],[10.5,'home','wineRack|barrelRack|kitchenTable','work','Racking the claret'],[13,DR,'sideboard','stand','Serving the wine','tray'],[14.5,'home','wineRack|barrelRack|barrel','work','In the cellar book','book'],[19.5,DR,'sideboard','stand','Serving the wine','tray']),
+ hallboy:day([6,'The Boot Room','workbench|bootRack','work','Blacking the boots'],[9,SH,'welshDresser|dresserKitchen|tableDining|trestleTable','work','Clearing the table','tray'],[10,'The Boot Room','workbench|bootRack|coatStand','work','Brushing the coats'],[13,SH,'tableDining|trestleTable|welshDresser','work','Clearing the table','tray'],[14,'The Kitchen','kitchenRange|kitchenTable','work','Carrying coal for the range','scuttle'],[16,'The Boot Room','workbench|bootRack','work','Cleaning the knives'],[19,'The Kitchen','kitchenTable','work','Fetching and carrying','scuttle']),
+ housekeeper:day([6.5,'home','desk','write','At her accounts','book'],[9,'The Still Room','dresserKitchen|kitchenTable|keyCabinet','work','Giving out the stores','book'],[10.5,'The Drawing Room','displayCabinet|bookcase|consoleTable','stand','Seeing that the rooms are done'],[13,'home','desk','write','Writing the orders','book'],[15,'The Still Room','dresserKitchen|kitchenTable','work','Making the preserves'],[17,'home','desk','write','At her accounts','book'],[19.5,'The Entrance Hall','consoleTable|pedestalTable','stand','Seeing the house ready for the evening']),
+ housemaid:day([6,'The Drawing Room','fireplace|coalScuttle|sofa|pedestalTable','dust','Laying the fires and dusting','scuttle'],[9,'The Double Library','bookcase|globe|writingTable','dust','Dusting the Library','duster'],[10.5,'The Morning Room','pedestalTable|commode|consoleTable|displayCabinet','dust','Doing the Morning Room','duster'],[13,'The Great Hall','tableDining|pedestalTable|settee','dust','Dusting the Great Hall','duster'],[15,SH,'tableDining|trestleTable|welshDresser','work','Mending the linen'],[17,'The Drawing Room','fireplace|pedestalTable|sofa','dust','Making up the fires','scuttle'],[19.5,'The Entrance Hall','consoleTable|pedestalTable|hallBench','dust','Turning down for the night','duster']),
+ cook:day([6,'home','kitchenRange','work','At the range'],[9,'home','kitchenTable|kitchenRange','work','Making the luncheon'],[13,'home','kitchenRange|kitchenTable','work','Sending up the luncheon'],[14.5,'home','kitchenTable','work','Baking for tea'],[17,'home','kitchenRange|kitchenTable','work','Cooking the dinner'],[20.5,'home','kitchenTable','work','Planning tomorrow with the housekeeper','book']),
+ kitchenmaid:day([6,'home','kitchenRange|kitchenTable','work','Lighting the range'],[9,'home','kitchenTable','work','Preparing the vegetables'],[13,'home','kitchenTable|kitchenRange','work','Dishing up','tray'],[14.5,'The Still Room','kitchenTable|dresserKitchen','work','Making the tea trays','tray'],[17,'home','kitchenTable|kitchenRange','work','Helping with the dinner'],[20.5,'home','kitchenTable','work','Scrubbing the table']),
+ scullery:day([6,'The Scullery','kitchenTable|milkChurns|butterChurn','work','Scouring the pans'],[9,'The Scullery','kitchenTable|butterChurn','work','Churning the butter'],[13,'home','kitchenTable|kitchenRange','work','Washing up the luncheon'],[14.5,'The Scullery','kitchenTable|milkChurns','work','Washing up'],[17,'home','kitchenTable','work','Peeling for the dinner'],[20.5,'The Scullery','kitchenTable','work','Washing up the dinner']),
+ member:[[7.5,'home','desk','write','At work'],[13,DR,'seat','eat','At luncheon in the Dining Room'],[14,'home','desk','write','At work'],[20,DR,'seat','eat','At dinner in the Dining Room'],[21.5,'home','desk','read','Sitting up late'],[23.5,null,'bed','bed','Retired for the night']],
+ night:[[0,'home','floor','stand','Keeping the night watch'],[7.5,'home','desk','write','At work'],[13,'home','floor','stand','At work'],[21,'home','floor','stand','Keeping the night watch']]};
+const SOULWORK={gold:'Attending at court',silver:'Casting the accounts',white:'Saying the office',copper:'Keeping the rolls',blue:'Keeping the watch',yellow:'At an experiment',green:'Minding the engines',violet:'Rehearsing',orange:'At the forge',grey:'On duty',obsidian:'Drilling',pink:'At leisure',red:'On parade'};
+function soulInit(){let n=0,seatN=0;SOUL.list.length=0;const dine={n:0};
+  for(const e of LIFE){if(e.kind!=='person'||e.kh||!e.fig.userData.fig2)continue;const ud=e.fig.userData,o=ud.o,sp={role:o.role,h:o.h,room:e.room||(e.indoor&&SOULDAY[o.role]?SH:null)};   /* a servant met in a passage belongs to the Servants' Hall */let sd=(Math.round(e.x)*73856093^Math.round(e.z)*83492791^0x5bd1)>>>0;const r=()=>{sd=(sd*1664525+1013904223)>>>0;return sd/4294967296};
+    const role=sp.role,nm=soulName(o,role,sp.h,r,n),s=e.soul=Object.assign(nm,{role,h:sp.h,home:sp.room,plan:null,si:-1,st:'free',station:null,until:0,greet:-99,bow:0,jam:0,idx:n,phase:r()*6.28});
+    if(e.indoor&&sp.room){if(SOULDAY[role])s.plan=SOULDAY[role];else if(sp.h&&sp.h!=='brown'){const nightly=sp.h==='blue'||(sp.h==='grey'&&n%2===0);s.plan=nightly?SOULDAY.night:SOULDAY.member;s.dines=!nightly&&/^(gold|pink|silver|violet|copper)$/.test(sp.h)&&dine.n++<12}}
+    SOUL.list.push(e);n++}
+  return n}
+const soulSlot=(s,h)=>{const P=s.plan;let k=P.length-1;for(let i=0;i<P.length;i++)if(P[i][0]<=h)k=i;return k};
+/* the station for a slot: one this figure can have to itself. A meal with no seat left is taken standing; one who works at a desk gets up now and then to consult a shelf, a map, a glass case */
+const SOULCONSULT='bookcase|cardCatalog|globe|mapTable|pigeonholes|wallMap|displayCabinet|labBench|telescope|wireless|blackboard|grandPiano|altarTable|lectern|anvil|glasshouseBench|fireplace|strongbox|deedChest|suitArmor|curioCabinet';
+function soulFree(e,rn,kind,alt){const s=e.soul,P=soulPool(rn,kind);let best=null,bd=1e9;for(let i=0;i<P.length;i++){const st=P[i];if(SOUL.taken.has(st.id)||(s.bad&&s.bad.has(st.id)))continue;const d=kind==='seat'||kind==='desk'||alt?((i*31+s.idx*17+(alt||0)*7)%97):Math.hypot(st.x-e.x,st.z-e.z)+((i+s.idx)%3)*2;if(d<bd){bd=d;best=st}}return best}
+function soulPick(e,alt){const s=e.soul,ent=s.plan[s.si];let rn=ent[1]==='home'?s.home:ent[1],kind=ent[2],task=ent[3];if(!rn)return null;
+  if(ent[1]===DR&&kind==='seat'&&!s.dines){rn=s.home;kind='desk';task='write'}
+  if(kind==='desk'&&(alt&1)){kind=SOULCONSULT;task='read'}
+  let st=soulFree(e,rn,kind,alt);
+  if(!st&&kind==='desk')st=soulFree(e,rn,'deskWriting|bureau|writingTable|libraryTable|kitchenTable|pedestalTable|tableDining|'+SOULCONSULT,alt);
+  if(!st&&kind===SOULCONSULT){st=soulFree(e,rn,'desk',alt);task=ent[3]}
+  if(!st&&kind!=='floor'){st=soulFree(e,rn,'floor',alt);if(task==='eat'||task==='write')task='stand'}
+  return st?{st,task}:null}
+function soulSend(e,alt){const s=e.soul,p=soulPick(e,alt);s.until=tt+45+((s.idx*13+alt*29)%70);if(!p){if(s.st!=='sit'&&s.st!=='at')s.st='free';return}s.tn=p.task;soulGo(e,p.st)}
+/* everyone to the place the hour gives them, at once: at the start, and when the hour is set by hand */
+function soulJump(){SOUL.hour=soulHour();SOUL.taken.clear();SOUL.q.length=0;SOUL.job=null;
+  for(const e of SOUL.list){const s=e.soul;if(!s.plan)continue;s.station=null;s.next=null;e.seated=false;e.gone=false;e.fig.position.y=0;const k=soulSlot(s,SOUL.hour);s.si=k;s.alt=0;s.carry=s.plan[k][5]||null;s.until=tt+30+((s.idx*13)%70);
+    if(s.plan[k][2]==='bed'){s.st='gone';e.gone=true;continue}const p=soulPick(e,0);if(p){s.tn=p.task;soulPut(e,p.st)}else{s.st='free';s.task='stand'}}}
+/* a figure out of sight keeps its hours: it is simply put where the hour wants it */
+function soulOff(e){const s=e.soul,k=soulSlot(s,SOUL.hour);if(s.st==='gone'){if(s.plan[k][2]==='bed')return;e.gone=false}
+  if(k!==s.si||s.st==='walk'||s.st==='seek'||s.st==='rise'||s.st==='free'||s.st==='bedward'){s.si=k;s.alt=0;s.carry=s.plan[k][5]||null;if(s.plan[k][2]==='bed'){s.st='gone';e.gone=true;e.seated=false;if(s.station){SOUL.taken.delete(s.station.id);s.station=null}return}
+    const p=s.station&&(s.st==='walk'||s.st==='seek')?{st:s.station,task:s.tn}:soulPick(e,0);if(p){s.tn=p.task;if(s.station&&s.station!==p.st)SOUL.taken.delete(s.station.id);e.seated=false;soulPut(e,p.st)}}}
+/* ---- going, arriving, sitting, working ---- */
+const soulCell=e=>[Math.round(e.x),e.y,Math.round(e.z)];
+function soulSeen(e){if(!e.fig.visible||!e.wrap.visible)return false;const c=camera.position;return(e.x-c.x)**2+(e.z-c.z)**2<60*60}
+function soulPut(e,st){const s=e.soul;if(s.station&&s.station!==st)SOUL.taken.delete(s.station.id);s.station=st;SOUL.taken.add(st.id);s.path=null;s.next=null;s.task=s.tn||s.task||'stand';e.x=st.x;e.z=st.z;e.y=st.y;e.wrap.position.set(e.x,e.y-.5,e.z);e.fig.rotation.y=st.yaw;
+  if(st.seat&&(s.task==='eat'||s.task==='write'||s.task==='read'))soulSit(e,1);else{s.st='at';e.seated=false}}
+function soulSit(e,now){const s=e.soul,st=s.station,sc=e.fig.scale.x;s.st='sit';e.seated=true;s.sx=st.seat.x;s.sz=st.seat.z;s.sy=st.seat.y+.15-FHIP*FU*sc+.5;s.syaw=st.seat.yaw;s.k=now?1:0;if(now){e.x=s.sx;e.z=s.sz;e.wrap.position.set(s.sx,s.sy-.5,s.sz);e.fig.rotation.y=s.syaw}}
+function soulGo(e,st){const s=e.soul;if(e.seated&&s.st==='sit'){s.next=st;SOUL.taken.add(st.id);s.st='rise';return}   /* first get up */
+  const from=s.station;if(from&&from!==st)SOUL.taken.delete(from.id);s.station=st;SOUL.taken.add(st.id);
+  const a=soulCell(e),b=[st.x,st.y,st.z],key=(from?from.id:a.join(','))+'>'+st.id;let P=SOUL.paths.get(key);if(!P&&from){const R=SOUL.paths.get(st.id+'>'+from.id);if(R)P=R.slice().reverse()}
+  if(P){s.path=P;s.pi=1;s.st=P.length>1?'walk':'arrive';return}
+  s.st='seek';s.path=null;SOUL.q.push({e,a,b,key,st})}
+function soulSeek(){let J=SOUL.job;if(!J){const q=SOUL.q.shift();if(!q)return;if(q.e.soul.station!==q.st||q.e.soul.st!=='seek')return;if(!rtFree(q.a[0],q.a[1],q.a[2])){const c=soulStand(q.a[0],q.a[2],q.a[1],null);if(c)q.a=c}J=SOUL.job=soulJob(q.a,q.b,40000);J.q=q}
+  if(!soulWork(J,320))return;SOUL.job=null;SOUL.stats.nodes+=J.n;const q=J.q,e=q.e,s=e.soul;if(s.station!==q.st||s.st!=='seek')return;
+  if(J.path){const P=soulSmooth(J.path);SOUL.paths.set(q.key,P);SOUL.stats.found++;s.path=P;s.pi=1;s.st=P.length>1?'walk':'arrive'}
+  else{SOUL.stats.fails++;(s.bad||(s.bad=new Set())).add(q.st.id);if(!soulSeen(e)){SOUL.stats.tele++;s.bad.delete(q.st.id);soulPut(e,q.st)}else{SOUL.taken.delete(q.st.id);s.station=null;s.st='free';s.until=tt+6}}}
+/* the limbs for a task. Every pose is eased to, so nothing snaps */
+function soulPose(e,ud,dt,task){const s=e.soul,k=Math.min(1,dt*6),to=(b,v)=>{b.rotation.x+=(v-b.rotation.x)*k},w=Math.sin(tt*3.1+s.phase),w2=Math.sin(tt*1.3+s.phase);let l=0,sh=0,a1=0,a2=0,f1=-.1,f2=-.1,bd=0,hp=0;
+  if(e.seated){l=-1.5;sh=1.5;a1=a2=-.35;f1=f2=-1.05}
+  if(s.carry==='tray'&&!e.seated){a1=a2=-.2;f1=f2=-1.32}
+  else if(task==='work'){a1=-.45+w*.1;a2=-.45-w*.1;f1=-.95-w*.18;f2=-.95+w*.18;bd=.08;hp=.2}
+  else if(task==='dust'){a2=-2.2+w*.3;f2=-.35;bd=.03;hp=-.15}
+  else if(task==='write'){f2=-1.25+w*.07;hp=.28;bd=.1}
+  else if(task==='read'){a1=-.5;f1=-1.5;hp=.3}
+  else if(task==='eat'){const u=Math.max(0,Math.sin(tt*.9+s.phase));f2=-1.1-u*u*.95;a2=-.35-u*.15;hp=.12}
+  else if(s.carry==='book'){a1=-.3;f1=-1.35}
+  to(ud.l1,l);to(ud.l2,l);to(ud.s1,sh);to(ud.s2,sh);to(ud.a1,a1);to(ud.a2,a2);to(ud.f1,f1);to(ud.f2,f2);if(!(s.bow>0)){to(ud.body,bd);ud.head.rotation.x+=(hp+w2*.03-ud.head.rotation.x)*k}}
+function soulWalkAnim(e,ud,dt){const s=e.soul,sk=ud.skirt;e.ph+=dt*e.speed*3.34;const sn=Math.sin(e.ph)*(sk?.13:.42),c=Math.cos(e.ph),as=Math.sin(e.ph)*(sk?.2:.34),tray=s&&(s.carry==='tray'),k=Math.min(1,dt*8);
+  ud.l1.rotation.x=sn;ud.l2.rotation.x=-sn;ud.s1.rotation.x=sk?0:Math.max(0,-c)*.55;ud.s2.rotation.x=sk?0:Math.max(0,c)*.55;
+  if(tray){ud.a1.rotation.x+=(-.2-ud.a1.rotation.x)*k;ud.a2.rotation.x+=(-.2-ud.a2.rotation.x)*k;ud.f1.rotation.x+=(-1.32-ud.f1.rotation.x)*k;ud.f2.rotation.x+=(-1.32-ud.f2.rotation.x)*k}
+  else{ud.a1.rotation.x=-as;ud.a2.rotation.x=s&&s.carry&&s.carry!=='book'?as*.3:as;ud.f1.rotation.x=s&&s.carry==='book'?-1.35:-.12-Math.max(0,as)*.5;ud.f2.rotation.x=-.12-Math.max(0,-as)*.5}
+  ud.head.rotation.y*=.9;ud.head.rotation.x*=.9;if(!(s&&s.bow>0))ud.body.rotation.x*=.85}
+/* His Grace is known: the head turns to him; once in a while a man bows from the hip and a woman drops a curtsey */
+function soulGreet(e,ud,dt){const s=e.soul;if(MODE!=='walk')return false;const dx=PL.x-e.x,dz=PL.z-e.z,d=Math.hypot(dx,dz);
+  if(s.bow>0){s.bow-=dt;const u=Math.sin(Math.PI*Math.max(0,Math.min(1,1-s.bow/1.5)));if(e.seated){ud.head.rotation.x+=(u*.45-ud.head.rotation.x)*Math.min(1,dt*10)}
+    else{ud.body.rotation.x=u*(ud.skirt?.16:.5);ud.head.rotation.x=u*(ud.skirt?.3:.1);if(ud.skirt){ud.l1.rotation.x=-u*.3;ud.l2.rotation.x=-u*.3;ud.s1.rotation.x=u*.6;ud.s2.rotation.x=u*.6;e.fig.position.y=-u*.09}
+      if(d>.4){let a=Math.atan2(dx,dz)-e.fig.rotation.y;a=Math.atan2(Math.sin(a),Math.cos(a));e.fig.rotation.y+=a*Math.min(1,dt*7)}}
+    if(s.bow<=0){e.fig.position.y=0;ud.body.rotation.x=0}return!e.seated}
+  if(d>9)s.met=false;if(d<3.3&&d>.5&&Math.abs(PL.y+.5-e.y)<1.6&&!s.met&&tt-s.greet>20&&!PL.fly){s.met=true;s.greet=tt;s.bow=1.5;SOUL.stats.bows++;return!e.seated}   /* once a meeting, not every time he turns round */
+  let ty=(!s.plan||s.task==='stand')&&!e.seated?Math.sin(tt*.31+s.phase)*.5:0;   /* one who waits looks about */
+  if(d<7&&d>.5&&Math.abs(PL.y+.5-e.y)<2.5){let a=Math.atan2(dx,dz)-e.fig.rotation.y;a=Math.atan2(Math.sin(a),Math.cos(a));if(Math.abs(a)<1.9)ty=Math.max(-1.1,Math.min(1.1,a))}
+  if(s.st!=='walk')ud.head.rotation.y+=(ty-ud.head.rotation.y)*Math.min(1,dt*3);return false}
+function soulStep(e,ud,dt){const s=e.soul;
+  if(s.st==='gone'){if(SOUL.tk%40===s.idx%40)soulOff(e);return}
+  if(soulGreet(e,ud,dt)){soulCarry(e,ud);return}
+  /* the hour: a new slot sends the figure on; within a task they move from one place of work to the next */
+  if(SOUL.tk%30===s.idx%30){const k=soulSlot(s,SOUL.hour);
+    if(k!==s.si){s.si=k;s.alt=0;s.carry=s.plan[k][5]||null;if(s.plan[k][2]==='bed'){s.st='bedward';s.until=tt+2+((s.idx*7)%20)}else soulSend(e,0)}
+    else if((s.st==='at'||s.st==='sit')&&tt>s.until&&s.plan[k][2]!=='seat')soulSend(e,++s.alt);
+    else if(s.st==='free'&&tt>s.until)soulSend(e,s.alt)}
+  switch(s.st){
+   case 'bedward':soulPose(e,ud,dt,'stand');if(tt>s.until&&!soulSeen(e)){s.st='gone';e.gone=true;e.seated=false;if(s.station){SOUL.taken.delete(s.station.id);s.station=null}}break;
+   case 'walk':{const P=s.path,w=P[s.pi],dx=w[0]-e.x,dz=w[2]-e.z,d=Math.hypot(dx,dz);
+     if(d<.12){e.y=w[1];if(++s.pi>=P.length)s.st='arrive';break}
+     const sp=Math.min(d,e.speed*dt),nx=e.x+dx/d*sp,nz=e.z+dz/d*sp;let stop=false;
+     if(MODE==='walk'&&!PL.fly&&Math.abs(PL.y+.5-e.y)<1.5){const d1=(PL.x-nx)**2+(PL.z-nz)**2;if(d1<.81&&d1<(PL.x-e.x)**2+(PL.z-e.z)**2)stop=true}   /* nobody walks into His Grace: they wait for him to pass */
+     if(!stop&&s.jam<1.4){const o=lifeNear(nx,e.y,nz,e.r*.9,e);if(o&&!o.gone&&(o.x-nx)**2+(o.z-nz)**2<(o.x-e.x)**2+(o.z-e.z)**2)stop=true}
+     if(stop){s.jam+=dt;soulPose(e,ud,dt,'stand');if(s.jam>3)s.jam=0;break}if(s.jam>0)s.jam=Math.max(0,s.jam-dt*.3);
+     e.x=nx;e.z=nz;if(d<.6||Math.abs(w[1]-e.y)>=1)e.y=w[1];let da=Math.atan2(dx,dz)-e.fig.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));e.fig.rotation.y+=da*Math.min(1,dt*7);
+     e.wrap.position.x=e.x;e.wrap.position.z=e.z;e.wrap.position.y+=(e.y-.5-e.wrap.position.y)*Math.min(1,dt*8);soulWalkAnim(e,ud,dt);break}
+   case 'arrive':{const st=s.station;s.task=s.tn||s.task;e.x=st.x;e.z=st.z;e.y=st.y;e.wrap.position.set(e.x,e.y-.5,e.z);if(st.seat&&(s.task==='eat'||s.task==='write'||s.task==='read'))soulSit(e,0);else s.st='at';break}
+   case 'rise':{s.k=Math.max(0,s.k-dt*2.4);const k=s.k,st=s.station;e.x=st.x+(s.sx-st.x)*k;e.z=st.z+(s.sz-st.z)*k;e.wrap.position.set(e.x,(st.y-.5)+(s.sy-.5-(st.y-.5))*k,e.z);soulPose(e,ud,dt,k>.5?s.task:'stand');if(k<=0){e.seated=false;e.x=st.x;e.z=st.z;const nx=s.next;s.next=null;s.st='at';if(nx)soulGo(e,nx)}break}
+   case 'sit':{if(s.k<1){s.k=Math.min(1,s.k+dt*2.2);const k=s.k,st=s.station;e.x=st.x+(s.sx-st.x)*k;e.z=st.z+(s.sz-st.z)*k;e.wrap.position.set(e.x,(st.y-.5)+(s.sy-.5-(st.y-.5))*k,e.z);let da=s.syaw-e.fig.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));e.fig.rotation.y+=da*Math.min(1,dt*8)}soulPose(e,ud,dt,s.task);break}
+   case 'at':{const st=s.station;let da=st.yaw-e.fig.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));e.fig.rotation.y+=da*Math.min(1,dt*5);e.wrap.position.y+=(e.y-.5-e.wrap.position.y)*Math.min(1,dt*8);
+     {const bx=st.x-e.x,bz=st.z-e.z,bd=Math.hypot(bx,bz);if(bd>.2&&(PL.x-st.x)**2+(PL.z-st.z)**2>1.7){const sp=Math.min(bd,e.speed*.6*dt);e.x+=bx/bd*sp;e.z+=bz/bd*sp;e.wrap.position.x=e.x;e.wrap.position.z=e.z}}   /* shouldered aside by His Grace, they step back to their place when he has passed */
+     soulPose(e,ud,dt,s.task);break}
+   default:soulPose(e,ud,dt,'stand')}
+  soulCarry(e,ud)}
+/* what is carried: a tray on both forearms, a duster or a coal scuttle in the right hand, a book in the left arm. Made once for each kind; shown only on the fine copy */
+const SOULITEM={};
+function soulItem(kind){if(SOULITEM[kind])return SOULITEM[kind];const V=new Map(),put=(x,y,z,c)=>V.set(x+','+y+','+z,[x,y,z,c,'b']),box=(x0,y0,z0,x1,y1,z1,c)=>{for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)put(x,y,z,c)};
+  if(kind==='tray'){box(-7,0,-4,6,0,4,'#b9c1cd');for(let x=-7;x<=6;x++){put(x,1,-4,'#dfe4ec');put(x,1,4,'#dfe4ec')}for(let z=-4;z<=4;z++){put(-7,1,z,'#dfe4ec');put(6,1,z,'#dfe4ec')}box(-4,1,-1,-2,4,1,'#f4f1ea');put(-3,5,0,'#c9a227');box(1,1,-2,3,2,0,'#e9dfc4');box(2,3,-1,2,5,-1,'#9fc0cf');box(4,1,1,5,3,2,'#9fc0cf')}
+  else if(kind==='duster'){box(0,0,0,0,7,0,'#6b4226');for(let y=8;y<=13;y++)for(let x=-2;x<=2;x++)for(let z=-2;z<=2;z++)if(Math.abs(x)+Math.abs(z)<=(y<10||y>12?2:3))put(x,y,z,(x+y+z)&1?'#8a6a48':'#c9b28a')}
+  else if(kind==='scuttle'){box(-3,0,-3,2,5,2,'#3a3d44');box(-2,6,-2,1,6,1,'#1a1a1d');for(const x of[-3,2])for(let y=6;y<=9;y++)put(x,y,0,'#55585f');box(-3,10,0,2,10,0,'#55585f');box(-4,4,-1,-4,5,0,'#55585f')}
+  else if(kind==='book'){box(-3,0,-1,2,7,0,'#7a1f2a');box(-2,0,1,1,7,1,'#efe6cf');box(-3,0,2,2,7,2,'#5c1520');put(-3,6,-1,'#c9a227');put(-3,1,-1,'#c9a227')}
+  const fb=new FB();emitPerson(V,fb,0,0,0,0,null,0);const g=fb.geo();g.scale(.5,.5,.5);return SOULITEM[kind]=g}
+function soulCarry(e,ud){const s=e.soul,want=s.carry&&ud.near&&ud.near.visible&&!(e.seated&&s.task==='eat')?s.carry:null;if(ud.item&&ud.itemK!==want){ud.item.parent.remove(ud.item);ud.item=null;ud.itemK=null}
+  if(want&&!ud.item){const m=new THREE.Mesh(soulItem(want),FMAT());m.castShadow=true;ud.itemK=want;ud.item=m;
+    if(want==='tray'){ud.body.add(m);m.position.set(0,(27-FHIP)*FU,9*FU)}   /* on both forearms, held level before the waist */
+    else if(want==='book'){ud.f1.add(m);m.position.set(0,-10*FU,3*FU)}   /* along the left forearm */
+    else if(want==='duster'){ud.f2.add(m);m.rotation.x=Math.PI;m.position.set(0,-9*FU,0)}   /* out beyond the right hand */
+    else{ud.f2.add(m);m.position.set(0,-21*FU,0)}}}   /* the scuttle hangs from the right hand by its handle */
+/* the card: who this is, what they are about, and what comes next */
+function soulNow(e){const s=e.soul;if(!s)return'';if(!s.plan)return e.indoor?'About the house':({gardener:'Tending the grounds',groom:'Seeing to the horses',farmhand:'About the farm',priest:'Going about the parish',villager:'About the village'})[s.role]||'Taking the air';
+  const ent=s.plan[Math.max(0,s.si)];let t=ent[4];if(t==='At work'||ent[1]==='home'&&s.h&&s.h!=='brown'&&SOULWORK[s.h]&&ent[3]!=='eat')t=ent[3]==='read'?'Sitting up late':SOULWORK[s.h];if(ent[1]===DR&&ent[2]==='seat'&&!s.dines)t=SOULWORK[s.h]||'At work';return s.st==='walk'||s.st==='seek'?'On the way: '+t.charAt(0).toLowerCase()+t.slice(1):t}
+function soulNext(e){const s=e.soul;if(!s||!s.plan)return'';const k=(Math.max(0,s.si)+1)%s.plan.length,ent=s.plan[k],h=ent[0],hh=Math.floor(h),mm=Math.round((h-hh)*60);let t=ent[4];if(ent[1]==='home'&&s.h&&s.h!=='brown'&&SOULWORK[s.h]&&ent[3]!=='eat'&&ent[3]!=='read')t=SOULWORK[s.h];if(ent[1]===DR&&ent[2]==='seat'&&!s.dines)return'';
+  return'At '+(mm?hh+'.'+(mm<10?'0':'')+mm:hh+" o'clock")+': '+t.charAt(0).toLowerCase()+t.slice(1)}
+function soulSay(e){const s=e.soul,h=SOUL.hour,part=h<12?'morning':h<17.5?'afternoon':'evening',you=OWNER?'Your Grace':(YOU.d&&YOU.d.name?YOU.d.name:'');
+  if(s.role==='villager'||!e.indoor)return'Good '+part+(you?', '+you:'')+'.';if(s.h==='brown'||SOULDAY[s.role])return(OWNER?'Your Grace.':'Good '+part+(you?', '+you:'')+'.')+(s.st==='walk'?' I am wanted elsewhere, if you will allow me.':'');return'Good '+part+(you?', '+you:'')+'.'}
+function soulCard(e){const s=e.soul;if(!s)return;const hs=s.h&&HOUSES[s.h],c=$('#card'),nx=soulNext(e);c.style.setProperty('--c',hs?hs[2]:'#D4AF37');
+  c.innerHTML=`<button class="x" aria-label="Close">&times;</button><h2>${esc(s.name)}</h2><div class="h">${esc(s.title)}${hs?' . '+esc(hs[0]+', '+hs[1]):''}</div><p>&ldquo;${esc(soulSay(e))}&rdquo;</p><p>${esc(soulNow(e))}.</p>${nx?`<p class="meta">${esc(nx)}.</p>`:''}`;
+  c.hidden=false;c.querySelector('.x').onclick=()=>c.hidden=true}
+function lifeNear(x,y,z,r,self){for(const o of LIFE){if(o===self||o.water||o.gone||Math.abs(o.y-y)>1.6)continue;const rr=r+(o.r||.36),dx=o.x-x,dz=o.z-z;if(dx*dx+dz*dz<rr*rr)return o}return null}
 function bodyGo(e,nx,nz){const r=e.r*.7,cx=Math.round(nx),cz=Math.round(nz);let ny=e.y;
   if(cx!==Math.round(e.x)||cz!==Math.round(e.z)){if(e.indoor){if(!walkable(cx,e.y,cz))return null}else{const gy=groundY(cx,cz);if(gy==null||Math.abs(gy-e.y)>1||!walkable(cx,gy,cz))return null;ny=gy}}
   for(const[ox,oz]of[[r,r],[-r,r],[r,-r],[-r,-r]]){const bx=Math.round(nx+ox),bz=Math.round(nz+oz);if(bx===Math.round(e.x+ox)&&bz===Math.round(e.z+oz))continue;if(G(bx,ny,bz)||G(bx,ny+1,bz))return null}
@@ -2489,7 +2685,7 @@ function bodyGo(e,nx,nz){const r=e.r*.7,cx=Math.round(nx),cz=Math.round(nz);let 
   return ny}
 /* His Grace against a body. A person or a small animal is shouldered aside if there is anywhere for it to go. A horse, a cow or the wolf stands its ground,
    and so does anyone seated. A body that cannot move stops him only where there is room to walk round it: nobody in a doorway can shut him in or out */
-function lifeBlock(x,y,z){if(!LIFE_ON||PL.fly)return false;for(const o of LIFE){if(o.water||Math.abs(o.y-y)>1)continue;const rr=.3+(o.r||.36),dx=o.x-x,dz=o.z-z,d1=dx*dx+dz*dz;if(d1>=rr*rr||d1>=(o.x-PL.x)**2+(o.z-PL.z)**2)continue;
+function lifeBlock(x,y,z){if(!LIFE_ON||PL.fly)return false;for(const o of LIFE){if(o.water||o.gone||Math.abs(o.y-y)>1)continue;const rr=.3+(o.seated&&o.soul?.14:(o.r||.36)),/* v1.73: one seated at a chair reaches no further than the chair, which stops him already; her elbow does not close the way beside her */dx=o.x-x,dz=o.z-z,d1=dx*dx+dz*dz;if(d1>=rr*rr||d1>=(o.x-PL.x)**2+(o.z-PL.z)**2)continue;
     const mx=o.x-PL.x,mz=o.z-PL.z,ml=Math.hypot(mx,mz)||1,ux=mx/ml,uz=mz/ml,lx=-uz,lz=ux,oy=Math.round(o.y),free=(px,pz)=>{const ax=Math.round(px),az=Math.round(pz);return !G(ax,oy,az)&&!G(ax,oy+1,az)&&G(ax,oy-1,az)!==0};
     if(!o.static&&!o.seated&&(o.r||.36)<.7){const d=Math.sqrt(d1),push=rr-d+.08;let moved=false;for(const[vx,vz]of[[ux,uz],[ux*.5+lx*.87,uz*.5+lz*.87],[ux*.5-lx*.87,uz*.5-lz*.87],[lx,lz],[-lx,-lz]]){const px=o.x+vx*push,pz=o.z+vz*push;if(free(px+vx*.3,pz+vz*.3)&&!lifeNear(px,o.y,pz,(o.r||.36)*.8,o)){o.x=px;o.z=pz;o.wrap.position.x=px;o.wrap.position.z=pz;o.tgt=[px+vx*2,pz+vz*2];o.wait=0;moved=true;break}}if(moved)continue}
     if(free(o.x+lx*1.1,o.z+lz*1.1)||free(o.x-lx*1.1,o.z-lz*1.1))return true}return false}
@@ -2751,13 +2947,13 @@ function wereFig(mat){const g=new THREE.Group(),st=[];for(const s of[0,1]){const
     const m=new THREE.Mesh(fb.geo(),mat);m.castShadow=true;m.visible=!s;g.add(m);st.push(m)}g.userData={st};return g}
 function buildLife(){const pm=FMAT();const hip=9*PS,RCNT={};let n=0;
   const mkPerson=p=>{let sd=(p.x*73856093^p.y*19349663^p.z*83492791)>>>0;const r=()=>{sd=(sd*1664525+1013904223)>>>0;return sd/4294967296};
-    const K=p.role==='kairos',wrap=new THREE.Group();let fig;
+    const K=p.role==='kairos',wrap=new THREE.Group();let fig,rn=null;
     if(K){fig=kairosFig(KMAT());kairosHead(fig,KMAT())}
-    else{const Bp=p.bid?BLD[p.bid]:null,Rp=Bp?Bp.rooms.find(q=>p.x>=q.x0&&p.x<=q.x1&&p.z>=q.z0&&p.z<=q.z1&&Math.abs(q.y+1-p.y)<=1):null,rn=Rp?Rp.n:null,ix=rn?(RCNT[rn]=(RCNT[rn]||0)+1)-1:n;
+    else{const Bp=p.bid?BLD[p.bid]:null,Rp=Bp?Bp.rooms.find(q=>p.x>=q.x0&&p.x<=q.x1&&p.z>=q.z0&&p.z<=q.z1&&Math.abs(q.y+1-p.y)<=1):null;rn=Rp?Rp.n:null;const ix=rn?(RCNT[rn]=(RCNT[rn]||0)+1)-1:n;
       const fo=figSpec(p.role||(p.h==='brown'?'below':null),p.h,rn,r,ix,p.child);if(p.child)fo.kid=1;fig=figRig(fo,pm);fig.scale.setScalar(p.child?.68:fo.tall)}   /* v1.72: the fine figure; its dress by role, House and room */
     wrap.add(fig);wrap.position.set(p.x,p.y-.5,p.z);fig.rotation.y=Math.atan2(p.tx||0,p.tz||1);scene.add(wrap);
     const bid=p.bid||0,band=bid?BLD[bid].band[p.y+OY]:-1;if(bid)GROUPS.push({obj:wrap,bid,band});
-    const B=p.b||[p.x-6,p.x+6,p.z-6,p.z+6];const E={wrap,fig,x:p.x+0,z:p.z+0,y:p.y,indoor:!!bid,b:B,static:p.role==='kairos',speed:p.child?1.5:bid?1.3:1.2,wait:rnd()*4,tgt:null,ph:rnd()*6,kind:'person'};if(p.role==='kairos'&&KSEAT){E.seated=true;E.x=KSEAT.x;E.z=KSEAT.z;E.y=KSEAT.y-KHIPV*KRU*KSC+.58;wrap.position.set(E.x,E.y-.5,E.z);fig.rotation.y=KSEAT.yaw;const ud=fig.userData;if(ud.l1){ud.l1.rotation.x=-1.45;ud.l2.rotation.x=-1.45}if(ud.a1){ud.a1.rotation.x=-.35;ud.a2.rotation.x=-.35}if(ud.s1){ud.l1.rotation.x=ud.l2.rotation.x=-1.6;ud.s1.rotation.x=ud.s2.rotation.x=1.6;ud.a1.rotation.x=ud.a2.rotation.x=-.22;ud.f1.rotation.x=-1.25;ud.f2.rotation.x=-1.3}}if(p.role==='kairos')E.kh=true;addLife(E);n++};
+    const B=p.b||[p.x-6,p.x+6,p.z-6,p.z+6];const E={wrap,fig,x:p.x+0,z:p.z+0,y:p.y,indoor:!!bid,b:B,static:p.role==='kairos',speed:p.child?1.5:bid?1.3:1.2,wait:rnd()*4,tgt:null,ph:rnd()*6,kind:'person',room:rn};if(p.role==='kairos'&&KSEAT){E.seated=true;E.x=KSEAT.x;E.z=KSEAT.z;E.y=KSEAT.y-KHIPV*KRU*KSC+.58;wrap.position.set(E.x,E.y-.5,E.z);fig.rotation.y=KSEAT.yaw;const ud=fig.userData;if(ud.l1){ud.l1.rotation.x=-1.45;ud.l2.rotation.x=-1.45}if(ud.a1){ud.a1.rotation.x=-.35;ud.a2.rotation.x=-.35}if(ud.s1){ud.l1.rotation.x=ud.l2.rotation.x=-1.6;ud.s1.rotation.x=ud.s2.rotation.x=1.6;ud.a1.rotation.x=ud.a2.rotation.x=-.22;ud.f1.rotation.x=-1.25;ud.f2.rotation.x=-1.3}}if(p.role==='kairos')E.kh=true;addLife(E);n++};
   for(const p of PEOPLE)mkPerson(p);
   for(const p of spawnOutdoorPeople())mkPerson(Object.assign(p,{bid:0}));
   let an=0;for(const a of spawnAnimals()){const{V,hip:ah}=animalVox(a.kind,a);const wrap=new THREE.Group();const fig=a.were?wereFig(pm):figMesh(V,ah,pm,ah);wrap.add(fig);wrap.position.set(a.x,a.y-.5,a.z);fig.rotation.y=a.static?(a.yaw||0):rnd()*6.28;if(a.scale&&!a.were)wrap.scale.setScalar(a.scale);scene.add(wrap);
@@ -2772,13 +2968,14 @@ let BIRDS=null;function makeBirds(){const n=14;const geo=new THREE.BufferGeometr
   BIRDS=new THREE.InstancedMesh(geo,new THREE.MeshBasicMaterial({color:'#2b2626',side:THREE.DoubleSide}),n);BIRDS.frustumCulled=false;BIRDS.userData.f=[...Array(n)].map((_,i)=>({a:i*.45,r:100+(i%5)*8,h:72+(i%4)*3,ox:(i%3)*4,oz:Math.floor(i/3)*3}));scene.add(BIRDS)}
 const _pos=new THREE.Vector3();
 function lifeStep(dt){if(!LIFE_ON)return;const cam=camera.position;const far=MODE==='walk'?(FULL.on?Math.min(GOV.far,320):90):340;   /* v1.40: figures out to 320 on foot; past that they are a few pixels and cost a draw each */
-  FIGQ.bf=6;FIGQ.bn=1;
-  for(const e of LIFE){const dx=e.x-cam.x,dz=e.z-cam.z,dd=dx*dx+dz*dz;e.fig.visible=dd<far*far;
+  FIGQ.bf=6;FIGQ.bn=1;if(!SOUL.ready){SOUL.ready=1;if(window.__EH_HOUR!=null)SOUL.fix=+window.__EH_HOUR;soulInit();soulJump()}SOUL.tk++;if((SOUL.tk&63)===0)SOUL.hour=soulHour();soulSeek();
+  for(const e of LIFE){const dx=e.x-cam.x,dz=e.z-cam.z,dd=dx*dx+dz*dz;e.fig.visible=dd<far*far&&!e.gone;
     {const u2=e.fig.userData;if(u2.fig2){const shown=e.fig.visible&&e.wrap.visible;e.wrap.matrixWorldAutoUpdate=shown;   /* v1.72: a figure out of sight costs nothing: no bones are worked out, no copy is made */
       if(shown){if(!u2.far&&FIGQ.bf>0){FIGQ.bf--;figFar(e.fig,FMAT())}const dy=cam.y-e.y-1.4,d3=dd+dy*dy,lim=FIGQ.near+(u2.near&&u2.near.visible?4:0),nr=d3<lim*lim;
         if(nr&&!u2.near&&FIGQ.bn>0){FIGQ.bn--;figNear(e.fig,FMAT())}const on=nr&&!!u2.near;if(u2.near){u2.near.visible=on;if(on)u2.seen=tt}if(u2.far)u2.far.visible=!on}}}
-    if(!e.fig.visible||e.static){if(e.static&&e.fig.visible){if(e.kh)kairosStep(e,dt);else e.fig.rotation.y+=Math.sin(tt*.3+e.ph)*.002}continue}
+    if(!e.fig.visible||e.static){if(e.soul&&e.soul.plan&&SOUL.tk%30===e.soul.idx%30)soulOff(e);if(e.static&&e.fig.visible){if(e.kh)kairosStep(e,dt);else e.fig.rotation.y+=Math.sin(tt*.3+e.ph)*.002}continue}
     const ud=e.fig.userData;
+    if(e.soul){if(e.soul.plan){soulStep(e,ud,dt);continue}if(soulGreet(e,ud,dt))continue}   /* v1.73: one with a day follows it; the rest still stroll, and know His Grace */
     if(e.wait>0){e.wait-=dt;if(ud.fig2)figIdle(e,ud,dt);else if(ud.l1){ud.l1.rotation.x*=.85;ud.l2.rotation.x*=.85}continue}
     if(!e.tgt){if(e.water){for(let t=0;t<6;t++){const x=e.x+(rnd()-.5)*12,z=e.z+(rnd()-.5)*12;if(lakeD(x,z)<.82){e.tgt=[x,z];break}}}
       else if(e.route){e.ri=((e.ri||0)+1)%e.route.length;e.tgt=e.route[e.ri].slice()}
@@ -4843,6 +5040,10 @@ const POSTX={
   'The Smoking Room':(K,Q)=>{const i=K.inner;if(!Q.placed.some(p=>p.k==='chesterfield'))placeFree(Q,'chesterfield',{},i.cx+3,i.cz+3,Math.PI);if(!Q.placed.some(p=>p.k==='cardTable'))placeFree(Q,'cardTable',{},i.cx-5,i.cz+4,0)},
   'The Entrance Hall':(K,Q)=>{const i=K.inner;placeFree(Q,'coatStand',{},i.x0+1.6,i.z1-2.2,0);placeFree(Q,'umbrellaStand',{},i.x1-1.6,i.z1-2.2,0)},
   "The Servants' Hall":(K,Q)=>{const R=K.R,y=R.y+3;for(let q=PQ.length-1;q>=0;q--)if(PQ[q].r&&PQ[q].r.kind==='bellBoard'&&PQ[q].bid===R.bid)PQ.splice(q,1);
+    /* v1.73: the household dines here, so the chairs stand at the two long tables, four a side (they stood one a side, four blocks off the table, and two at the serving tables) */
+    {const tabs=Q.placed.filter(q=>q.k==='tableDining');if(tabs.length){for(let q=PQ.length-1;q>=0;q--){const it=PQ[q];if(it.r&&it.r.kind==='windsor'&&it.bid===R.bid&&it.x>R.x0&&it.x<R.x1&&it.z>R.z0&&it.z<R.z1&&Math.abs(it.y-Q.fs)<1.2)PQ.splice(q,1)}
+      for(let q=Q.placed.length-1;q>=0;q--)if(Q.placed[q].k==='windsor')Q.placed.splice(q,1);
+      for(const t of tabs){const ux=Math.sin(t.th),uz=Math.cos(t.th),nx=Math.cos(t.th),nz=-Math.sin(t.th);for(const sg of[-1,1])for(const sf of[-3.3,-1.1,1.1,3.3]){const x=t.x+ux*sf+nx*sg*1.5,z=t.z+uz*sf+nz*sg*1.5,th=Math.atan2(-nx*sg,-nz*sg);K.at('windsor',{},x,z,th);Q.placed.push({k:'windsor',x,y:Q.fs,z,th})}}}}
     for(const[sd,a0,a1]of[['w',R.z0+2,R.z1-2],['e',R.z0+2,R.z1-2],['n',R.x0+2,R.x1-2],['s',R.x0+2,R.x1-2]])for(let k=0,a=Math.round((a0+a1)/2);k<=a1-a0;k++,a+=(k%2?k:-k)){if(a<a0||a>a1)continue;let ok=true;
       for(let dd=-1;dd<=1;dd++){const wx=sd==='w'?R.x0:sd==='e'?R.x1:a+dd*2,wz=sd==='n'?R.z0:sd==='s'?R.z1:a+dd*2;for(const yy of[y-1,y,y+1]){const g=G(wx,yy,wz);if(!g||isInv(g)||isPane(g))ok=false}}if(ok){K.atWall('bellBoard',{},sd,a,{dy:.6,proud:.12});return}}}};   /* the bell board: a row of bells on springs, one for each room above. The plan hung one where a window stood and tidy took it down: the house had none. It hangs high on the first clear stretch of wall */
 for(const n in POSTX){const o=RPOST[n],f=POSTX[n];RPOST[n]=(K,Q)=>{if(o)o(K,Q);f(K,Q)}}
@@ -5507,7 +5708,7 @@ function sheet(title,src){$('#shT').textContent=title;const f=$('#shF');SHEET=tr
   if(src.startsWith('nepsis.html')&&lastSrc.startsWith('nepsis.html')){try{f.contentWindow.location.hash=src.split('#')[1];lastSrc=src;return}catch(e){}}f.src=src;lastSrc=src}
 $('#shX').onclick=()=>{$('#sheet').classList.remove('on');SHEET=false;if(lastSrc.startsWith('index.html')){$('#shF').src='about:blank';lastSrc=''}};
 let kz=0;
-function run(a){if(!a)return;if(VISITOR&&/^(nx|v23|doc|cat|kchat|goal|room)$/.test(a[0])){visitorWire();return youOpen()}   /* belt and braces: no click of a visitor's opens a link, a toolkit or the owner's chat */
+function run(a){if(!a)return;if(a[0]==='soul')return soulCard(a[1]);if(VISITOR&&/^(nx|v23|doc|cat|kchat|goal|room)$/.test(a[0])){visitorWire();return youOpen()}   /* belt and braces: no click of a visitor's opens a link, a toolkit or the owner's chat */
   const[t,v]=a;if(t==='doc'&&!v){toast('Not yet linked.');return}
   if(t==='nx'||t==='v23'){const u=VIEWURL(v);if(u)run(['doc',u]);else toast('Not yet linked.')}
   else if(t==='room')showRoomCard(v);
@@ -5626,6 +5827,7 @@ function walkStep(dt){{let b=null,bd=2.4;if(!PL.sit)for(const s of SEATS){const 
   let where='The park';if(WB!=null){const R=roomAt(WB,WL,Math.round(PL.x),Math.round(PL.z));PL.tall=R&&R.tall?1:0;where=R?R.n:(BLD[WB].short||BLD[WB].name)}else{let best=1e9;for(const B of BLD.slice(1)){if(B.hideWith)continue;const d=Math.hypot(B.lab[0]-PL.x,B.lab[2]-PL.z);if(d<best&&d<40){best=d;where='Near '+(B.short||B.name)}}if(PL.z>204&&vilD(PL.x,PL.z)<VILR){where=PL.x<0?'Lower Euphrates':'Kitezh Green';const py=PL.y-.5;for(const R of VROOMS)if(PL.x>R.x0&&PL.x<R.x1&&PL.z>R.z0&&PL.z<R.z1&&py>=R.y-.6&&py<R.yt+1){where=R.n;break}}else if(Math.max(Math.abs(PL.x),Math.abs(PL.z))>WALL)where='Beyond the wall'}
   $('#where').textContent=RN(where);
   NEAR=null;let nd=3.4;for(const o of OBJ){const dd=Math.hypot(o.x-PL.x,o.z-PL.z);const dy=Math.abs(o.y-(PL.y+.5));if(dd<(o.out?7:nd)&&dy<3.5){nd=dd;NEAR=o}}
+  {let pd=NEAR?Math.min(2.7,nd-.6):2.7,pe=null;for(const e of SOUL.list){if(e.gone||!e.soul)continue;const dd=Math.hypot(e.x-PL.x,e.z-PL.z);if(dd<pd&&Math.abs(e.y-(PL.y+.5))<1.6){pd=dd;pe=e}}if(pe){if(!pe.soulAct)pe.soulAct={n:'Speak to '+pe.soul.short,a:['soul',pe]};NEAR=pe.soulAct}}   /* v1.73: a person nearer than any record can be spoken to */
   if(!NEAR&&WB!=null){const R=roomAt(WB,WL,Math.round(PL.x),Math.round(PL.z));if(R&&HOUSES[R.h]){const d2=Math.hypot(R.c[0]-PL.x,R.c[2]-PL.z);if(d2<4)NEAR={n:'The '+HOUSES[R.h][0]+' files',a:['room',R]}}}
   const ab=$('#act');ab.hidden=!NEAR;if(NEAR&&ab.textContent!==NEAR.n)ab.textContent=NEAR.n;
   const insideNow=WB!=null;$('#bUp').hidden=!stairsTarget(1);$('#bDown').hidden=!stairsTarget(-1);lastInside=insideNow}
@@ -6219,9 +6421,9 @@ const TM={};async function build(){const t0=performance.now();let tm=t0;TM.start
     for(const k of['sg','glg']){const geo=g[k];if(!geo)continue;quads+=geo.index.count/6;const m=new THREE.Mesh(geo,k==='sg'?MATS.s:MATS.gl);if(k==='sg'){m.castShadow=true;m.receiveShadow=true}m.matrixAutoUpdate=false;m.updateMatrix();obj.add(m)}
     let wn=null;for(const k of['s','gl','wn','w','gs']){const gb=g[k];if(!gb||!gb.n)continue;quads+=gb.n;const m=new THREE.Mesh(gb.geo(),k==='wn'?MATS.gl:k==='s'&&!g.bid&&!g.vh?MATS.t:MATS[k]);m.scale.setScalar(.5);if(k==='wn')wn=m;if(k==='s'){m.castShadow=true;m.receiveShadow=true;if(g.gq)GRQ.push({m,q:g.gq})}else if(k==='w')m.receiveShadow=true;m.matrixAutoUpdate=false;m.updateMatrix();obj.add(m)}obj.matrixAutoUpdate=false;obj.updateMatrix();scene.add(obj);GROUPS.push({obj,bid:g.bid,band:g.band,si:g.si||0,vh:g.vh||0,x:g.x,z:g.z,wn})}
   try{TM.water=mergeWater()}catch(e){TM.water=String(e)}tm=performance.now();makeClouds();makeCards();makeExtras();const PPL=LIVE?buildLife():buildPeople();mark('life');await Y();const WIN=LIVE?buildWindowDetail():0;mark('windows');await Y();wdOutdoor();const PRB=buildProps();wdApply();mark('props');await Y();TM.stairq=buildStairs();TM.chapel=chapelGlass();TM.bars=glazeInside()+glazeInsideAll();mark('stairs');await Y();TM.ground=groundDress();const PRF=buildFloors();TM.trim=propTrim();fxInit();fxLightInit();postInit();rail();size();setTime('day');applyVis();styleUI();mark('scene');GOV.base=renderer.getPixelRatio();try{GOV.off=localStorage.getItem('euph_gov')==='off'}catch(e){}seaInit();seaUI();mark('sky');groveInit();mark('grove');flowersInit();mark('beds');if(posLoad())setTimeout(()=>{if(!(VISITOR&&YOU.d&&!/[?&](stats|nowelcome)/.test(location.search)))toast('Walk, and you are back where you last stood.')},900);   /* v1.72: a returning visitor is greeted by name instead; the two notices raced, and whichever came second wiped the other */cullStep();
-  window.__vx={THREE,fig:{Q:FIGQ,spec:figSpec,build:figBuild,quads:figQuads,half:figHalf,rig:figRig,near:figNear,far:figFar,mat:()=>FMAT()},tidyStats:()=>TM.tidy,stood:(x,y,z)=>FSTOOD.has(FKEY(x,y,z)),roomName:n=>RN(n),whereOf:o=>whereOf(o),owner:()=>OWNER,viewUrl:k=>VIEWURL(k),roomOf:()=>ROOMOF,blindBetween:()=>blindPanes.between,trunkN:()=>TRUNKN,glz:()=>({bars:TM.bars,doors:glazeInsideAll.doors}),finOn:()=>FIN_ON,kbot:()=>({P:kairosBot(),H:kairosHeadVox().V,person:personVox(outfit('none',null,()=>.37))}),groundY,get KH(){return KH},GOAL,goalOpen,URLS,WDRESS,wdApply,regRow,holesOf,T20,LMAP,LAMPS,LDAY,FULL,GROVE,IMP,BENCH,benchUI,pq:PQ,palette:PAL,trail:trailAt,settle:SETTLE,skins:CSKINS,windows:windowList,dep:DSTAT,seats:SEATS,kseat:()=>KSEAT,vr:VROOMS,dmap:DMAP,isWin:g=>isPane(g),isBlind:g=>g===C.winB,isInv:g=>!!(g&&(PF[g]&IV)),props:Object.assign({},PRO,PRB,typeof PRF!=="undefined"?PRF:{},typeof PRS!=="undefined"?PRS:{}),FP:()=>FPV,setFP:v=>{FPV=v},life:LIFE,win:WIN,post:postRender,style:SK,quadsTotal:quads,people:PPL,PEOPLE,moveTo,fall,setFly,tapJump,KEYS,PROPS,propGet,pbox,GOV,govSet,cullStep,pickTime,photo,posSave,posLoad,HALLS,GR:GROUPS,TM,pal:()=>PAL.length,grove:()=>({trees:GROVE.n,ready:GROVE.ready,got:GROVE.got||0,ver:TVER,drawn:GROVE.drawn,worker:!!TWORK,bad:TBAD}),pickSeason,seak:()=>SEAK,grassRGB:()=>PAL[C.grass[0]].map(v=>+v.toFixed(3)),flowers:()=>FBED?FBED.stats():null,KIT,SEASONS,sea:()=>SEA,liveAt:d=>{SEAD=d;pickTime('live')},perf:()=>({ms:GOV.ms,worst:GOV.worst,lv:GOV.lv,calls:renderer.info.render.calls,tris:renderer.info.render.triangles}),G,T,renderer,scene,camera,controls,quads,groups:GROUPS.length,trees:TREES,objs:OBJ.length,rooms:BLD.slice(1).reduce((s,b)=>s+b.rooms.length,0),gen:Math.round(t1-t0),mesh:Math.round(t2-t1),setTime,openB,close,setMode,PL,run,catalog,BLD,OBJ,goStairs,pickAt,FLIGHTS,stairRamp};
+  window.__vx={THREE,soul:{S:SOUL,setHour:h=>{SOUL.fix=h;soulJump()},clock:h=>{SOUL.fix=h;SOUL.hour=soulHour()},jump:soulJump,hourNow:soulHour,path:(a,b,cap)=>{const J=soulJob(a,b,cap);while(!soulWork(J,5000));return J.path?soulSmooth(J.path):null},pool:soulPool,now:soulNow,next:soulNext,say:soulSay,card:soulCard,send:soulSend,day:SOULDAY},fig:{Q:FIGQ,spec:figSpec,build:figBuild,quads:figQuads,half:figHalf,rig:figRig,near:figNear,far:figFar,mat:()=>FMAT()},tidyStats:()=>TM.tidy,stood:(x,y,z)=>FSTOOD.has(FKEY(x,y,z)),roomName:n=>RN(n),whereOf:o=>whereOf(o),owner:()=>OWNER,viewUrl:k=>VIEWURL(k),roomOf:()=>ROOMOF,blindBetween:()=>blindPanes.between,trunkN:()=>TRUNKN,glz:()=>({bars:TM.bars,doors:glazeInsideAll.doors}),finOn:()=>FIN_ON,kbot:()=>({P:kairosBot(),H:kairosHeadVox().V,person:personVox(outfit('none',null,()=>.37))}),groundY,get KH(){return KH},GOAL,goalOpen,URLS,WDRESS,wdApply,regRow,holesOf,T20,LMAP,LAMPS,LDAY,FULL,GROVE,IMP,BENCH,benchUI,pq:PQ,palette:PAL,trail:trailAt,settle:SETTLE,skins:CSKINS,windows:windowList,dep:DSTAT,seats:SEATS,kseat:()=>KSEAT,vr:VROOMS,dmap:DMAP,isWin:g=>isPane(g),isBlind:g=>g===C.winB,isInv:g=>!!(g&&(PF[g]&IV)),props:Object.assign({},PRO,PRB,typeof PRF!=="undefined"?PRF:{},typeof PRS!=="undefined"?PRS:{}),FP:()=>FPV,setFP:v=>{FPV=v},life:LIFE,win:WIN,post:postRender,style:SK,quadsTotal:quads,people:PPL,PEOPLE,moveTo,fall,setFly,tapJump,KEYS,PROPS,propGet,pbox,GOV,govSet,cullStep,pickTime,photo,posSave,posLoad,HALLS,GR:GROUPS,TM,pal:()=>PAL.length,grove:()=>({trees:GROVE.n,ready:GROVE.ready,got:GROVE.got||0,ver:TVER,drawn:GROVE.drawn,worker:!!TWORK,bad:TBAD}),pickSeason,seak:()=>SEAK,grassRGB:()=>PAL[C.grass[0]].map(v=>+v.toFixed(3)),flowers:()=>FBED?FBED.stats():null,KIT,SEASONS,sea:()=>SEA,liveAt:d=>{SEAD=d;pickTime('live')},perf:()=>({ms:GOV.ms,worst:GOV.worst,lv:GOV.lv,calls:renderer.info.render.calls,tris:renderer.info.render.triangles}),G,T,renderer,scene,camera,controls,quads,groups:GROUPS.length,trees:TREES,objs:OBJ.length,rooms:BLD.slice(1).reduce((s,b)=>s+b.rooms.length,0),gen:Math.round(t1-t0),mesh:Math.round(t2-t1),setTime,openB,close,setMode,PL,run,catalog,BLD,OBJ,goStairs,pickAt,FLIGHTS,stairRamp};
   TM.wall=Math.round(performance.now()-t0);frame();BENCH.first=performance.now();if(BENCH.on)setTimeout(benchUI,800);$('#bStats').onclick=()=>{const b=$('#bench');if(b)b.remove();else benchUI()};setTimeout(fxWarm,2500);if(!KIT||!GROVE.n||(GROVE.fd||0)>=GROVE.b.size*2)veilOff();else setTimeout(veilOff,8000)}
-function styleUI(){$('#brandS').textContent='Kairos Manor v1.72 . the '+ST.n+' Estate';if(!SHOWCASE)$('#bStyle').hidden=true;$('#styleList').innerHTML=Object.entries(STYLES).map(([k,v])=>`<button class="b${k===SK?' on':''}" data-st="${k}">${esc(v.n)}<small>${esc(v.d)}</small></button>`).join('');
+function styleUI(){$('#brandS').textContent='Kairos Manor v1.73 . the '+ST.n+' Estate';if(!SHOWCASE)$('#bStyle').hidden=true;$('#styleList').innerHTML=Object.entries(STYLES).map(([k,v])=>`<button class="b${k===SK?' on':''}" data-st="${k}">${esc(v.n)}<small>${esc(v.d)}</small></button>`).join('');
   $('#styleList').querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>pickStyle(b.dataset.st));$('#bStyle').onclick=()=>{$('#stylebox').hidden=!$('#stylebox').hidden};
   if(ISO){for(const[id,dd]of[['#bRotL',-1],['#bRotR',1]]){const b=$(id);b.hidden=false;b.onclick=()=>{if(ISOV.rot)return;const a=ISOV.yaw;ISOV.rot={t0:performance.now(),a,b:a+dd*Math.PI/2};if(MODE==='walk'){ISOV.yaw=a+dd*Math.PI/2;ISOV.rot=null}}}}}
 $('#load').innerHTML='Raising Euphrates Hall<i>The '+ST.n+' Estate. Raising the mansion, about ten seconds.</i>';

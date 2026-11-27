@@ -84,6 +84,15 @@ for f in src .; do
     echo "gate: FAIL figure_test $f"; grep -v ' ok ' "$tmp/ft.log" | head -20; fail=1
   fi
 done
+# v1.73: the souls. Names and timetables; the household in its places at four hours; the ways found on foot; a servant walks; a curtsey; the card.
+for f in src .; do
+  s=$(date +%s)
+  if python3 tools/tests/soul_test.py "$f" > "$tmp/so.log" 2>&1; then
+    echo "gate: ok   soul_test $f ($(( $(date +%s) - s ))s) $(grep -c ' ok ' "$tmp/so.log") checks;$(grep '^  ways:' "$tmp/so.log")"
+  else
+    echo "gate: FAIL soul_test $f"; grep -v ' ok ' "$tmp/so.log" | head -20; fail=1
+  fi
+done
 # v1.67: the walker bot. Every pair of rooms joined by a door, every stair and a circuit of the grounds, walked on foot twice.
 # A fall or a pass-through fails the gate; sticks, missing routes and rooms with no way in are printed.
 s=$(date +%s)
