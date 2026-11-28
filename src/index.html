@@ -5519,33 +5519,40 @@ function settleDoors(){const D=doorList(),by={};let n=0;const hit=(a,b,e)=>a.x0<
   SETTLE.doors={doors:D.length,cleared:n,by}}
 /* plants: out of the passages and into the corners */
 const PLANTK=new Set(['fern','palm','potPlant']);
-/* vx3-M (WO-M1 step 3, F001): His Grace's fault 1, plants in the middle of hallways, and the Inspector's wider reading: nothing stands in a passage's walking line.
-   A passage is a hall (HALLS) or a room that is a passage or corridor or no more than 8 wide (PASSR). A plant there stands hard against a long wall; any standing piece whose footprint
-   enters the middle two blocks is moved hard against a long wall, turned to face across, leaving 4 blocks clear beside it and off every door's approach: a corner of the passage
-   first if one is free, else the free place along a wall nearest where it stood. If none is free it goes. Every piece moved or taken out is listed in __vx.settle.passMoves:
-   [passage, kind, from x, from z, to x, to z] (to null when it goes). Seats move with the piece. */
-const PASSR=R=>/Passage|Corridor/.test(R.n||'')||Math.min(R.x1-R.x0,R.z1-R.z0)-1<=8,PLM=[];
+/* vx3-M (WO-M1 step 3, F001): His Grace's fault 1, plants in the middle of hallways, and the Inspector's wider reading: nothing stands in a passage's clear way.
+   A passage is a hall (HALLS) or a room named a corridor, passage, gallery, lobby, landing or link, at least half as long again as it is wide (PASSR); its clear way is all of its width
+   but 1.6 blocks along each wall (and never less than one block), as the Inspector's clear-way check reads it (PBAND). A piece that rises past foot height and enters the clear way is moved
+   hard against a long wall, turned to face across, off every door's approach: a corner of the passage first, else the free place along a wall nearest where it stood. A plant goes where it
+   would still enter the clear way; any other piece too deep for the margin stands against the wall only if 4 blocks stay clear beside it, and is listed as left (deep). If none of that is free
+   it goes. Every piece moved, left or taken out is listed in __vx.settle.passMoves: [passage, kind, from x, from z, to x, to z, note] (to null when it goes). Seats move with the piece. */
+const PASSR=R=>{const w=Math.min(R.x1-R.x0,R.z1-R.z0)-1,L=Math.max(R.x1-R.x0,R.z1-R.z0)-1;return L>=w*1.5&&(R.hall||HALLS.includes(R)||/corridor|passage|gallery|lobby|landing|link/i.test(R.n||''))},PLM=[];
+const PBAND=Hh=>{const ax=Hh.x1-Hh.x0>=Hh.z1-Hh.z0,w=Math.min(Hh.x1-Hh.x0,Hh.z1-Hh.z0)-1,mid=ax?(Hh.z0+Hh.z1)/2:(Hh.x0+Hh.x1)/2,half=Math.max(.5,(w-3.2)/2);return{ax,w,lo:mid-half+.05,hi:mid+half-.05}};
+const inBand=(it,Hh)=>{const P=PBAND(Hh),b=wbox(it),lo=P.ax?b.z0:b.x0,hi=P.ax?b.z1:b.x1;return hi>P.lo&&lo<P.hi};
 const PASSX=new Set(['column','balustrade','balPost','fireplace','doorDouble','daisDoor','stageCurtain','stageFlat','gatePier','obelisk','ceilingRose','bellPull','pierGlass','pictureRail','rug','ragRug']);
 function reseat(it,ox,oz){const S0=SEATK[it.r.kind];if(!S0)return;for(let i=SEATS.length-1;i>=0;i--){const e=SEATS[i];if(e.k===it.r.kind&&Math.hypot(e.x-ox,e.z-oz)<2.2)SEATS.splice(i,1)}if(!it.dead)noteSeats({placed:[{k:it.r.kind,x:it.x,z:it.z,th:it.th}],fs:it.y})}
-function passPlant(it,Hh,fy,w,turn){const B=pbox(it.r),alongX=Hh.x1-Hh.x0>=Hh.z1-Hh.z0,ox=it.x,oz=it.z,oth=it.th,nm=Hh.n||'hall',kd=it.r.kind;
+function passPlant(it,Hh,fy,w,turn){const B=pbox(it.r),alongX=Hh.x1-Hh.x0>=Hh.z1-Hh.z0,ox=it.x,oz=it.z,oth=it.th,nm=Hh.n||'hall',kd=it.r.kind,plant=PASSPL.test(kd);
   const dims=th=>{const q=Math.round(th/HP)&1;return[(q?B.z1-B.z0:B.x1-B.x0)/2+.25,(q?B.x1-B.x0:B.z1-B.z0)/2+.25]};
   const D=doorList(),nearDoor=(x,z)=>{for(const d of D){if(d.bid!==it.bid||d.y!==fy)continue;const a=d.axis==='x'?x:z,p=d.axis==='x'?z:x;if(a>=d.a0-1.6&&a<=d.a1+1.6&&Math.abs(p-d.w)<=3.1)return true}return false};
-  const go=()=>{it.dead=1;PLM.push([nm,kd,+ox.toFixed(1),+oz.toFixed(1),null]);reseat(it,ox,oz);return 'gone'};
-  {const[hx,hz]=dims(it.th),dep=alongX?2*hz:2*hx,hug=alongX?(Math.abs(it.z-(Hh.z0+.5+hz))<.35||Math.abs(it.z-(Hh.z1-.5-hz))<.35):(Math.abs(it.x-(Hh.x0+.5+hx))<.35||Math.abs(it.x-(Hh.x1-.5-hx))<.35);
-    if(hug&&w-dep>=4&&!nearDoor(Math.round(it.x),Math.round(it.z)))return 'stay'}
-  const C=[],A=[];for(const side of alongX?['n','s']:['w','e']){const th=turn?SIDES[side].th:it.th,[hx,hz]=dims(th),dep=alongX?2*hz:2*hx;if(w-dep<4)continue;
-    const fix=side==='n'?Hh.z0+.5+hz:side==='s'?Hh.z1-.5-hz:side==='w'?Hh.x0+.5+hx:Hh.x1-.5-hx,a0=alongX?Hh.x0+.5+hx:Hh.z0+.5+hz,a1=alongX?Hh.x1-.5-hx:Hh.z1-.5-hz,pt=a=>alongX?[a,fix,th]:[fix,a,th];
+  const go=()=>{it.dead=1;PLM.push([nm,kd,+ox.toFixed(1),+oz.toFixed(1),null,null,'gone']);reseat(it,ox,oz);return 'gone'};
+  if(!inBand(it,Hh)&&!nearDoor(Math.round(it.x),Math.round(it.z)))return 'stay';
+  const C=[],A=[];for(const side of alongX?['n','s']:['w','e']){const th=turn&&!plant?SIDES[side].th:it.th,[hx,hz]=dims(th),dep=(alongX?2*hz:2*hx)-.5,deep=dep>1.55;
+    if(deep&&(plant||w-dep<4))continue;
+    const fix=side==='n'?Hh.z0+.5+hz-.25:side==='s'?Hh.z1-.5-hz+.25:side==='w'?Hh.x0+.5+hx-.25:Hh.x1-.5-hx+.25,a0=alongX?Hh.x0+.5+hx:Hh.z0+.5+hz,a1=alongX?Hh.x1-.5-hx:Hh.z1-.5-hz,pt=a=>alongX?[a,fix,th,deep]:[fix,a,th,deep];
     C.push(pt(a0),pt(a1));for(let a=a0;a<=a1;a+=1)A.push(pt(a))}
-  if(!C.length){settlePlants.lift(it);return go()}
-  const byD=L=>L.map(c=>[c[0],c[1],c[2],Math.hypot(c[0]-it.x,c[1]-it.z)]).sort((a,b)=>a[3]-b[3]);settlePlants.lift(it);
-  for(const c of byD(C).concat(byD(A))){it.th=c[2];const cells=settlePlants.fits(it,Hh,c[0],c[1]);if(!cells)continue;PLM.push([nm,kd,+ox.toFixed(1),+oz.toFixed(1),+c[0].toFixed(1),+c[1].toFixed(1)]);
+  settlePlants.lift(it);if(!C.length)return go();
+  const byD=L=>L.map(c=>c.concat([Math.hypot(c[0]-it.x,c[1]-it.z)])).sort((a,b)=>a[4]-b[4]);
+  for(const c of byD(C).concat(byD(A))){it.th=c[2];const cells=settlePlants.fits(it,Hh,c[0],c[1]);if(!cells||cells.some(q=>laneSet().has(q[0]+','+fy+','+q[1])))continue;PLM.push([nm,kd,+ox.toFixed(1),+oz.toFixed(1),+c[0].toFixed(1),+c[1].toFixed(1),c[3]?'left (deep)':'moved']);
     it.x=c[0];it.z=c[1];CUR=it.bid;for(const[cx,cz]of cells)for(let k=1;k<=3;k++)if(!G(cx,fy+k,cz))S(cx,fy+k,cz,C_INV);CUR=0;reseat(it,ox,oz);return 'moved'}
   it.th=oth;return go()}
-let C_INV=0;
-function settlePass(){let moved=0,gone=0;C_INV=C.inv;for(const it of PQ){if(it.dead||it.v||!it.bid||it.wint)continue;const kd=it.r.kind;if(PLANTK.has(kd)||WALLK.has(kd)||PASSX.has(kd))continue;const pi=PINFO(kd);if(pi.hang||pi.wall)continue;const B=pbox(it.r);if(B.y1<.25)continue;
-    const fy=Math.round(it.y-.5),inR=r=>r.bid===it.bid&&r.y===fy&&it.x>r.x0&&it.x<r.x1&&it.z>r.z0&&it.z<r.z1;let Hh=HALLS.find(inR);if(!Hh){const Rm=BLD[it.bid].rooms.find(inR);if(Rm&&PASSR(Rm))Hh=Rm}if(!Hh)continue;
-    const alongX=Hh.x1-Hh.x0>=Hh.z1-Hh.z0,c=alongX?(Hh.z0+Hh.z1)/2:(Hh.x0+Hh.x1)/2,b=wbox(it),lo=alongX?b.z0:b.x0,hi=alongX?b.z1:b.x1;if(hi<=c-1||lo>=c+1)continue;
-    const w=Math.min(Hh.x1-Hh.x0,Hh.z1-Hh.z0)-1,res=passPlant(it,Hh,fy,w,true);if(res==='moved')moved++;else if(res==='gone')gone++}
+let C_INV=0;const PASSPL=/^(fern|palm|potPlant|orangeTree|urn|stoneVase)$/;
+/* the doorway lanes, found as the Inspector's clear-way check finds them: an opening in a room's or hall's wall with a lid over it and walls either side; its lane is the cells one and two out, both ways */
+let LANES=null;function laneSet(){if(LANES)return LANES;LANES=new Set();const vis=(x,y,z)=>SOL(G(x,y,z)),rs=[];for(let b=1;b<BLD.length;b++)for(const r of BLD[b].rooms)rs.push(r);for(const h of HALLS)rs.push(h);
+  for(const r of rs){const y=r.y,L=[];for(let z=r.z0+1;z<r.z1;z++)L.push([r.x0,z,1,0],[r.x1,z,-1,0]);for(let x=r.x0+1;x<r.x1;x++)L.push([x,r.z0,0,1],[x,r.z1,0,-1]);
+    for(const[x,z,dx,dz]of L){if(!vis(x,y,z)||vis(x,y+1,z)||vis(x,y+2,z))continue;let lid=false;for(let e=3;e<=9;e++)if(vis(x,y+e,z)){lid=true;break}if(!lid)continue;const px=dz,pz=dx;let wl=0;
+      for(let k=1;k<=4;k++)if(vis(x+px*k,y+1,z+pz*k)){wl++;break}for(let k=1;k<=4;k++)if(vis(x-px*k,y+1,z-pz*k)){wl++;break}if(wl<2)continue;for(const sd of[1,-1])for(const k of[1,2])LANES.add((x+dx*k*sd)+','+y+','+(z+dz*k*sd))}}return LANES}
+function settlePass(){LANES=null;let moved=0,gone=0;C_INV=C.inv;for(const it of PQ){if(it.dead||it.v||!it.bid||it.wint)continue;const kd=it.r.kind;if(PLANTK.has(kd)||WALLK.has(kd)||PASSX.has(kd))continue;const pi=PINFO(kd);if(pi.hang||HANGK.has(kd))continue;const B=pbox(it.r);if(B.y1<.6)continue;
+    const fy=Math.round(it.y-.5),inR=r=>r.bid===it.bid&&r.y===fy&&it.x>r.x0&&it.x<r.x1&&it.z>r.z0&&it.z<r.z1;let Hh=HALLS.filter(inR).find(PASSR);if(!Hh){const Rm=BLD[it.bid].rooms.find(inR);if(Rm&&PASSR(Rm))Hh=Rm}if(!Hh)continue;
+    if(!inBand(it,Hh))continue;const w=Math.min(Hh.x1-Hh.x0,Hh.z1-Hh.z0)-1,res=passPlant(it,Hh,fy,w,true);if(res==='moved')moved++;else if(res==='gone')gone++}
   SETTLE.pass={moved,gone};SETTLE.passMoves=PLM}
 function settlePlants(){let moved=0,gone=0,stay=0;const D=doorList(),fr=g=>!g||(PF[g]&IV);
   const nearDoor=(bid,y,x,z)=>{for(const d of D){if(d.bid!==bid||d.y!==y)continue;const a=d.axis==='x'?x:z,p=d.axis==='x'?z:x;if(a>=d.a0-1.6&&a<=d.a1+1.6&&Math.abs(p-d.w)<=3.1)return true}return false};
@@ -5556,7 +5563,7 @@ function settlePlants(){let moved=0,gone=0,stay=0;const D=doorList(),fr=g=>!g||(
     const B=pbox(it.r),c=Math.cos(it.th),sn=Math.sin(it.th),q=Math.round(it.th/HP)&1,hx=(q?B.z1-B.z0:B.x1-B.x0)/2,hz=(q?B.x1-B.x0:B.z1-B.z0)/2;
     for(const o of PQ){if(o===it||o.dead||o.bid!==it.bid||o.y<fy||o.y>fy+4||Math.abs(o.x-x)>8||Math.abs(o.z-z)>8)continue;const k=o.r.kind;if(/^(dado|panelling|cornice|rug|ragRug)/.test(k))continue;const b=wbox(o);if(b.x0<x+hx-.12&&b.x1>x-hx+.12&&b.z0<z+hz-.12&&b.z1>z-hz+.12&&b.y0<fy+.5+B.y1&&b.y1>fy+.6)return null}return cells};settlePlants.lift=lift;settlePlants.fits=fits;
   for(const it of PQ){if(it.dead||it.v||!it.bid||!PLANTK.has(it.r.kind))continue;const fy=Math.round(it.y-.5),R=BLD[it.bid].rooms.find(r=>r.y===fy&&it.x>r.x0&&it.x<r.x1&&it.z>r.z0&&it.z<r.z1);
-    if(!R||PASSR(R)){const Hh=R||HALLS.find(r=>r.bid===it.bid&&r.y===fy&&it.x>r.x0&&it.x<r.x1&&it.z>r.z0&&it.z<r.z1);if(!Hh){stay++;continue}const w=Math.min(Hh.x1-Hh.x0,Hh.z1-Hh.z0)-1;C_INV=C.inv;if(w<=4){lift(it);it.dead=1;gone++;PLM.push([Hh.n||'hall',it.r.kind,+it.x.toFixed(1),+it.z.toFixed(1),null]);continue}const res=passPlant(it,Hh,fy,w,false);if(res==='stay')stay++;else if(res==='gone')gone++;else moved++;continue}   /* vx3-M (F001): a passage keeps its clear way */
+    if(!R||PASSR(R)){const Hh=R||HALLS.find(r=>r.bid===it.bid&&r.y===fy&&it.x>r.x0&&it.x<r.x1&&it.z>r.z0&&it.z<r.z1);if(!Hh){stay++;continue}const w=Math.min(Hh.x1-Hh.x0,Hh.z1-Hh.z0)-1;C_INV=C.inv;if(!R&&!PASSR(Hh)&&w>4){stay++;continue}if(w<=4){lift(it);it.dead=1;gone++;PLM.push([Hh.n||'hall',it.r.kind,+it.x.toFixed(1),+it.z.toFixed(1),null,null,'gone (4 wide or less)']);continue}const res=passPlant(it,Hh,fy,w,false);if(res==='stay')stay++;else if(res==='gone')gone++;else moved++;continue}   /* vx3-M (F001): a passage keeps its clear way */
     const B=pbox(it.r),hw=(B.x1-B.x0)/2+.25,hd=(B.z1-B.z0)/2+.25,cs=[[R.x0+.5+hw,R.z0+.5+hd],[R.x1-.5-hw,R.z0+.5+hd],[R.x0+.5+hw,R.z1-.5-hd],[R.x1-.5-hw,R.z1-.5-hd]].map(c=>[c[0],c[1],Math.hypot(c[0]-it.x,c[1]-it.z)]).sort((a,b)=>a[2]-b[2]);
     if(cs[0][2]<2.6&&!nearDoor(it.bid,fy,Math.round(it.x),Math.round(it.z))){stay++;continue}
     lift(it);let ok=null;for(const c of cs){const cells=fits(it,R,c[0],c[1]);if(cells){ok=[c,cells];break}}

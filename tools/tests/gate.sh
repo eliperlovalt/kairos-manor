@@ -84,6 +84,15 @@ for f in src .; do
     echo "gate: FAIL figure_test $f"; grep -v ' ok ' "$tmp/ft.log" | head -20; fail=1
   fi
 done
+# vx3-M (WO-M1): the furniture tiers and pools. Every pooled piece drawn once, fine and middle boxes agree, the fine copy near inside its budget, the winter run.
+for f in src .; do
+  s=$(date +%s)
+  if python3 tools/tests/pinst_test.py "$f" > "$tmp/pi.log" 2>&1; then
+    echo "gate: ok   pinst_test $f ($(( $(date +%s) - s ))s) $(grep -c '^PASS' "$tmp/pi.log") checks"
+  else
+    echo "gate: FAIL pinst_test $f"; grep '^FAIL' "$tmp/pi.log" | head -20; fail=1
+  fi
+done
 # v1.73: the souls. Names and timetables; the household in its places at four hours; the ways found on foot; a servant walks; a curtsey; the card.
 for f in src .; do
   s=$(date +%s)
