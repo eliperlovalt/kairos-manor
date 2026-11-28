@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Founders' Pass | Kairos Manor</title>
+<meta name="description" content="The Estate and GOLEM are being built. The first hundred founders receive GOLEM: Founders' Edition, a name on the Founders' wall, and the Kairos pack. Join the waitlist to hear when the doors open.">
+<link rel="canonical" href="https://kairosmanor.com/founders/">
+<meta property="og:title" content="The Founders' Pass">
+<meta property="og:description" content="The house is being built. The first hundred become its founders.">
+<meta property="og:image" content="https://kairosmanor.com/founders/img/e-fountain.jpg">
+<meta property="og:url" content="https://kairosmanor.com/founders/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,700;1,6..96,500&family=Spectral:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a calling card from the house. One column on the phone: the invitation, the house in pictures,
+   what a founder receives, the butler's study (GOLEM), the questions, the card again. Green baize and brass. */
+:root{
+  --baize:#E9EEE7; --panel:#F6F8F3; --ink:#13231C; --ink-2:#3E5148; --line:#C9D3C8;
+  --brass:#6E540F; --brass-hi:#8A6A1E; --oxblood:#7B2532; --on-ox:#FBF4EA; --tag:#FFF3C9; --tag-ink:#5A4300;
+  --display:"Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
+  --body:"Spectral", Georgia, "Times New Roman", serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --baize:#0F1E18; --panel:#16291F; --ink:#EEE7D6; --ink-2:#B9B8A6; --line:#2C4237;
+  --brass:#D2AE55; --brass-hi:#E6C56E; --oxblood:#9A3141; --on-ox:#FBF4EA; --tag:#3A300F; --tag-ink:#F2D88A; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --baize:#0F1E18; --panel:#16291F; --ink:#EEE7D6; --ink-2:#B9B8A6; --line:#2C4237;
+  --brass:#D2AE55; --brass-hi:#E6C56E; --oxblood:#9A3141; --on-ox:#FBF4EA; --tag:#3A300F; --tag-ink:#F2D88A; color-scheme:dark }
+
+*{box-sizing:border-box}
+img{height:auto}
+body{background:var(--baize);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;margin:0}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.1;text-wrap:balance;margin:0}
+h2{font-size:clamp(28px,5vw,42px)}
+p{margin:0}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--brass-hi);outline-offset:3px}
+section{padding-block:56px}
+section + section{border-top:1px solid var(--line)}
+
+/* the draft notice */
+.draft{background:var(--tag);color:var(--tag-ink);font-family:var(--mono);font-size:12.5px;letter-spacing:.04em}
+.draft .wrap{padding-block:10px}
+
+/* the invitation */
+.hero{padding-block:36px 56px}
+.hero .grid{display:grid;gap:28px;grid-template-columns:1fr}
+.hero h1{font-size:clamp(38px,8.5vw,72px);letter-spacing:-.01em}
+.hero h1 em{font-style:italic;color:var(--brass)}
+.hero .lede{font-size:clamp(18px,2.6vw,21px);color:var(--ink-2);max-width:34em;margin-top:18px}
+.plate{position:relative;margin:0}
+.plate img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid var(--line)}
+.plate figcaption{font-family:var(--mono);font-size:12px;color:var(--ink-2);margin-top:8px}
+
+/* the card: price and the button */
+.card{background:var(--panel);border:1px solid var(--line);padding:22px;display:grid;gap:14px;max-width:440px;margin-top:26px;position:relative}
+.card::before{content:"";position:absolute;inset:5px;border:1px solid var(--brass);opacity:.45;pointer-events:none}
+.card .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.price{font-family:var(--display);font-size:52px;line-height:1}
+.price small{font-family:var(--body);font-size:16px;color:var(--ink-2);margin-left:6px}
+.places{font-family:var(--mono);font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.buy{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--oxblood);color:var(--on-ox);font-family:var(--display);font-size:19px;letter-spacing:.02em;text-decoration:none;padding:15px 18px;border:0;cursor:pointer;width:100%;position:relative;z-index:1}
+.buy:hover{filter:brightness(1.08)}
+.fine{font-size:14px;color:var(--ink-2)}
+
+/* the house */
+.head{display:grid;gap:10px;margin-bottom:26px;max-width:40em}
+.head p{color:var(--ink-2)}
+.rooms{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.rooms figure{margin:0}
+.rooms img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid var(--line)}
+.rooms figcaption{font-size:15px;margin-top:6px}
+.rooms figcaption span{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--brass)}
+.walk{display:inline-flex;gap:8px;align-items:center;margin-top:22px;font-family:var(--display);font-size:19px;color:var(--brass);text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:2px}
+
+/* what a founder receives */
+.receive{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line)}
+.receive li{display:grid;grid-template-columns:3.2em minmax(0,1fr);gap:14px;padding-block:18px;border-bottom:1px solid var(--line)}
+.receive .n{font-family:var(--display);font-style:italic;font-size:30px;color:var(--brass);line-height:1}
+.receive h3{font-size:22px;margin-bottom:4px}
+.receive p{color:var(--ink-2)}
+.wall{margin-top:26px;background:var(--panel);border:1px solid var(--line);padding:18px}
+.wall .names{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px 14px;margin-top:10px;font-family:var(--mono);font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.wall .names b{color:var(--ink);font-weight:500}
+
+/* GOLEM */
+.phones{display:grid;gap:18px;grid-template-columns:1fr}
+.phone{margin:0;display:grid;gap:10px;align-content:start}
+.phone .frame{border:1px solid var(--line);background:var(--panel);padding:8px;border-radius:22px;overflow:hidden}
+.phone img{display:block;width:100%;border-radius:14px}
+.phone .frame{max-height:560px}
+.phone figcaption h3{font-size:21px}
+.phone figcaption p{color:var(--ink-2);font-size:15.5px}
+.sample{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
+
+/* questions */
+.faq{display:grid;gap:0;border-top:1px solid var(--line)}
+.faq details{border-bottom:1px solid var(--line);padding-block:4px}
+.faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:baseline;padding-block:14px;font-family:var(--display);font-size:20px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-family:var(--mono);color:var(--brass);font-size:20px}
+.faq details[open] summary::after{content:"\2212"}
+.faq details p{color:var(--ink-2);padding-bottom:16px;max-width:42em}
+
+/* close */
+.close .card{margin-top:22px}
+footer{border-top:1px solid var(--line);padding-block:28px 44px;font-size:14px;color:var(--ink-2)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
+footer .legal{display:flex;flex-wrap:wrap;gap:6px 18px;width:100%}
+footer .legal a{color:var(--brass);text-underline-offset:3px;padding-block:6px}
+
+@media (min-width:760px){
+  .hero .grid{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);align-items:start;gap:44px}
+  .rooms{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .phones{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .close .inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:40px;align-items:center}
+  .close .card{margin-top:0}
+}
+@media (prefers-reduced-motion:no-preference){ .buy{transition:filter .15s} }
+/* the waitlist */
+.wl{display:grid;gap:12px;position:relative;z-index:1}
+.wl label{display:grid;gap:5px;font-size:15px}
+.wl .lab{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.wl input[type=email],.wl input[type=text]{font:inherit;font-size:17px;color:var(--ink);background:var(--baize);border:1px solid var(--line);padding:11px 12px;min-height:46px;width:100%}
+.wl input:focus-visible{outline:2px solid var(--brass-hi);outline-offset:1px}
+.wl .consent{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:start;font-size:15.5px}
+.wl .consent input{width:20px;height:20px;margin:3px 0 0;accent-color:var(--oxblood)}
+.wl .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.wl .msg{font-size:15.5px;padding:10px 12px;border:1px solid var(--line)}
+.wl .msg.ok{background:var(--tag);color:var(--tag-ink);border-color:var(--tag-ink)}
+.wl .msg.err{color:var(--oxblood);border-color:var(--oxblood)}
+.buy[disabled]{opacity:.6;cursor:progress}
+</style>
+</head>
+<body>
+
+
+<header class="hero">
+  <div class="wrap grid">
+    <div>
+      <h1>The house is being built. <em>The first hundred</em> become its founders.</h1>
+      <p class="lede">The Estate is a country house being built block by block. You can walk it today, unfinished, in your browser. When the doors open, your goals, records and notes will live in its rooms, and I, Kairos, the butler, will keep the house and tell you the next thing to do.</p>
+      <div class="card" id="pass">
+        <div class="row"><div class="label">The Founders' pass</div><div class="places">100 places</div></div>
+        <div class="price">$49<small>once</small></div>
+        <form class="wl" id="waitlist" novalidate>
+          <p class="fine" style="margin:0">Not on sale yet. Leave your email to hear when the doors open and the hundred places go on sale.</p>
+          <label><span class="lab">Email</span><input type="email" name="email" required autocomplete="email" inputmode="email" maxlength="200" placeholder="you@example.com"></label>
+          <label class="hp" aria-hidden="true">Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+          <label class="consent"><input type="checkbox" name="consent" required><span>Email me when the first hundred places open. Nothing else.</span></label>
+          <button class="buy" type="submit">Join the waitlist</button>
+          <p class="msg" role="status" aria-live="polite" hidden></p>
+        </form>
+        <p class="fine">When it opens: GOLEM: Founders' Edition, your name on the Founders' wall, and the Kairos pack.</p>
+      </div>
+    </div>
+    <figure class="plate">
+      <img src="img/e-fountain.jpg" alt="The Estate's forecourt: a stone fountain in front of a long classical house with a double stair and statues" width="900" height="900">
+      <figcaption>The forecourt, from inside the Estate.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<main>
+  <section id="house">
+    <div class="wrap">
+      <div class="head">
+        <div class="label">The house</div>
+        <h2>Every room is being made to keep a part of your life.</h2>
+        <p>These are the Estate as it stands today, unfinished, taken in the house itself. You can walk it now in a browser, on a phone or at a desk. When the doors open, the rooms will hold your goals, your records and your notes, each answering to one of fourteen Houses, one per colour.</p>
+      </div>
+      <div class="rooms">
+        <figure><img src="img/e-dining.jpg" alt="A long dining room with a white table, red chairs, a chandelier and portraits" width="900" height="900" loading="lazy"><figcaption><span>Dining</span>The long table, laid for the household.</figcaption></figure>
+        <figure><img src="img/e-hall.jpg" alt="The billiard room: a billiard table, a blue-carpeted stair behind it and red walls hung with portraits" width="900" height="900" loading="lazy"><figcaption><span>The billiard room</span>The table, and the stair to the family rooms.</figcaption></figure>
+        <figure><img src="img/e-chapel.jpg" alt="A lawn running between lamp posts to a pale chapel with tall stained windows, autumn trees around it" width="900" height="900" loading="lazy"><figcaption><span>The grounds</span>The walk to the chapel.</figcaption></figure>
+        <figure><img src="img/e-fountain.jpg" alt="The stone fountain in the forecourt, the house behind it" width="900" height="900" loading="lazy"><figcaption><span>The forecourt</span>Where every visit begins.</figcaption></figure>
+      </div>
+      <a class="walk" href="https://kairosmanor.com/">Walk the house as it stands, free</a>
+    </div>
+  </section>
+
+  <section id="receive">
+    <div class="wrap">
+      <div class="head">
+        <div class="label">What a founder receives</div>
+        <h2>Three things, kept for the first hundred.</h2>
+      </div>
+      <ol class="receive">
+        <li><span class="n">i</span><div><h3>GOLEM: Founders' Edition</h3><p>Your own copy of the system behind the house: one file you keep on your own device. It needs no account and no network. You pay once.</p></div></li>
+        <li><span class="n">ii</span><div><h3>Your name on the Founders' wall</h3><p>The first hundred names are set on a wall inside the Estate, where every later visitor walks past them. The wall is being built in the house now.</p></div></li>
+        <li><span class="n">iii</span><div><h3>Kairos, your guide</h3><p>Two parts. Inside your GOLEM: his lines on every page, a short tour, and a weekly note written from your own records. In your own Claude: the Kairos pack, one page you paste into a Claude Project so your Claude answers as Kairos, with his voice and rules, for your check-ins and reviews. The pack needs a Claude account; like the pass, Claude is for adults 18 and over. The free plan is enough (it allows up to five Projects) and no paid plan is required. The guide, the tour and the weekly notes need nothing at all. He is an AI, and he says so.</p></div></li>
+      </ol>
+      <div class="wall" aria-label="How the Founders' wall reads">
+        <div class="label">The Founders' wall, as it will read</div>
+        <div class="names"><span><b>No. 001</b> first founder</span><span><b>No. 002</b> waiting</span><span><b>No. 003</b> waiting</span><span><b>No. 004</b> waiting</span><span><b>No. 005</b> waiting</span><span><b>&hellip; No. 100</b></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="golem">
+    <div class="wrap">
+      <div class="head">
+        <div class="label">Behind the house: GOLEM</div>
+        <h2>The study where the household does its work.</h2>
+        <p>GOLEM: Founders' Edition is the system behind the Estate. It is built and working today, and founders receive it when the pass goes on sale. You give it up to five goals; it sorts them into the fourteen Houses and proposes a first step for each. Orders, a page for every House, books you fill yourself, and a weekly review that keeps it honest. Everything stays on your device, with export, import and reset.</p>
+      </div>
+      <div class="phones">
+        <figure class="phone"><div class="frame"><img src="img/f-orders.jpg" alt="GOLEM: Founders' Edition on a phone: Today's orders, Kairos greeting by name, the three orders that matter with the overdue one first" width="600" height="1298" loading="lazy"></div><figcaption><h3>Today's orders</h3><p>Three that matter, overdue first, then today, then starred. Kairos says what to do first.</p></figcaption></figure>
+        <figure class="phone"><div class="frame"><img src="img/f-house.jpg" alt="GOLEM: Founders' Edition on a phone: the Drill Hall, one of fourteen Houses, with a goal and a line from Kairos" width="600" height="1298" loading="lazy"></div><figcaption><h3>Fourteen Houses</h3><p>Each colour is a part of a life: direction, money, learning, work, home, people. Each House keeps its goals, orders and notes.</p></figcaption></figure>
+        <figure class="phone"><div class="frame"><img src="img/f-review.jpg" alt="GOLEM: Founders' Edition on a phone: Kairos's weekly note on the week's done, overdue and quiet goals, with a recommendation" width="600" height="1298" loading="lazy"></div><figcaption><h3>The weekly review</h3><p>Counted from your own orders, then a note from Kairos and the one thing for next week. The Commonplace and Pantry Books sit beside it.</p></figcaption></figure>
+      </div>
+      <p class="sample" style="margin-top:12px">Shown with sample entries.</p>
+    </div>
+  </section>
+
+  <section id="questions">
+    <div class="wrap">
+      <div class="head">
+        <div class="label">Questions</div>
+        <h2>What visitors ask at the door.</h2>
+      </div>
+      <div class="faq">
+        <details><summary>Is Kairos a person?</summary><p>No. Kairos is an AI butler, and he says so. Inside GOLEM he is written lines and notes built from your records; in your own Claude, he is the Kairos pack. He helps with goals, routines and the next action. He gives no medical, legal or financial advice, and steers you to a professional when that is what you need.</p></details>
+        <details><summary>Is there a free way in?</summary><p>Yes. The house is free to walk as it stands, while it is built. The Founders' pass adds GOLEM: Founders' Edition, the Kairos pack and your place on the wall.</p></details>
+        <details><summary>Is anything taken away later?</summary><p>No. Your GOLEM, your copy of the Kairos pack and your name on the wall stay yours for good.</p></details>
+        <details><summary>Where are my records kept?</summary><p>On your device. GOLEM keeps your goals, orders, books and reviews in your own browser and sends them nowhere; export a copy whenever you like. The Kairos pack runs in your own Claude account, under its own terms; we never see those chats. The <a href="privacy.html">privacy policy</a> says exactly what we keep.</p></details>
+        <details><summary>Does it work on my phone?</summary><p>Yes, in the browser. GOLEM has a tab bar made for the thumb.</p></details>
+        <details><summary>When can I buy?</summary><p>Not yet. The house is still being built, and the pass goes on sale when the doors open. Join the waitlist and you will be emailed once, when the hundred places open.</p></details>
+        <details><summary>Who may buy?</summary><p>Adults aged 18 and over. The pass is not sold to anyone younger, and the Kairos pack runs on a Claude account, which is also for adults 18 and over. See the <a href="terms.html">terms of sale</a>.</p></details>
+        <details><summary>Can I change my mind?</summary><p>Yes. A full refund within 14 days of buying, no questions asked. After that, we look at each request fairly. See the <a href="refunds.html">refund policy</a>.</p></details>
+        <details><summary>Why only a hundred?</summary><p>The first hundred are the household that shapes the house. Their faults and their wishes decide what is built next, and their names stay on the wall.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="close">
+    <div class="wrap inner">
+      <div class="head" style="margin-bottom:0">
+        <div class="label">At your service</div>
+        <h2>I will set your name on the wall.</h2>
+        <p>One payment, one hundred places, when the doors open. When they are gone, the pass is gone. The waitlist hears first.</p>
+      </div>
+      <div class="card">
+        <div class="row"><div class="label">The Founders' pass</div><div class="places">100 places</div></div>
+        <div class="price">$49<small>once</small></div>
+        <a class="buy" href="#waitlist">Join the waitlist</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap"><span>The Estate and GOLEM. Made by Elijah Shaiova-Perlov.</span><span>Presented by Kairos, the butler.</span><nav class="legal" aria-label="Policies"><a href="terms.html">Terms of sale</a><a href="privacy.html">Privacy</a><a href="refunds.html">Refunds</a></nav></div></footer>
+
+<script>
+/* The waitlist. Sends {email, ts} to WAITLIST_URL and nothing else; no cookies, no tracking. The name for the wall is asked at checkout, not here (F8). */
+(function(){
+  var WAITLIST_URL = "https://waitlist.kairosmanor.com/join";
+  var f = document.getElementById('waitlist'); if(!f) return;
+  var msg = f.querySelector('.msg'), btn = f.querySelector('button[type=submit]');
+  function say(text, ok){ msg.textContent = text; msg.className = 'msg ' + (ok ? 'ok' : 'err'); msg.hidden = false; }
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var email = f.email.value.trim();
+    if(f.website.value){ say('Thank you. You are on the list.', true); return; }
+    if(!email || !f.email.checkValidity()){ say('Please give a valid email address.', false); f.email.focus(); return; }
+    if(!f.consent.checked){ say('Please tick the box, so we may email you when the places open.', false); f.consent.focus(); return; }
+    if(WAITLIST_URL.indexOf('__') === 0){ say('The waitlist is not connected yet. Please try again soon.', false); return; }
+    btn.disabled = true; say('Sending...', true);
+    fetch(WAITLIST_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ email: email, ts: new Date().toISOString() }) })
+      .then(function(r){
+        if(r.status === 200){ f.reset(); say('Thank you. You are on the list, and you will hear from us once, when the hundred places open.', true); }
+        else say('Something went wrong on our side (error ' + r.status + '). Please try again later.', false);
+      }, function(){ say('Could not reach the waitlist. Check your connection and try again.', false); })
+      .then(function(){ btn.disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>
