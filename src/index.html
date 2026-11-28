@@ -5271,7 +5271,7 @@ RPOST['The Smoking Room']=(K,Q)=>{placeFree(Q,'wingChairFine',{},K.inner.cx-2,K.
 /* v1.69: the state rooms dressed to the Highclere reference, with what each lacked. post() adds to a room's rule without replacing it; it is called once the page's rules are all set (genProps2) */
 /* vx3-M (WO-M1 step 5): the Chapel set out as a chapel. F006: the pews in rows across the nave, facing east to the altar, a block either side of a centre aisle on the line of the west door.
    F009: an altar under the dossal, an altar rail across the chancel with a gap at the aisle, an eagle lectern on the north and a pulpit (props7.js) on the south, the two candle stands either side of the altar.
-   F010: the clergy take the pews' own seats (noteSeats), inside the pews. F012: in the crypt study the lecterns and the chairs before them turn their backs to the south wall and face into the room.
+   F010: the clergy take the pews' own seats (noteSeats), inside the pews. F012: in the crypt study the eagle lecterns faced into the room with their reading side a hand's breadth from the south wall; each stands 2 blocks out, so a reader has room behind it. The chairs face into the room, backs to the wall, and stay.
    Today's fineness; their fine carving is wave 6. Counts in __vx.vx3m.chapel */
 const VX3M={chapel:null,crypt:0,village:0};
 function unplace(Q,pred){const out=[];for(let i=Q.placed.length-1;i>=0;i--){const p=Q.placed[i];if(!pred(p))continue;const j=PQ.findIndex(it=>it.bid===Q.bid&&it.r.kind===p.k&&Math.abs(it.x-p.x)<.01&&Math.abs(it.z-p.z)<.01);
@@ -5287,8 +5287,9 @@ function putAt(Q,kind,o,x,z,th){const r=tryFloor(Q,kind,o,x,z,th,{});if(!r)retur
   for(const dz of[-2.4,2.4])if(putAt(Q,'candleStand',{},east-1.4,zc+dz,EH))out.candles++;
   out.removed=old.length;VX3M.chapel=out}}
 {const cr0=RPOST['Pardes, the crypt study'];RPOST['Pardes, the crypt study']=(K,Q)=>{if(cr0)cr0(K,Q);const R=K.R;
-  for(const p of Q.placed.slice()){if(p.k!=='lectern'&&!(SEATK[p.k]&&p.z>R.z1-3))continue;if(p.z<R.z1-3)continue;const fz=Math.cos(p.th);if(fz<.5)continue;   /* faces the south wall (+z) */
-    const[q]=unplace(Q,x=>x===p);if(q&&putAt(Q,q.k,q.o||{},q.x,q.z-.5,q.th+Math.PI))VX3M.crypt++}}}
+  for(const it of PQ.slice()){if(it.bid!==Q.bid||!(it.x>R.x0&&it.x<R.x1&&it.z>R.z0&&it.z<R.z1)||Math.abs(it.y-Q.fs)>.6)continue;if(it.r.kind!=='lectern'||it.z<R.z1-3)continue;   /* an eagle lectern hard by the south wall: its reader stands behind it, on the wall side */
+    const k=it.r.kind,o=it.r.o||{},x=it.x,z=it.z,th=it.th;CUR=Q.bid;for(const[cx,cz]of fpCells(fpRect(it.r,x,z,th))){Q.used.delete(Q.key(cx,cz));for(let h=1;h<=3;h++){const g=G(cx,Q.y+h,cz);if(g&&(PF[g]&IV))S(cx,Q.y+h,cz,0)}}CUR=0;
+    PQ.splice(PQ.indexOf(it),1);const pi=Q.placed.findIndex(p=>p.k===k&&Math.abs(p.x-x)<.01&&Math.abs(p.z-z)<.01);if(pi>=0)Q.placed.splice(pi,1);if(putAt(Q,k,o,x,z-2,th))VX3M.crypt++;else queueProp(k,o,x,Q.fs,z,th,Q.bid,Q.band,false)}}}
 const POSTX={
   'The Billiard Room':(K,Q)=>{const i=K.inner,t=Q.placed.find(p=>p.k==='billiard')||PQ.find(it=>it.bid===K.R.bid&&it.r.kind==='billiard'&&it.x>K.R.x0&&it.x<K.R.x1&&it.z>K.R.z0&&it.z<K.R.z1)||{x:i.cx,z:i.cz,th:0},B=pbox(propGet('billiard',{}));
     K.at('billiardLight',{h:Math.round((K.ceil-K.y-2.4)/.115)},t.x,t.z,(t.th||0)+((B.x1-B.x0)>=(B.z1-B.z0)?0:HP),{dy:2.4});let hung=0;for(let n=0;n<2;n++){const s=K.spot(2.8,1);if(s){K.atWall('hallBench',{},s.side,s.a,{solid:true});K.atWall(n?'scoreBoard':'cueRack',{},s.side,s.a,{proud:.26});hung++}}
