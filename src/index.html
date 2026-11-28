@@ -5328,8 +5328,10 @@ function putAt(Q,kind,o,x,z,th){const r=tryFloor(Q,kind,o,x,z,th,{});if(!r)retur
   /* vx3-M: the pews stand a block clear of each wall (the pilasters stand there: a pew run to the wall failed there and placeFree pushed it into the aisle), each placed exactly or not at all,
      and a row only where both its pews fit, so the two blocks are mirror images about the nave's centre line and the aisle is clear from the west door to the rail */
   const nb=[R.z0+1,zc-2],sb=[zc+2,R.z1-1],pn=[R.z0+2,zc-2],ps=[zc+2,R.z1-2],L=nb[1]-nb[0]+1,LP=pn[1]-pn[0]+1,Wp=Math.max(8,Math.floor(((LP-.3)/.115-1)/2)),EH=-HP;   /* EH: the front (+z) turned to face east (+x) is th HP; facing west it is -HP */
-  out.skipped=[];for(let x=R.x0+4;x<=east-10;x+=2){const zs=[(pn[0]+pn[1])/2,(ps[0]+ps[1])/2],rs=zs.map(z=>tryFloor(Q,'pew',{w:Wp},x,z,HP,{})||pewFit(Q,Wp,x,z));if(!rs[0]||!rs[1]){out.skipped.push(x);continue}
-    zs.forEach((z,i)=>{commitFloor(Q,'pew',{w:Wp},x,z,HP,rs[i]);Q.placed.push({k:'pew',o:{w:Wp},x,y:Q.fs,z,th:HP});out.pews++})}
+  /* a row stands only where both its pews fit; a lone row left between a cross aisle and the chancel is not set (it read as a stray stall by the pulpit), so the pews are whole blocks */
+  out.skipped=[];out.lone=[];const zs=[(pn[0]+pn[1])/2,(ps[0]+ps[1])/2],rows=[];for(let x=R.x0+4;x<=east-10;x+=2){const rs=zs.map(z=>tryFloor(Q,'pew',{w:Wp},x,z,HP,{})||pewFit(Q,Wp,x,z));if(rs[0]&&rs[1])rows.push([x,rs]);else out.skipped.push(x)}
+  const gap=out.skipped.length?Math.max(...out.skipped):null,east1=gap==null?[]:rows.filter(r=>r[0]>gap);if(east1.length===1){out.lone.push(east1[0][0]);rows.splice(rows.indexOf(east1[0]),1)}
+  for(const[x,rs]of rows)zs.forEach((z,i)=>{commitFloor(Q,'pew',{w:Wp},x,z,HP,rs[i]);Q.placed.push({k:'pew',o:{w:Wp},x,y:Q.fs,z,th:HP});out.pews++})
   if(putAt(Q,'altarTable',{},east-1.2,zc,EH))out.altar++;
   {const len=Math.round((L-.2)*8.7)|1;for(const b of[nb,sb])if(putAt(Q,'altarRail',{len},east-5,(b[0]+b[1])/2,EH))out.rail++}
   if(putAt(Q,'lectern',{},east-7.5,(nb[0]+nb[1])/2+.5,EH))out.lectern++;if(putAt(Q,'pulpit',{},east-7.5,(sb[0]+sb[1])/2-.5,EH))out.pulpit++;
