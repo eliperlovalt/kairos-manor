@@ -14,7 +14,7 @@ PWA = '''<meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Estate">
+<meta name="apple-mobile-web-app-title" content="Kairos Manor">
 <meta name="theme-color" content="#0d0f12">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">

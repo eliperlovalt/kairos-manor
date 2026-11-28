@@ -38,14 +38,19 @@ def _route(route):
 
 OWNER_LINKS = "try{localStorage.setItem('eh-links',JSON.stringify({urls:{golem:'https://golem.invalid/',datahub:'https://datahub.invalid/',globe:'https://globe.invalid/',chat:'https://chat.invalid/',pardes:'https://pardes.invalid/'}}))}catch(e){}"
 
-def open_estate(p, base, page='index.html', w=844, h=390, timeout=180000, owner=None):
+def open_estate(p, base, page='index.html', w=844, h=390, timeout=180000, owner=None, lite=0, ua=None, dpr=1, init=None):
     # v1.70: the house is tested as its owner sees it unless a test asks for a visitor (owner=False, or EH_VISITOR=1).
     # The owner's device is the one that holds private links; the tests give it stand-in links that lead nowhere.
     if owner is None: owner = os.environ.get('EH_VISITOR') != '1'
     browser = p.chromium.launch(executable_path=(os.environ.get('CHROME') or None), args=['--no-sandbox','--use-gl=angle', '--use-angle=swiftshader',
                                       '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+    kw = {'user_agent': ua} if ua else {}
     ctx = browser.new_context(viewport={'width': w, 'height': h}, has_touch=True,
-                              is_mobile=False, device_scale_factor=1)
+                              is_mobile=False, device_scale_factor=dpr, **kw)
+    # v1.76: the tests see the full house unless a test asks for the phone's (lite=1), the lighter one (2), or the page's own choice (None); EH_LITE in the environment sets it for a whole run
+    if os.environ.get('EH_LITE'): lite = int(os.environ['EH_LITE'])
+    if lite is not None: ctx.add_init_script('window.__EH_LITE=%d' % lite)
+    if init: ctx.add_init_script(init)
     if owner: ctx.add_init_script(OWNER_LINKS)
     # v1.73: the household keeps the real hour; the tests hold the clock at half past ten in the morning so every run sees the same house
     ctx.add_init_script('window.__EH_HOUR=%s' % os.environ.get('EH_HOUR','10.5'))

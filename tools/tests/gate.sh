@@ -119,6 +119,21 @@ if python3 tools/tests/extras_test.py src > "$tmp/ex.log" 2>&1; then
 else
   echo "gate: FAIL extras_test src"; grep -v ' ok ' "$tmp/ex.log" | head -20; fail=1
 fi
+# v1.76: the phone. The page as an iPhone gets it (its own budget, the lighter house after a failed start, the messages), on both copies; then the walker bot once on the phone budget.
+for f in src .; do
+  s=$(date +%s)
+  if python3 tools/tests/phone_test.py "$f" > "$tmp/ph.log" 2>&1; then
+    echo "gate: ok   phone_test $f ($(( $(date +%s) - s ))s) $(grep -c ' ok ' "$tmp/ph.log") checks;$(grep '^  phone budget:' "$tmp/ph.log")"
+  else
+    echo "gate: FAIL phone_test $f"; grep -v ' ok ' "$tmp/ph.log" | head -20; fail=1
+  fi
+done
+s=$(date +%s)
+if EH_LITE=1 python3 tools/tests/walkbot.py src 1 --strict > "$tmp/wbl.log" 2>&1; then
+  echo "gate: ok   walkbot src on the phone budget ($(( $(date +%s) - s ))s)$(sed -n 2p "$tmp/wbl.log");$(grep -E '^  (falls|pass-throughs|sticks) ' "$tmp/wbl.log" | tr -s ' ' | tr '\n' ';')"
+else
+  echo "gate: FAIL walkbot src on the phone budget"; head -40 "$tmp/wbl.log"; fail=1
+fi
 # v1.67: the walker bot. Every pair of rooms joined by a door, every stair and a circuit of the grounds, walked on foot twice.
 # A fall or a pass-through fails the gate; sticks, missing routes and rooms with no way in are printed.
 s=$(date +%s)
