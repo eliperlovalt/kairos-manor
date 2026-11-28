@@ -15,6 +15,12 @@ GEO = """()=>{const seen=new Set(),arr=new Set();let b=0,n=0;const add=a=>{if(a&
  const m=__vx.renderer.info.memory;return {geoms:n,geoMB:+(b/1048576).toFixed(1),glGeoms:m.geometries,textures:m.textures,programs:(__vx.renderer.info.programs||[]).length}}"""
 
 
+def tick(pg, n=4):
+    """A headless page draws a frame only when one is asked for: without this every spot read the same stale frame (VOXEL III, v1.78)."""
+    for _ in range(n):
+        pg.screenshot(clip={'x': 0, 'y': 0, 'width': 8, 'height': 8}); pg.wait_for_timeout(120)
+
+
 def run(folder, page):
     with serve(folder) as base, sync_playwright() as p:
         b = p.chromium.launch(executable_path=os.environ.get('CHROME') or None, args=['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--enable-precise-memory-info'])
@@ -36,9 +42,9 @@ def run(folder, page):
         draws = {}
         for nm, s in SPOTS.items():
             x, y, z, yaw = s[:4]; pitch = s[4] if len(s) > 4 else .1
-            pg.evaluate("([x,y,z,yaw,pt])=>{const P=__vx.PL;P.x=x;P.y=y+.5;P.z=z;P.yaw=yaw;P.pitch=pt;P.vy=0;P.sit=null}", [x, y, z, yaw, pitch]); pg.wait_for_timeout(1600)
+            pg.evaluate("([x,y,z,yaw,pt])=>{const P=__vx.PL;P.x=x;P.y=y+.5;P.z=z;P.yaw=yaw;P.pitch=pt;P.vy=0;P.sit=null}", [x, y, z, yaw, pitch]); pg.wait_for_timeout(1600); tick(pg)
             draws[nm] = pg.evaluate("()=>{const i=__vx.renderer.info.render;return [i.calls,i.triangles]}")
-        pg.evaluate("()=>__vx.setMode('over')"); pg.wait_for_timeout(2500)
+        pg.evaluate("()=>__vx.setMode('over')"); pg.wait_for_timeout(2500); tick(pg)
         draws['overview'] = pg.evaluate("()=>{const i=__vx.renderer.info.render;return [i.calls,i.triangles]}")
         b.close()
     return dict(ready=round(ready), tm=tm, longMs=sum(d for s, d in lt), maxLong=max([d for s, d in lt] or [0]), mem=mem, draws=draws, errors=errs)
