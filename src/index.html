@@ -4285,15 +4285,19 @@ D('wreath','Holly wreath with a red bow',WN+': over a mantel, on a door, in a wi
   for(let x=-5;x<=5;x++)for(let y=-5;y<=5;y++){const d=Math.hypot(x,y);if(d<3||d>5.3)continue;for(let z=0;z<(d>3.6&&d<4.8?2:1);z++)k.put(x,y+6,z,h3(x,y,z,2)<.3?FIR2:FIR);if(h3(x,y,1,9)<.14)k.put(x,y+6,2,BERRY)}
   k.box(-2,1,2,2,1,2,RED);k.put(0,2,2,RED);k.box(-2,-1,2,-1,0,2,RED);k.box(1,-1,2,2,0,2,RED);return{anchor:'wall'}},{wall:true});
 D('christmasTree','Christmas tree with candles',WN+': the Saloon, the Great Hall, the Entrance Hall, the Servants\' Hall, the Day Nursery','look',(k,o)=>{const lit=o.lit!==false,BAU=[RED,GOLD,'#2E5E9E','#c0c7cf'];
-  /* vx3-M: carved at PU2 (the third level) in the old box (44 by 98 by 44 fine cells). Eight tiers of boughs, each a skirt in the dark green with drooping tips over a lighter body,
-     candles stood on each tier's ledge, baubles hung under its skirt, a gilt star; a crimson tub with gilt corners. Broad faces of one colour, so it meshes to about 5,000 triangles (it was 8,176) */
+  /* vx3-M: carved at PU2 (the third level) in the old box (44 by 98 by 44 fine cells). Eight tiers of boughs: each a lobed skirt in the dark green (seven boughs that droop at their tips),
+     a body that steps in twice, its top in the lighter green; candles on the ledges, baubles under the skirts, a gilt star; a crimson tub with gilt corners.
+     Broad faces of one colour, so it meshes to fewer triangles than the old tree's 8,176 */
   k.box(-6,0,-6,5,1,5,'#5a1620');k.box(-6,2,-6,5,9,5,'#7a1f2b');k.box(-7,10,-7,6,11,6,GILT);for(const a of[-6,5])for(const b of[-6,5])k.box(a,2,b,a,9,b,GILT);k.box(-2,12,-2,1,17,1,'#3a2a1c');
-  for(let t=0;t<8;t++){const y0=16+t*10,y1=y0+9,Rr=21.6-t*2.3;
-    for(let y=y0;y<=y1;y++){const sk=y<=y0+1,r=sk?Rr:Rr-1.1-(y-y0-2)*.12;for(let x=-22;x<=21;x++)for(let z=-22;z<=21;z++){if(Math.hypot(x+.5,z+.5)>r)continue;k.put(x,y,z,sk?FIR3:FIR)}}
-    const nt=Math.round(Rr*.9),nc=Math.max(4,Math.round(Rr*.45));
-    for(let i=0;i<nt;i++){const a=i/nt*Math.PI*2+t*.37,x=Math.max(-22,Math.min(21,Math.round(Math.cos(a)*(Rr-.8)-.5))),z=Math.max(-22,Math.min(21,Math.round(Math.sin(a)*(Rr-.8)-.5)));k.put(x,y0-1,z,FIR3);if(i%3===1){k.put(x,y0-2,z,BAU[(i+t)%4]);k.put(x,y0-3,z,BAU[(i+t)%4])}}
-    if(t<7)for(let i=0;i<nc;i++){const a=(i+.5)/nc*Math.PI*2+t*.9,x=Math.round(Math.cos(a)*(Rr-.6)-.5),z=Math.round(Math.sin(a)*(Rr-.6)-.5);k.box(x,y0+2,z,x,y0+4,z,WH);k.box(x,y0+5,z,x,y0+6,z,lit?FLAME:WH,lit?'flame':undefined)}}
-  k.box(-1,92,-1,0,97,0,GOLD,lit?'flame':undefined);k.box(-3,94,-1,2,95,0,GOLD);
+  const rad=(t,a)=>{const R=21.6-t*2.35,lobe=Math.pow(Math.abs(Math.cos(a*3.5+t*.8)),.6);return R-2.2+2.2*lobe};
+  for(let t=0;t<8;t++){const y0=16+t*10,Rr=21.6-t*2.35;
+    for(let y=y0-1;y<=y0+9;y++){const j=y-y0;for(let x=-22;x<=21;x++)for(let z=-22;z<=21;z++){const dx=x+.5,dz=z+.5,d=Math.hypot(dx,dz),a=Math.atan2(dz,dx),rs=rad(t,a);
+        if(j<0){if(d<=rs&&d>rs-1.6&&rs>Rr-.9)k.put(x,y,z,FIR3);continue}   /* the bough tips droop one cell */
+        const r=j<=1?rs:j<=5?Rr-2.6:Rr-4.6;if(d>r)continue;k.put(x,y,z,j<=1?FIR3:(j===5||j===9)?FIR2:FIR)}}
+    const nb=Math.max(3,Math.round(Rr*.55)),nc=Math.max(3,Math.round(Rr*.4));
+    for(let i=0;i<nb;i++){const a=(i+.5)/nb*Math.PI*2+t*.37,rr=Rr-3.2,x=Math.round(Math.cos(a)*rr-.5),z=Math.round(Math.sin(a)*rr-.5);k.box(x,y0-3,z,x+1,y0-2,z+1,BAU[(i+t)%4])}
+    if(t<7)for(let i=0;i<nc;i++){const a=(i+.25)/nc*Math.PI*2+t*.9,rr=Rr-3.4,x=Math.round(Math.cos(a)*rr-.5),z=Math.round(Math.sin(a)*rr-.5);k.box(x,y0+6,z,x,y0+8,z,WH);k.box(x,y0+9,z,x,y0+10,z,lit?FLAME:WH,lit?'flame':undefined)}}
+  for(const[a,b]of[[-3,2],[-2,1]])k.box(a,94,-1,b,95,0,GOLD);k.box(-1,91,-1,0,97,0,GOLD,lit?'flame':undefined);k.box(-1,93,-2,0,96,1,GOLD);
   return{unit:P.PU2,glow:lit}},{light:true});
 D('presents','Presents under the tree',WN+': at the foot of the tree','open',k=>{
   k.box(-4,0,-3,0,3,1,RED);k.box(-2,0,-3,-2,4,1,GOLD);k.box(-4,2,-1,0,2,-1,GOLD);k.box(1,0,-2,4,2,2,'#2E5E9E');k.box(1,1,0,4,1,0,WH);k.box(2,0,-2,2,3,2,WH);
@@ -5578,20 +5582,31 @@ const PBAND=Hh=>{const ax=Hh.x1-Hh.x0>=Hh.z1-Hh.z0,w=Math.min(Hh.x1-Hh.x0,Hh.z1-
 const inBand=(it,Hh)=>{const P=PBAND(Hh),b=wbox(it),lo=P.ax?b.z0:b.x0,hi=P.ax?b.z1:b.x1;return hi>P.lo&&lo<P.hi};
 const PASSX=new Set(['column','balustrade','balPost','fireplace','doorDouble','daisDoor','stageCurtain','stageFlat','gatePier','obelisk','ceilingRose','bellPull','pierGlass','pictureRail','rug','ragRug']);
 function reseat(it,ox,oz){const S0=SEATK[it.r.kind];if(!S0)return;for(let i=SEATS.length-1;i>=0;i--){const e=SEATS[i];if(e.k===it.r.kind&&Math.hypot(e.x-ox,e.z-oz)<2.2)SEATS.splice(i,1)}if(!it.dead)noteSeats({placed:[{k:it.r.kind,x:it.x,z:it.z,th:it.th}],fs:it.y})}
-function passPlant(it,Hh,fy,w,turn){const B=pbox(it.r),alongX=Hh.x1-Hh.x0>=Hh.z1-Hh.z0,ox=it.x,oz=it.z,oth=it.th,nm=Hh.n||'hall',kd=it.r.kind,plant=PASSPL.test(kd);
-  const dims=th=>{const q=Math.round(th/HP)&1;return[(q?B.z1-B.z0:B.x1-B.x0)/2+.25,(q?B.x1-B.x0:B.z1-B.z0)/2+.25]};
+/* vx3-M (WO-M2): where a piece goes. Every passage the spot lies in keeps its clear way (halls overlap: the ottoman at 39.1, 0.27 was set against one hall's wall inside another's clear way).
+   The nearest spot first, within 6 blocks along the walls, then 12, then (not for plants) anywhere in the passage, flagged far, so a piece stays where its passage's dressing put it.
+   A palm or fern too deep for the margin becomes a slim pot plant; a plant stands at a pier (wall, not glass, behind it) or in a corner, 2 blocks or more from any door.
+   An orange tree prefers the glass wall and may stand deep against it while 4 blocks stay clear. In a passage 5 or less wide a piece hard against the wall stands, listed: the clear way there is the middle block. */
+function passAll(it,fy){const inR=r=>r.bid===it.bid&&r.y===fy&&it.x>r.x0&&it.x<r.x1&&it.z>r.z0&&it.z<r.z1;return HALLS.filter(inR).filter(PASSR).concat(BLD[it.bid].rooms.filter(inR).filter(PASSR))}
+function passPlant(it,Hh,fy,w,turn){const alongX=Hh.x1-Hh.x0>=Hh.z1-Hh.z0,ox=it.x,oz=it.z,oth=it.th,or=it.r,nm=Hh.n||'hall',kd=it.r.kind,orange=kd==='orangeTree',plant=PASSPL.test(kd)&&!orange;
   const D=doorList(),nearDoor=(x,z)=>{for(const d of D){if(d.bid!==it.bid||d.y!==fy)continue;const a=d.axis==='x'?x:z,p=d.axis==='x'?z:x;if(a>=d.a0-1.6&&a<=d.a1+1.6&&Math.abs(p-d.w)<=3.1)return true}return false};
-  const go=()=>{it.dead=1;PLM.push([nm,kd,+ox.toFixed(1),+oz.toFixed(1),null,null,'gone']);reseat(it,ox,oz);return 'gone'};
-  if(!inBand(it,Hh)&&!nearDoor(Math.round(it.x),Math.round(it.z)))return 'stay';
-  const C=[],A=[];for(const side of alongX?['n','s']:['w','e']){const th=turn&&!plant?SIDES[side].th:it.th,[hx,hz]=dims(th),dep=(alongX?2*hz:2*hx)-.5,deep=dep>1.55;
-    if(deep&&(plant||w-dep<4))continue;
-    const fix=side==='n'?Hh.z0+.5+hz-.25:side==='s'?Hh.z1-.5-hz+.25:side==='w'?Hh.x0+.5+hx-.25:Hh.x1-.5-hx+.25,a0=alongX?Hh.x0+.5+hx:Hh.z0+.5+hz,a1=alongX?Hh.x1-.5-hx:Hh.z1-.5-hz,pt=a=>alongX?[a,fix,th,deep]:[fix,a,th,deep];
-    C.push(pt(a0),pt(a1));for(let a=a0;a<=a1;a+=1)A.push(pt(a))}
-  settlePlants.lift(it);if(!C.length)return go();
-  const byD=L=>L.map(c=>c.concat([Math.hypot(c[0]-it.x,c[1]-it.z)])).sort((a,b)=>a[4]-b[4]);
-  for(const c of byD(C).concat(byD(A))){it.th=c[2];const cells=settlePlants.fits(it,Hh,c[0],c[1]);if(!cells||cells.some(q=>laneSet().has(q[0]+','+fy+','+q[1])))continue;PLM.push([nm,kd,+ox.toFixed(1),+oz.toFixed(1),+c[0].toFixed(1),+c[1].toFixed(1),c[3]?'left (deep)':'moved']);
-    it.x=c[0];it.z=c[1];CUR=it.bid;for(const[cx,cz]of cells)for(let k=1;k<=3;k++)if(!G(cx,fy+k,cz))S(cx,fy+k,cz,C_INV);CUR=0;reseat(it,ox,oz);return 'moved'}
-  it.th=oth;return go()}
+  const doorFar=()=>{const b=wbox(it);for(const d of D){if(d.bid!==it.bid||d.y!==fy)continue;const X=d.axis==='x'?[d.a0,d.a1]:[d.w,d.w],Z=d.axis==='x'?[d.w,d.w]:[d.a0,d.a1],dx=Math.max(X[0]-.5-b.x1,0,b.x0-X[1]-.5),dz=Math.max(Z[0]-.5-b.z1,0,b.z0-Z[1]-.5);if(Math.hypot(dx,dz)<2)return false}return true};
+  const bandFree=()=>passAll(it,fy).every(H=>!inBand(it,H));
+  const behind=(side,glass)=>{const b=wbox(it);let pane=0,n=0;const wz=side==='n'?Hh.z0:side==='s'?Hh.z1:null,wx=side==='w'?Hh.x0:side==='e'?Hh.x1:null;
+    for(let t=Math.round(alongX?b.x0+.3:b.z0+.3);t<=Math.round(alongX?b.x1-.3:b.z1-.3);t++){const g=alongX?G(t,fy+2,wz):G(wx,fy+2,t);n++;if(!g||isPane(g))pane++}return glass?pane>0:pane===0};
+  const go=()=>{it.r=or;it.th=oth;it.dead=1;PLM.push([nm,kd,+ox.toFixed(1),+oz.toFixed(1),null,null,'gone']);reseat(it,ox,oz);return 'gone'};
+  if(bandFree()&&!nearDoor(Math.round(it.x),Math.round(it.z)))return 'stay';
+  settlePlants.lift(it);const tries=[[or,'']];if(plant&&kd!=='potPlant')tries.push([propGet('potPlant',{}),'swapped to a pot plant']);
+  for(const[r,how]of tries){it.r=r;const B=pbox(r),dims=th=>{const q=Math.round(th/HP)&1;return[(q?B.z1-B.z0:B.x1-B.x0)/2+.25,(q?B.x1-B.x0:B.z1-B.z0)/2+.25]},P=[];
+    for(const side of alongX?['n','s']:['w','e']){const th=turn&&!plant&&!orange?SIDES[side].th:it.th,[hx,hz]=dims(th),dep=(alongX?2*hz:2*hx)-.5,deep=dep>1.55;if(deep&&(plant||w-dep<4))continue;
+      const fix=side==='n'?Hh.z0+.5+hz-.25:side==='s'?Hh.z1-.5-hz+.25:side==='w'?Hh.x0+.5+hx-.25:Hh.x1-.5-hx+.25,a0=alongX?Hh.x0+.5+hx:Hh.z0+.5+hz,a1=alongX?Hh.x1-.5-hx:Hh.z1-.5-hz;
+      for(let a=Math.ceil(a0*2)/2;a<=a1;a+=.5){const x=alongX?a:fix,z=alongX?fix:a,al=Math.abs(alongX?a-ox:a-oz);P.push({x,z,th,deep,side,al,d:Math.hypot(x-ox,z-oz)})}}
+    for(const cap of plant?[6,12]:[6,12,1e9]){const L=P.filter(c=>c.al<=cap).sort((a,b)=>(orange?(a.side===b.side?0:0):0)+a.d-b.d);if(orange)L.sort((a,b)=>(behind_g(a)-behind_g(b))||a.d-b.d);
+      for(const c of L){it.th=c.th;const cells=settlePlants.fits(it,Hh,c.x,c.z);if(!cells||cells.some(q=>laneSet().has(q[0]+','+fy+','+q[1])))continue;const px=it.x,pz=it.z;it.x=c.x;it.z=c.z;
+        let ok=bandFree()||c.deep||w<=5;if(ok&&(plant||orange))ok=doorFar();if(ok&&plant)ok=behind(c.side,false);if(!ok){it.x=px;it.z=pz;continue}
+        const note=[how,c.deep?'left (deep)':'',!c.deep&&w<=5&&!bandFree()?'left (narrow passage, against the wall)':'',c.al>12?'far ('+c.al.toFixed(0)+' along)':''].filter(Boolean).join(', ')||'moved';PLM.push([nm,kd,+ox.toFixed(1),+oz.toFixed(1),+c.x.toFixed(1),+c.z.toFixed(1),note]);
+        CUR=it.bid;for(const[cx,cz]of cells)for(let k=1;k<=3;k++)if(!G(cx,fy+k,cz))S(cx,fy+k,cz,C_INV);CUR=0;reseat(it,ox,oz);return 'moved'}}}
+  return go();
+  function behind_g(c){const px=it.x,pz=it.z,pth=it.th;it.x=c.x;it.z=c.z;it.th=c.th;const g=behind(c.side,true)?0:1;it.x=px;it.z=pz;it.th=pth;return g}}
 let C_INV=0;const PASSPL=/^(fern|palm|potPlant|orangeTree|urn|stoneVase)$/;
 /* the doorway lanes, found as the Inspector's clear-way check finds them: an opening in a room's or hall's wall with a lid over it and walls either side; its lane is the cells one and two out, both ways */
 let LANES=null;function laneSet(){if(LANES)return LANES;LANES=new Set();const vis=(x,y,z)=>SOL(G(x,y,z)),rs=[];for(let b=1;b<BLD.length;b++)for(const r of BLD[b].rooms)rs.push(r);for(const h of HALLS)rs.push(h);
@@ -5600,7 +5615,7 @@ let LANES=null;function laneSet(){if(LANES)return LANES;LANES=new Set();const vi
       for(let k=1;k<=4;k++)if(vis(x+px*k,y+1,z+pz*k)){wl++;break}for(let k=1;k<=4;k++)if(vis(x-px*k,y+1,z-pz*k)){wl++;break}if(wl<2)continue;for(const sd of[1,-1])for(const k of[1,2])LANES.add((x+dx*k*sd)+','+y+','+(z+dz*k*sd))}}return LANES}
 function settlePass(){LANES=null;let moved=0,gone=0;C_INV=C.inv;for(const it of PQ){if(it.dead||it.v||!it.bid||it.wint)continue;const kd=it.r.kind;if(PLANTK.has(kd)||WALLK.has(kd)||PASSX.has(kd))continue;const pi=PINFO(kd);if(pi.hang||HANGK.has(kd))continue;const B=pbox(it.r);if(B.y1<.6)continue;
     const fy=Math.round(it.y-.5),inR=r=>r.bid===it.bid&&r.y===fy&&it.x>r.x0&&it.x<r.x1&&it.z>r.z0&&it.z<r.z1;let Hh=HALLS.filter(inR).find(PASSR);if(!Hh){const Rm=BLD[it.bid].rooms.find(inR);if(Rm&&PASSR(Rm))Hh=Rm}if(!Hh)continue;
-    if(!inBand(it,Hh))continue;const w=Math.min(Hh.x1-Hh.x0,Hh.z1-Hh.z0)-1,res=passPlant(it,Hh,fy,w,true);if(res==='moved')moved++;else if(res==='gone')gone++}
+    if(passAll(it,fy).every(H=>!inBand(it,H)))continue;const w=Math.min(Hh.x1-Hh.x0,Hh.z1-Hh.z0)-1,res=passPlant(it,Hh,fy,w,true);if(res==='moved')moved++;else if(res==='gone')gone++}
   SETTLE.pass={moved,gone};SETTLE.passMoves=PLM}
 function settlePlants(){let moved=0,gone=0,stay=0;const D=doorList(),fr=g=>!g||(PF[g]&IV);
   const nearDoor=(bid,y,x,z)=>{for(const d of D){if(d.bid!==bid||d.y!==y)continue;const a=d.axis==='x'?x:z,p=d.axis==='x'?z:x;if(a>=d.a0-1.6&&a<=d.a1+1.6&&Math.abs(p-d.w)<=3.1)return true}return false};

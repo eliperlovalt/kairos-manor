@@ -48,15 +48,19 @@ D('wreath','Holly wreath with a red bow',WN+': over a mantel, on a door, in a wi
   for(let x=-5;x<=5;x++)for(let y=-5;y<=5;y++){const d=Math.hypot(x,y);if(d<3||d>5.3)continue;for(let z=0;z<(d>3.6&&d<4.8?2:1);z++)k.put(x,y+6,z,h3(x,y,z,2)<.3?FIR2:FIR);if(h3(x,y,1,9)<.14)k.put(x,y+6,2,BERRY)}
   k.box(-2,1,2,2,1,2,RED);k.put(0,2,2,RED);k.box(-2,-1,2,-1,0,2,RED);k.box(1,-1,2,2,0,2,RED);return{anchor:'wall'}},{wall:true});
 D('christmasTree','Christmas tree with candles',WN+': the Saloon, the Great Hall, the Entrance Hall, the Servants\' Hall, the Day Nursery','look',(k,o)=>{const lit=o.lit!==false,BAU=[RED,GOLD,'#2E5E9E','#c0c7cf'];
-  /* vx3-M: carved at PU2 (the third level) in the old box (44 by 98 by 44 fine cells). Eight tiers of boughs, each a skirt in the dark green with drooping tips over a lighter body,
-     candles stood on each tier's ledge, baubles hung under its skirt, a gilt star; a crimson tub with gilt corners. Broad faces of one colour, so it meshes to about 5,000 triangles (it was 8,176) */
+  /* vx3-M: carved at PU2 (the third level) in the old box (44 by 98 by 44 fine cells). Eight tiers of boughs: each a lobed skirt in the dark green (seven boughs that droop at their tips),
+     a body that steps in twice, its top in the lighter green; candles on the ledges, baubles under the skirts, a gilt star; a crimson tub with gilt corners.
+     Broad faces of one colour, so it meshes to fewer triangles than the old tree's 8,176 */
   k.box(-6,0,-6,5,1,5,'#5a1620');k.box(-6,2,-6,5,9,5,'#7a1f2b');k.box(-7,10,-7,6,11,6,GILT);for(const a of[-6,5])for(const b of[-6,5])k.box(a,2,b,a,9,b,GILT);k.box(-2,12,-2,1,17,1,'#3a2a1c');
-  for(let t=0;t<8;t++){const y0=16+t*10,y1=y0+9,Rr=21.6-t*2.3;
-    for(let y=y0;y<=y1;y++){const sk=y<=y0+1,r=sk?Rr:Rr-1.1-(y-y0-2)*.12;for(let x=-22;x<=21;x++)for(let z=-22;z<=21;z++){if(Math.hypot(x+.5,z+.5)>r)continue;k.put(x,y,z,sk?FIR3:FIR)}}
-    const nt=Math.round(Rr*.9),nc=Math.max(4,Math.round(Rr*.45));
-    for(let i=0;i<nt;i++){const a=i/nt*Math.PI*2+t*.37,x=Math.max(-22,Math.min(21,Math.round(Math.cos(a)*(Rr-.8)-.5))),z=Math.max(-22,Math.min(21,Math.round(Math.sin(a)*(Rr-.8)-.5)));k.put(x,y0-1,z,FIR3);if(i%3===1){k.put(x,y0-2,z,BAU[(i+t)%4]);k.put(x,y0-3,z,BAU[(i+t)%4])}}
-    if(t<7)for(let i=0;i<nc;i++){const a=(i+.5)/nc*Math.PI*2+t*.9,x=Math.round(Math.cos(a)*(Rr-.6)-.5),z=Math.round(Math.sin(a)*(Rr-.6)-.5);k.box(x,y0+2,z,x,y0+4,z,WH);k.box(x,y0+5,z,x,y0+6,z,lit?FLAME:WH,lit?'flame':undefined)}}
-  k.box(-1,92,-1,0,97,0,GOLD,lit?'flame':undefined);k.box(-3,94,-1,2,95,0,GOLD);
+  const rad=(t,a)=>{const R=21.6-t*2.35,lobe=Math.pow(Math.abs(Math.cos(a*3.5+t*.8)),.6);return R-2.2+2.2*lobe};
+  for(let t=0;t<8;t++){const y0=16+t*10,Rr=21.6-t*2.35;
+    for(let y=y0-1;y<=y0+9;y++){const j=y-y0;for(let x=-22;x<=21;x++)for(let z=-22;z<=21;z++){const dx=x+.5,dz=z+.5,d=Math.hypot(dx,dz),a=Math.atan2(dz,dx),rs=rad(t,a);
+        if(j<0){if(d<=rs&&d>rs-1.6&&rs>Rr-.9)k.put(x,y,z,FIR3);continue}   /* the bough tips droop one cell */
+        const r=j<=1?rs:j<=5?Rr-2.6:Rr-4.6;if(d>r)continue;k.put(x,y,z,j<=1?FIR3:(j===5||j===9)?FIR2:FIR)}}
+    const nb=Math.max(3,Math.round(Rr*.55)),nc=Math.max(3,Math.round(Rr*.4));
+    for(let i=0;i<nb;i++){const a=(i+.5)/nb*Math.PI*2+t*.37,rr=Rr-3.2,x=Math.round(Math.cos(a)*rr-.5),z=Math.round(Math.sin(a)*rr-.5);k.box(x,y0-3,z,x+1,y0-2,z+1,BAU[(i+t)%4])}
+    if(t<7)for(let i=0;i<nc;i++){const a=(i+.25)/nc*Math.PI*2+t*.9,rr=Rr-3.4,x=Math.round(Math.cos(a)*rr-.5),z=Math.round(Math.sin(a)*rr-.5);k.box(x,y0+6,z,x,y0+8,z,WH);k.box(x,y0+9,z,x,y0+10,z,lit?FLAME:WH,lit?'flame':undefined)}}
+  for(const[a,b]of[[-3,2],[-2,1]])k.box(a,94,-1,b,95,0,GOLD);k.box(-1,91,-1,0,97,0,GOLD,lit?'flame':undefined);k.box(-1,93,-2,0,96,1,GOLD);
   return{unit:P.PU2,glow:lit}},{light:true});
 D('presents','Presents under the tree',WN+': at the foot of the tree','open',k=>{
   k.box(-4,0,-3,0,3,1,RED);k.box(-2,0,-3,-2,4,1,GOLD);k.box(-4,2,-1,0,2,-1,GOLD);k.box(1,0,-2,4,2,2,'#2E5E9E');k.box(1,1,0,4,1,0,WH);k.box(2,0,-2,2,3,2,WH);
