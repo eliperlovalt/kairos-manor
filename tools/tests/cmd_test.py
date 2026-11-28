@@ -54,6 +54,18 @@ with serve(folder) as base, sync_playwright() as p:
         tick(2);q=pg.evaluate(ST)
         if 'sent for me' in ' '.join(q['log']): break
     check('she says she was sent for', 'sent for me' in ' '.join(q['log']), str(q['log']))
+    # 2b. the report on a fixed short step (the Studio films at exactly 1/30 s a frame, the household at its real pace)
+    pg.evaluate("()=>{__vx.soul.S.rate=10;const o=__vx.cmd.order('summon','the cook');window.__o=o}")
+    for k in range(260):
+        tick(2);q=pg.evaluate(ST)
+        if q['state'] in('reporting','done','failed'): break
+    pg.evaluate("()=>{__vx.soul.S.rate=1;let t=performance.now();const raf=window.requestAnimationFrame.bind(window);window.__raf=window.requestAnimationFrame;window.requestAnimationFrame=cb=>raf(()=>{t+=1000/30;cb(t)});performance.now=()=>t}")
+    fr=0
+    for k in range(200):
+        tick(2);fr+=2;q=pg.evaluate(ST)
+        if q['state'] in('done','failed'): break
+    check('on a fixed step of 1/30 s the report ends (%s after about %d frames)'%(q['state'],fr), q['state']=='done' and fr<=360, str(q)[:200])
+    pg.evaluate("()=>{window.requestAnimationFrame=window.__raf;delete performance.now;__vx.soul.S.rate=10}");tick(2)
     # 3. night
     N=pg.evaluate("()=>{__vx.soul.setHour(23.6);const a=__vx.cmd.order('tidy','the Library');const cap=__vx.cmd.C.log.slice(-1)[0];const b=__vx.cmd.order('tidy','the Library',{wake:true});return {a:!!a,cap,b:!!b}}")
     check('at night nobody is sent, and Kairos says so; woken, one goes', not N['a'] and 'abed' in N['cap'] and N['b'], str(N))
