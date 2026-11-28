@@ -189,7 +189,7 @@ function plant(THREE,list,o={}){const VAR=o.variants||3,FAR=o.far||14,GONE=o.gon
   const geo=(b,l)=>geometry(THREE,b.species,{seed:b.seed,color:b.color,stage:o.stage||stage(b.species,st),lod:l});
   for(const b of buckets.values())for(const l of LV){const im=new THREE.InstancedMesh(geo(b,l),mat,b.items.length);im.frustumCulled=false;im.count=0;im.userData={k:'flower',o:{species:b.species,color:b.color,seed:b.seed,lod:l}};group.add(im);b[l]=im}
   const wp=new THREE.Vector3();
-  function update(cam,dt){acc+=dt==null?1e9:dt;if(acc<(o.every||.4))return;acc=0;group.updateMatrixWorld();wp.copy(cam).applyMatrix4(new THREE.Matrix4().copy(group.matrixWorld).invert());const F2=FAR*FAR,G2=GONE*GONE;
+  function update(cam,dt){acc+=dt==null?1e9:dt;if(acc<(o.every||.4))return;acc=0;group.updateMatrixWorld();wp.copy(cam).applyMatrix4(new THREE.Matrix4().copy(group.matrixWorld).invert());const F2=Math.pow(o.far||FAR,2),G2=Math.pow(o.gone||GONE,2);
     for(const b of buckets.values()){let n=0,f=0;for(const it of b.items){const dx=it.x-wp.x,dz=it.z-wp.z,d=dx*dx+dz*dz;if(d<F2)b.near.setMatrixAt(n++,it.m);else if(d<G2)b.far.setMatrixAt(f++,it.m)}b.near.count=n;b.far.count=f;b.near.instanceMatrix.needsUpdate=true;b.far.instanceMatrix.needsUpdate=true}}
   function season(s){st=s;const k=SPECIES.map(sp=>stage(sp,st)).join();if(k===stamp)return;stamp=k;for(const b of buckets.values())for(const l of LV)b[l].geometry=geo(b,l)}
   function stats(){let q=0,dc=0,n=0,f=0;for(const b of buckets.values())for(const l of LV){const im=b[l];if(im.count&&im.geometry.userData.quads){dc++;q+=im.count*im.geometry.userData.quads;l==='near'?n+=im.count:f+=im.count}}return{plants:list.length,drawCalls:dc,quads:q,near:n,far:f}}
