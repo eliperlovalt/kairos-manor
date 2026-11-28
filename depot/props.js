@@ -11,7 +11,7 @@
    the same face-buffer path as people, scaled by r.unit. r.size is [w,h,d] in blocks.
    ========================================================= */
 const PROPS=(()=>{
-const PU=.115, TU=.25;
+const PU=.115, PU2=PU/2, TU=.25;   /* vx3: PU2, the third level (the figures' FU): a part may return unit:PU2 */
 const C={oak:'#6b4226',oakL:'#8a5a32',mah:'#5a2418',mahL:'#74331f',wal:'#4a3020',ebony:'#1e1612',gilt:'#c9a227',giltD:'#9c7a1c',brass:'#b8913a',
   iron:'#2e2e33',ironL:'#55555c',marble:'#e8e4dc',marbleV:'#cfc8bb',marbleG:'#3f5a4a',linen:'#efe6cf',white:'#f4f1ea',damask:'#7a1f2a',damaskD:'#5c1520',
   green:'#2f5a3a',baize:'#2f6b3a',blue:'#2f4a6e',gold:'#d4af37',cream:'#e9dfc4',leather:'#5b2a1a',leatherL:'#7a3a22',paper:'#efe6cf',flame:'#ffd36b',
@@ -262,5 +262,5 @@ function faces(r,scale){const s=(scale||1)*r.unit,V=r.V,P=[],Cc=[],N=[];const ha
   for(const[x,y,z,c,p]of V.values()){const rgb=cache[c]||(cache[c]=hex(c));const sh=p==='flame'?1.25:1;for(const[dx,dy,dz,q]of F){if(has(x+dx,y+dy,z+dz))continue;const L=dy>0?1:dy<0?.55:dx!==0?.78:.88;
     const v=[0,1,2,0,2,3].map(i=>q[i]);for(const[a,b,cz]of v){P.push((x-.5+a)*s,(y+b)*s,(z-.5+cz)*s);Cc.push(Math.min(1,rgb[0]*L*sh),Math.min(1,rgb[1]*L*sh),Math.min(1,rgb[2]*L*sh));N.push(dx,dy,dz)}}}
   return{pos:new Float32Array(P),col:new Float32Array(Cc),nor:new Float32Array(N)}}
-const api={build,faces,get kinds(){return Object.keys(B)},info:INFO,colors:C,books:BOOKS,PU,TU,def,kit,rng,blob,trunk,limb,TREE};return api})();
+const api={build,faces,get kinds(){return Object.keys(B)},info:INFO,colors:C,books:BOOKS,PU,PU2,TU,def,kit,rng,blob,trunk,limb,TREE};return api})();
 if(typeof module!=='undefined')module.exports=PROPS;
