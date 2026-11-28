@@ -3,6 +3,8 @@
 - at the fixed spots (the view test off, as for the shadow map) every pooled piece whose cell is drawn is drawn exactly once, as its middle copy or its fine copy, and none whose cell is cut;
 - every kind with a fine carving: the fine box and the halved middle box agree to one fine cell (so nothing floats, sinks or grows into a doorway);
 - beside each fine piece the fine copy is shown within three seconds, inside the budget (pieces, triangles, megabytes);
+- the winter run (the season held at winter, January 20, when the winter dress is on): the winter pieces are drawn, the fine Christmas tree shows beside one,
+  costs fewer than the old tree's 8,176 triangles and keeps its box, and every pooled piece is still drawn once;
 - no page errors."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -45,6 +47,27 @@ def main():
             pg.evaluate("()=>__vx.pinst.step()"); r = pg.evaluate(ONCE); s = pg.evaluate(STATE)
             ok(r['fine'] >= 1 and r['bad'] == 0, '%s: the fine copy shows beside it (%d fine)' % (kind, r['fine']))
             ok(s['shown'] <= s['max'] and s['tris'] <= s['cap'] and s['mb'] <= s['mbcap'], '%s: inside the budget (%d pieces, %d triangles, %.2f MB)' % (kind, s['shown'], s['tris'], s['mb']))
+        tree = pg.evaluate("()=>__vx.pq.filter(it=>it.r.kind==='christmasTree').length")
+        ok(tree == 0 or pg.evaluate("()=>!__vx.pinst.P.pools.filter(p=>p.gr.wint).some(p=>p.on)"), 'out of season the winter pools are not drawn')
+        # the winter run
+        pg.evaluate("()=>{try{localStorage.setItem('euph_season','winter')}catch(e){}}"); pg.reload(wait_until='domcontentloaded')
+        pg.wait_for_function('window.__vx && window.__vx.TM && window.__vx.TM.wall', timeout=300000); pg.wait_for_timeout(4000)
+        pg.evaluate("()=>{if(__vx.GOV){__vx.GOV.off=true;__vx.govSet(0)}__vx.setMode('walk')}")
+        w = pg.evaluate("()=>{const T=__vx.pq.filter(it=>it.r.kind==='christmasTree');return {on:!!(__vx.WDRESS?__vx.WDRESS.on:true),trees:T.length,pooled:T.filter(it=>it.pool).length,pools:__vx.pinst.P.pools.filter(p=>p.gr.wint&&p.on).length}}")
+        ok(w['trees'] >= 1 and w['pooled'] == w['trees'] and w['pools'] >= 1, 'winter: %d Christmas trees, %d pooled, %d winter pools drawn' % (w['trees'], w['pooled'], w['pools']))
+        pos = pg.evaluate(NEAR, 'christmasTree')
+        if pos:
+            pg.evaluate(GO, pos); pg.wait_for_timeout(3000); pg.evaluate("()=>__vx.pinst.step()"); r = pg.evaluate(ONCE)
+            F = pg.evaluate("()=>{for(const F of __vx.pinst.F.M.values())if(F.r.kind==='christmasTree'&&F.geos)return F.tris;return 0}")
+            ok(r['fine'] >= 1 and r['bad'] == 0, 'winter: the fine tree shows beside it (%d fine) %s' % (r['fine'], ' '.join(r['why'])))
+            ok(0 < F < 8176, 'winter: the fine tree costs %d triangles (the old tree 8,176)' % F)
+            for kind, d, u in pg.evaluate(BOX):
+                if kind == 'christmasTree': ok(d <= u * 1.05, 'winter: the tree keeps its box (%.3f)' % d)
+            old = pg.evaluate("()=>{const B=__vx.pbox(__vx.pq.find(it=>it.r.kind==='christmasTree').r);return [B.x1-B.x0,B.y1-B.y0,B.z1-B.z0]}")
+            ok(abs(old[0]-2.53) < .13 and abs(old[1]-5.64) < .13 and abs(old[2]-2.53) < .13, 'winter: the tree is the old size, 2.53 by 5.64 by 2.53 (%.2f by %.2f by %.2f)' % tuple(old))
+        for nm in ['saloon', 'state_hall']:
+            pg.evaluate(GO, ALL[nm]); pg.wait_for_timeout(800); r = pg.evaluate(ONCE)
+            ok(r['bad'] == 0, 'winter, %s: every pooled piece drawn once %s' % (nm, ' '.join(r['why'])))
         ok(not err, 'no page errors %s' % err[:3])
         b.close()
     print('pinst_test: %d failed' % len(fails)); sys.exit(1 if fails else 0)
