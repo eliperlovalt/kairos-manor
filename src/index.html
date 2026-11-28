@@ -5617,6 +5617,52 @@ function settlePass(){LANES=null;let moved=0,gone=0;C_INV=C.inv;for(const it of 
     const fy=Math.round(it.y-.5),inR=r=>r.bid===it.bid&&r.y===fy&&it.x>r.x0&&it.x<r.x1&&it.z>r.z0&&it.z<r.z1;let Hh=HALLS.filter(inR).find(PASSR);if(!Hh){const Rm=BLD[it.bid].rooms.find(inR);if(Rm&&PASSR(Rm))Hh=Rm}if(!Hh)continue;
     if(passAll(it,fy).every(H=>!inBand(it,H)))continue;const w=Math.min(Hh.x1-Hh.x0,Hh.z1-Hh.z0)-1,res=passPlant(it,Hh,fy,w,true);if(res==='moved')moved++;else if(res==='gone')gone++}
   SETTLE.pass={moved,gone};SETTLE.passMoves=PLM}
+/* vx3-M (28 Nov, His Grace's rule): nothing movable stands on a room-to-room axis. Wherever two doors face each other across a room or a passage, the strip between them, as wide as
+   the doors' common width, is clear end to end. A door is an opening in the wall, open at foot and head height, with a lid over it and walls either side, five blocks wide or less (a wider
+   opening is the open end of a passage, which the passage rule keeps). A table on a strip moves sideways off it, with the chairs drawn up to it, by the least that clears it; any other
+   piece moves to the nearest wall spot in its room that is off every strip, every doorway lane and every door's approach; failing that, it goes. A laid table whose set cannot shift is
+   left whole and listed (never broken up). The thrones (bisellium) are the seats of state and are not moved. Every move is listed in
+   __vx.settle.axisMoves: [room, kind, from x, from z, to x, to z, how] */
+const AXTAB=new Set(['tableDining','kitchenTable','trestleTable','libraryTable','pedestalTable','billiard','studyTable','writingTable','deskWriting','gamesTable','cardTable','teaTable','mapTable','labBench','workbench','pubTable','altarTable','ironingTable']);
+function doorRuns(R){const y=R.y,vis=(x,yy,z)=>SOL(G(x,yy,z)),D=[];const line=(side,cells)=>{let run=null;const ok=(x,z)=>{if(!vis(x,y,z)||vis(x,y+1,z)||vis(x,y+2,z))return false;for(let e=3;e<=9;e++)if(vis(x,y+e,z))return true;return false};
+    for(const[a,x,z]of cells){if(ok(x,z)){if(run&&a===run.a1+1)run.a1=a;else{if(run)D.push(run);run={side,a0:a,a1:a}}}else if(run){D.push(run);run=null}}if(run)D.push(run)};
+  const rx=[],rz=[];for(let x=R.x0+1;x<R.x1;x++)rx.push(x);for(let z=R.z0+1;z<R.z1;z++)rz.push(z);
+  line('n',rx.map(x=>[x,x,R.z0]));line('s',rx.map(x=>[x,x,R.z1]));line('w',rz.map(z=>[z,R.x0,z]));line('e',rz.map(z=>[z,R.x1,z]));return D.filter(d=>d.a1-d.a0+1<=5)}
+function axisStrips(R){const D=doorRuns(R),S=[];for(const[A,B]of[['n','s'],['w','e']])for(const a of D.filter(d=>d.side===A))for(const b of D.filter(d=>d.side===B)){const lo=Math.max(a.a0,b.a0),hi=Math.min(a.a1,b.a1);if(lo<=hi)S.push({ns:A==='n',s0:lo-.5,s1:hi+.5})}return S}
+const onStrip=(it,S)=>{const b=wbox(it);return S.some(t=>{const a0=t.ns?b.x0:b.z0,a1=t.ns?b.x1:b.z1;return a1>t.s0+.05&&a0<t.s1-.05})};
+function settleAxis(){const out=[];LANES=null;C_INV=C.inv;const rooms=[];for(let b=1;b<BLD.length;b++)for(const R of BLD[b].rooms)rooms.push(R);for(const H of HALLS)rooms.push(H);
+  const stand=it=>{if(it.dead||it.v||!it.bid||it.wint)return false;const k=it.r.kind;if(k==='bisellium'||WALLK.has(k)||PASSX.has(k)||HANGK.has(k)||PINFO(k).hang)return false;const B=pbox(it.r);return B.y1>=.6&&B.y0<.3};
+  const riders=it=>{const b=wbox(it);return PQ.filter(o=>o!==it&&!o.dead&&o.bid===it.bid&&o.y>it.y+.3&&o.y<it.y+3&&o.x>b.x0&&o.x<b.x1&&o.z>b.z0&&o.z<b.z1).map(o=>{const dx=o.x-it.x,dz=o.z-it.z,c=Math.cos(-it.th),s2=Math.sin(-it.th);return[o,dx*c+dz*s2,-dx*s2+dz*c,o.th-it.th]})};
+  const carry=(it,R0)=>{const c=Math.cos(it.th),s2=Math.sin(it.th);for(const[o,lx,lz,dth]of R0){o.x=it.x+lx*c+lz*s2;o.z=it.z-lx*s2+lz*c;o.th=it.th+dth}};   /* a vase on a table goes where the table goes */
+  const put=(it,cells,fy)=>{CUR=it.bid;for(const[cx,cz]of cells)for(let k=1;k<=3;k++)if(!G(cx,fy+k,cz))S(cx,fy+k,cz,C_INV);CUR=0};
+  for(const R of rooms){const Sx=axisStrips(R);if(!Sx.length)continue;const fy=R.y,inR=it=>it.bid===R.bid&&Math.round(it.y-.5)===fy&&it.x>R.x0&&it.x<R.x1&&it.z>R.z0&&it.z<R.z1;
+    const here=PQ.filter(it=>stand(it)&&inR(it)),hit=here.filter(it=>onStrip(it,Sx));if(!hit.length)continue;const nm=R.n||'hall',done=new Set();
+    const free=(it,x,z,th)=>{const px=it.x,pz=it.z,pt=it.th;it.th=th;const cells=settlePlants.fits(it,R,x,z);if(!cells||cells.some(q=>laneSet().has(q[0]+','+fy+','+q[1]))){it.th=pt;return null}it.x=x;it.z=z;const ok=!onStrip(it,Sx);it.x=px;it.z=pz;it.th=pt;return ok?cells:null};
+    for(const it of hit){if(done.has(it)||it.dead)continue;const ox=it.x,oz=it.z;
+      if(AXTAB.has(it.r.kind)){/* the table and the chairs drawn up to it, moved together sideways */
+        const tb=wbox(it),grp=[it].concat(here.filter(o=>o!==it&&!o.dead&&!AXTAB.has(o.r.kind)&&SEATK[o.r.kind]&&(()=>{const b=wbox(o);return b.x1>tb.x0-1.8&&b.x0<tb.x1+1.8&&b.z1>tb.z0-1.8&&b.z0<tb.z1+1.8})()));
+        const t=Sx.find(t=>{const a0=t.ns?tb.x0:tb.z0,a1=t.ns?tb.x1:tb.z1;return a1>t.s0+.05&&a0<t.s1-.05}),a0=t.ns?tb.x0:tb.z0,a1=t.ns?tb.x1:tb.z1,gb=grp.map(wbox),g0=Math.min(...gb.map(b=>t.ns?b.x0:b.z0)),g1=Math.max(...gb.map(b=>t.ns?b.x1:b.z1));
+        const gx0=Math.min(...gb.map(b=>b.x0)),gx1=Math.max(...gb.map(b=>b.x1)),gz0=Math.min(...gb.map(b=>b.z0)),gz1=Math.max(...gb.map(b=>b.z1)),dX=[0],dZ=[0];
+        for(const u of Sx){const A0=u.ns?gx0:gz0,A1=u.ns?gx1:gz1;if(A1<=u.s0+.05||A0>=u.s1-.05)continue;for(let e=0;e<=3;e+=.5)(u.ns?dX:dZ).push(u.s1+.1-A0+e,u.s0-.1-A1-e)}
+        const shifts=[];for(const a of dX)for(const b of dZ)if(a||b)shifts.push([a,b]);shifts.sort((p,q)=>Math.hypot(...p)-Math.hypot(...q));const RD=grp.map(riders);let moved=false;for(const o of grp){settlePlants.lift(o);o.dead=1}   /* both ways at once where two axes cross */   /* the set is lifted while it is tried, so it does not stand in its own way */
+        for(const sh of shifts){const pos=grp.map(o=>[o.x+sh[0],o.z+sh[1]]),cl=[];let ok=true;for(let i=0;i<grp.length;i++){const c=free(grp[i],pos[i][0],pos[i][1],grp[i].th);if(!c){ok=false;break}cl.push(c)}
+          if(!ok)continue;grp.forEach(o=>o.dead=0);for(const g of PQ)if(!g.dead&&g.r.kind==='rug'&&g.bid===it.bid&&Math.abs(g.y-it.y)<.3&&g.x>tb.x0&&g.x<tb.x1&&g.z>tb.z0&&g.z<tb.z1){g.x+=sh[0];g.z+=sh[1]}   /* its rug goes with it */
+          grp.forEach((o,i)=>{const fx=o.x,fz=o.z;o.x=pos[i][0];o.z=pos[i][1];carry(o,RD[i]);put(o,cl[i],fy);reseat(o,fx,fz);out.push([nm,o.r.kind,+fx.toFixed(1),+fz.toFixed(1),+o.x.toFixed(1),+o.z.toFixed(1),'sideways with its table']);done.add(o)});moved=true;break}
+        for(const o of grp)o.dead=0;if(moved)continue;
+        if(grp.length>1){for(const o of grp)put(o,fpCells(fpRect(o.r,o.x,o.z,o.th)),fy);for(const o of grp){done.add(o);out.push([nm,o.r.kind,+o.x.toFixed(1),+o.z.toFixed(1),null,null,'left: a laid table and its chairs with no room to shift'])}continue}settlePlants.lift(it)}
+      else settlePlants.lift(it);
+      /* to the nearest wall spot off every strip */
+      const B=pbox(it.r),P=[];for(const side of['n','s','w','e']){const th=SIDES[side].th,q=Math.round(th/HP)&1,hx=(q?B.z1-B.z0:B.x1-B.x0)/2+.25,hz=(q?B.x1-B.x0:B.z1-B.z0)/2+.25,ns=side==='n'||side==='s';
+        const fix=side==='n'?R.z0+.5+hz-.25:side==='s'?R.z1-.5-hz+.25:side==='w'?R.x0+.5+hx-.25:R.x1-.5-hx+.25,a0=ns?R.x0+.5+hx:R.z0+.5+hz,a1=ns?R.x1-.5-hx:R.z1-.5-hz;
+        for(let a=Math.ceil(a0*2)/2;a<=a1;a+=.5){const x=ns?a:fix,z=ns?fix:a;P.push([x,z,AXTAB.has(it.r.kind)?it.th:th,Math.hypot(x-ox,z-oz)])}}
+      P.sort((p,q)=>p[3]-q[3]);let placed=false;const RI=riders(it);for(const c of P){const cells=free(it,c[0],c[1],c[2]);if(!cells)continue;it.x=c[0];it.z=c[1];it.th=c[2];carry(it,RI);put(it,cells,fy);reseat(it,ox,oz);out.push([nm,it.r.kind,+ox.toFixed(1),+oz.toFixed(1),+it.x.toFixed(1),+it.z.toFixed(1),'to the wall']);placed=true;break}
+      if(!placed){it.dead=1;for(const[o]of RI)o.dead=1;reseat(it,ox,oz);out.push([nm,it.r.kind,+ox.toFixed(1),+oz.toFixed(1),null,null,'gone'])}done.add(it)}}
+  /* the thrones are moved apart, never away: each stands off the strip by the least, and Kairos's own seat (KSEAT) goes with his */
+  for(const R of rooms){const Sx=axisStrips(R);if(!Sx.length)continue;for(const it of PQ){if(it.dead||it.r.kind!=='bisellium'||it.bid!==R.bid||Math.round(it.y-.5)!==R.y||!(it.x>R.x0&&it.x<R.x1&&it.z>R.z0&&it.z<R.z1)||!onStrip(it,Sx))continue;
+    const b=wbox(it),t=Sx.find(u=>{const A0=u.ns?b.x0:b.z0,A1=u.ns?b.x1:b.z1;return A1>u.s0+.05&&A0<u.s1-.05}),mid=(t.s0+t.s1)/2,c=t.ns?it.x:it.z,sh=c<mid?t.s0-.1-(t.ns?b.x1:b.z1):t.s1+.1-(t.ns?b.x0:b.z0);
+    const ox=it.x,oz=it.z;settlePlants.lift(it);const nx=ox+(t.ns?sh:0),nz=oz+(t.ns?0:sh),cells=settlePlants.fits(it,R,nx,nz);if(!cells){put(it,fpCells(fpRect(it.r,ox,oz,it.th)),R.y);out.push([R.n||'hall','bisellium',+ox.toFixed(1),+oz.toFixed(1),null,null,'left: a throne with no room to stand apart']);continue}
+    it.x=nx;it.z=nz;put(it,cells,R.y);if(KSEAT&&Math.hypot(KSEAT.x-ox,KSEAT.z-oz)<1){KSEAT.x+=nx-ox;KSEAT.z+=nz-oz}else reseat(it,ox,oz);out.push([R.n||'hall','bisellium',+ox.toFixed(1),+oz.toFixed(1),+nx.toFixed(2),+nz.toFixed(2),'apart, off the strip'])}}
+  SETTLE.axisMoves=out;SETTLE.axis={moved:out.filter(m=>m[4]!=null).length,gone:out.filter(m=>m[6]==='gone').length,left:out.filter(m=>/^left/.test(m[6])).length};return out}
 function settlePlants(){let moved=0,gone=0,stay=0;const D=doorList(),fr=g=>!g||(PF[g]&IV);
   const nearDoor=(bid,y,x,z)=>{for(const d of D){if(d.bid!==bid||d.y!==y)continue;const a=d.axis==='x'?x:z,p=d.axis==='x'?z:x;if(a>=d.a0-1.6&&a<=d.a1+1.6&&Math.abs(p-d.w)<=3.1)return true}return false};
   const lift=it=>{const fy=Math.round(it.y-.5);CUR=it.bid;for(const[cx,cz]of fpCells(fpRect(it.r,it.x,it.z,it.th)))for(let q=1;q<=3;q++){const g=G(cx,fy+q,cz);if(g&&(PF[g]&IV))S(cx,fy+q,cz,0)}CUR=0};
@@ -5705,7 +5751,7 @@ function settleGroups(){const D=doorList(),st={rooms:0,groups:0,hearth:0,centre:
     if(comps(R)>c0){/* the floor was cut in two: the room goes back as it was */st.undone++;for(const g of groups)for(const it of mem(g))lift(it);for(const[it,o]of orig){it.x=o[0];it.z=o[1];it.th=o[2]}for(const g of groups)for(const it of mem(g))drop(it)}
     st.log.push(R.n+':'+groups.length)}
   return st}
-function settle(){const t0=performance.now();try{settleGroups()}catch(e){SETTLE.groupsErr=String(e&&e.message||e)}settlePlants();settlePass();settleRugs();settleHang();settleUpper();settleDoors();settleCeil();for(let i=PQ.length-1;i>=0;i--)if(PQ[i].dead)PQ.splice(i,1);SETTLE.ms=Math.round(performance.now()-t0);return SETTLE}
+function settle(){const t0=performance.now();try{settleGroups()}catch(e){SETTLE.groupsErr=String(e&&e.message||e)}settlePlants();settlePass();settleAxis();settleRugs();settleHang();settleUpper();settleDoors();settleCeil();for(let i=PQ.length-1;i>=0;i--)if(PQ[i].dead)PQ.splice(i,1);SETTLE.ms=Math.round(performance.now()-t0);return SETTLE}
 
 /* ---------- v1.18: the contours. The Depot's v15 kit dresses the outside of every estate building ---------- */
 const CSKINS=[],CSTYLE=[[/Euphrates Hall/,'hall'],[/State Wing/,'state'],[/Service Wing/,'service'],[/Chapel/,'chapel'],[/Greenhouse/,'glass'],[/Stable/,'stable'],[/Gatehouse/,'gate'],[/Lodge/,'lodge'],[/Farm/,'farm']];
